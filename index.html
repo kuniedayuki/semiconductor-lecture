@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>半導体の構造 ── 解説ムービー（拡張版）</title>
+<style>
+  :root{
+    --bg:#070b12; --panel:#121a2b; --line:#27314c; --txt:#eaf0fb; --sub:#9fb0d0; --dim:#5f6f8f;
+    --accent:#4ea1ff; --gold:#f4c542; --green:#39d98a; --gate:#9b6de8; --metal:#d8b24a;
+    --si:#5b7fb5; --nd:#ff7a7a; --pd:#4ec1ff; --power:#ff6b6b; --cool:#3fc7ff; --data:#9b6de8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:#000;overflow:hidden;
+    font-family:"Segoe UI","Hiragino Kaku Gothic ProN","Meiryo",system-ui,sans-serif;color:var(--txt)}
+  #stage{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(120% 120% at 50% 0%,#0c1322,#05080f)}
+  #frame{position:relative;width:min(100vw,177.78vh);height:min(56.25vw,100vh);
+    background:linear-gradient(180deg,#0a0f1a,#070b12);overflow:hidden}
+  .scene{position:absolute;inset:0;display:none;padding:4.0% 5%;flex-direction:column}
+  .scene.active{display:flex}
+  .s-kicker{font-size:1.5vh;font-weight:800;letter-spacing:.2em;color:var(--accent);text-transform:uppercase}
+  .s-title{font-size:3.4vh;font-weight:800;margin:.4vh 0 0;line-height:1.2}
+  .s-title .hl{color:var(--gold)}
+  .s-body{flex:1;display:flex;align-items:center;justify-content:center;gap:3.5%;min-height:0;margin-top:1.2vh;overflow:visible}
+  .s-viz{flex:1;height:100%;display:grid;place-items:center;overflow:visible}
+  .s-viz svg{width:100%;height:100%;max-height:60vh;overflow:visible}
+  .scene.active .s-viz svg{animation:kb 26s ease-in-out infinite alternate}
+  @keyframes kb{from{transform:scale(1)}to{transform:scale(1.03)}}
+  .s-side{width:29%;max-width:31%}
+  .s-side .pt{font-size:1.78vh;color:var(--sub);line-height:1.6;margin:0 0 .9vh;opacity:0;transform:translateY(10px)}
+  .scene.active .s-side .pt{animation:rise .6s ease forwards}
+  .scene.active .s-side .pt:nth-child(2){animation-delay:.4s}
+  .scene.active .s-side .pt:nth-child(3){animation-delay:.8s}
+  .scene.active .s-side .pt:nth-child(4){animation-delay:1.2s}
+  .s-side .pt b{color:var(--txt)} .s-side .pt .g{color:var(--gold);font-weight:700} .s-side .pt .term{color:#7fd0ff;font-weight:700}
+
+  .s-stocks{margin-top:1.2vh;opacity:0}
+  .scene.active .s-stocks{animation:rise .6s ease 1.5s forwards}
+  .s-stocks .lab{font-size:1.28vh;color:var(--dim);letter-spacing:.1em;font-weight:800;margin-bottom:.6vh}
+  .chips{display:flex;flex-wrap:wrap;gap:.55vh}
+  .chip-s{font-size:1.36vh;background:rgba(78,161,255,.10);border:1px solid rgba(78,161,255,.32);color:#bcd8ff;
+    border-radius:7px;padding:.42vh 1vh;white-space:nowrap}
+  .chip-s.jp{background:rgba(244,197,66,.10);border-color:rgba(244,197,66,.4);color:#f4d97a}
+  .scene.active .chip-s{animation:chipglow 3.2s ease-in-out infinite}
+  .scene.active .chip-s:nth-child(2){animation-delay:.4s}.scene.active .chip-s:nth-child(3){animation-delay:.8s}
+  .scene.active .chip-s:nth-child(4){animation-delay:1.2s}.scene.active .chip-s:nth-child(5){animation-delay:1.6s}
+  @keyframes chipglow{0%,100%{box-shadow:0 0 0 rgba(78,161,255,0)}50%{box-shadow:0 0 12px rgba(78,161,255,.22)}}
+
+  #subtitle{position:absolute;left:0;right:0;bottom:0;padding:2.0vh 7% 2.6vh;
+    background:linear-gradient(0deg,rgba(0,0,0,.82),rgba(0,0,0,.4) 60%,transparent);text-align:center;
+    font-size:2.05vh;line-height:1.55;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.9);pointer-events:none}
+  #subtitle b{color:var(--gold)}
+  .titlecard{align-items:center;justify-content:center;text-align:center}
+  .titlecard .big{font-size:5.4vh;font-weight:900;line-height:1.15;position:relative;z-index:2}
+  .titlecard .big .hl{color:var(--gold)}
+  .titlecard .lead{font-size:2.2vh;color:var(--sub);margin-top:2vh;max-width:74%;position:relative;z-index:2}
+  .titlecard .chip{margin-top:2.6vh;font-size:1.7vh;color:var(--accent);border:1px solid var(--line);padding:.8vh 2vh;border-radius:999px;position:relative;z-index:2}
+  #titlebg,#titlebg2{position:absolute;inset:0;z-index:1;opacity:.5}
+
+  #bar{position:fixed;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.08);z-index:20}
+  #barfill{height:100%;width:0;background:linear-gradient(90deg,#4ea1ff,#9b6de8);transition:width .25s linear}
+  #ctl{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:flex;align-items:center;gap:9px;
+    background:rgba(12,18,30,.86);border:1px solid var(--line);border-radius:999px;padding:8px 14px;z-index:30;
+    backdrop-filter:blur(8px);transition:opacity .4s;font-size:13px}
+  #ctl.hide{opacity:0;pointer-events:none}
+  #ctl button{background:#1a2336;border:1px solid var(--line);color:var(--txt);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:15px;display:grid;place-items:center}
+  #ctl button:hover{border-color:var(--accent);color:var(--accent)}
+  #ctl .play{width:42px;height:42px;font-size:18px;background:var(--accent);color:#071018;border:0}
+  #ctl .lbl{color:var(--sub);font-variant-numeric:tabular-nums;min-width:120px;text-align:center}
+  #ctl select{background:#1a2336;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:6px;font-size:12px;max-width:210px}
+  .hint{position:fixed;top:12px;right:16px;z-index:30;color:var(--dim);font-size:11.5px;text-align:right;line-height:1.6}
+  .badge-audio{position:fixed;top:12px;left:16px;z-index:30;font-size:11.5px;color:var(--dim);background:rgba(12,18,30,.7);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+  @keyframes pop{0%{opacity:0;transform:scale(.4)}70%{transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}
+  @keyframes grow-h{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @keyframes grow-v{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important}}
+  .scene .pop,.scene .gh,.scene .gv,.scene .fin{opacity:0}
+  .scene.active .pop{animation:pop .55s cubic-bezier(.2,.8,.3,1.4) forwards}
+  .scene.active .fin{animation:fadein .7s ease forwards}
+  .scene.active .gh{transform-origin:left center;animation:grow-h .7s ease forwards,fadein .3s ease forwards}
+  .scene.active .gv{transform-origin:bottom center;animation:grow-v .7s ease forwards,fadein .3s ease forwards}
+  .scene.active [style*="--d"]{animation-delay:var(--d)}
+  /* continuous motion helpers */
+  .flow{stroke-dasharray:6 8;animation:flow 1.1s linear infinite}
+  .flow.slow{animation-duration:2.2s}.flow.rev{animation-direction:reverse}
+  .pulse{animation:pulse 1.5s ease-in-out infinite}
+  .spin{transform-origin:center;animation:spin 3s linear infinite}
+  @keyframes flow{to{stroke-dashoffset:-28}}
+  @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .svgcap{fill:var(--sub);font-size:11px;font-family:inherit}
+  .svgcap.sm{font-size:9px}.svgcap.w{fill:#dbe5f7}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="softglow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="5"/></filter>
+  <radialGradient id="gSi" cx="35%" cy="30%"><stop offset="0%" stop-color="#8fb0e0"/><stop offset="100%" stop-color="#39548a"/></radialGradient>
+  <radialGradient id="gP" cx="35%" cy="30%"><stop offset="0%" stop-color="#ffb0b0"/><stop offset="100%" stop-color="#d23b3b"/></radialGradient>
+  <radialGradient id="gB" cx="35%" cy="30%"><stop offset="0%" stop-color="#a8e6ff"/><stop offset="100%" stop-color="#2a93d6"/></radialGradient>
+  <radialGradient id="gSun" cx="50%" cy="50%"><stop offset="0%" stop-color="#fff3c4"/><stop offset="60%" stop-color="#ffd86b"/><stop offset="100%" stop-color="#e69a2e"/></radialGradient>
+  <linearGradient id="gWafer" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3a4f78"/><stop offset="45%" stop-color="#243a5e"/><stop offset="55%" stop-color="#2c4670"/><stop offset="100%" stop-color="#1a2742"/></linearGradient>
+  <linearGradient id="gMetal" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f0d56a"/><stop offset="100%" stop-color="#b9912f"/></linearGradient>
+  <linearGradient id="gCopper" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#e8a06a"/><stop offset="100%" stop-color="#b5703a"/></linearGradient>
+  <linearGradient id="gDie" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a2c4a"/><stop offset="100%" stop-color="#0e1830"/></linearGradient>
+  <linearGradient id="gGold" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f4c542"/><stop offset="100%" stop-color="#ffe9a0"/></linearGradient>
+</defs></svg>
+
+<div id="stage"><div id="frame">
+
+  <!-- ========== S100 TITLE ========== -->
+  <section class="scene titlecard" data-vid="s100"
+    data-narration="半導体とは何か。スマートフォン、自動車、そしてAIまで、現代社会のほとんどはこの小さなチップで動いています。けれど、その中で何が起きているかを知る人は多くありません。この映像では、目に見えないシリコン原子の世界から、AIを動かす巨大なチップが組み上がるまでを、専門用語もやさしく解説しながら順番に見ていきます。各工程で世界の鍵を握る企業も紹介します。"
+    data-tts="半導体とは何か。スマートフォン、自動車、そしてエーアイまで、現代社会のほとんどはこの小さなチップで動いています。けれど、その中で何が起きているかを知る人は多くありません。この映像では、目に見えないシリコン原子の世界から、エーアイを動かす巨大なチップが組み上がるまでを、専門用語もやさしく解説しながら順番に見ていきます。各工程で世界の鍵を握る企業も紹介します。">
+    <svg id="titlebg" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid slice">
+      <g stroke="#1d2c47" stroke-width="1"><path d="M0 140 H1000 M0 280 H1000 M0 420 H1000 M200 0 V560 M400 0 V560 M600 0 V560 M800 0 V560"/></g>
+      <g fill="#4ea1ff" filter="url(#glow)">
+        <circle r="3"><animateMotion dur="9s" repeatCount="indefinite" path="M-20 140 H1020"/></circle>
+        <circle r="3"><animateMotion dur="11s" begin="-3s" repeatCount="indefinite" path="M-20 280 H1020"/></circle>
+        <circle r="3" fill="#9b6de8"><animateMotion dur="13s" begin="-6s" repeatCount="indefinite" path="M-20 420 H1020"/></circle>
+        <circle r="2.5" fill="#39d98a"><animateMotion dur="10s" begin="-2s" repeatCount="indefinite" path="M400 -20 V580"/></circle>
+        <circle r="2.5"><animateMotion dur="12s" begin="-5s" repeatCount="indefinite" path="M600 -20 V580"/></circle>
+      </g>
+    </svg>
+    <div class="s-kicker fin">SEMICONDUCTOR · 教材ムービー 第1章</div>
+    <div class="big fin" style="--d:.2s">半導体の<span class="hl">構造</span><br>原子からチップまで</div>
+    <div class="lead fin" style="--d:.7s">スマホもAIも、すべてはシリコンの上の数百億個のスイッチから始まる。専門用語をやさしく解きほぐしながら、約10桁・100億倍のスケールを旅する。</div>
+    <div class="chip fin" style="--d:1.2s">▶ 自動再生します</div>
+  </section>
+
+  <!-- ========== S101 半導体とは ========== -->
+  <section class="scene" data-vid="s101"
+    data-narration="まず「半導体」という言葉の意味から。世の中の材料は、電気をよく通す導体、たとえば金属の銅と、電気を通さない絶縁体、たとえばゴムやガラスに分かれます。半導体は、ちょうどその中間。ふだんは電気を通しにくいのに、条件しだいで通したり止めたりを自在に操れる、不思議な材料です。この「通す・通さないを制御できる」という性質こそが、あらゆる電子回路の出発点。代表的な半導体材料が、砂の主成分でもあるシリコンです。"
+    data-tts="まず「半導体」という言葉の意味から。世の中の材料は、電気をよく通す導体、たとえば金属の銅と、電気を通さない絶縁体、たとえばゴムやガラスに分かれます。半導体は、ちょうどその中間。ふだんは電気を通しにくいのに、条件しだいで通したり止めたりを自在に操れる、不思議な材料です。この、通す・通さないを制御できるという性質こそが、あらゆる電子回路の出発点。代表的な半導体材料が、砂の主成分でもあるシリコンです。">
+    <div class="s-kicker fin">基礎 ／ そもそも半導体とは</div>
+    <h2 class="s-title fin">① <span class="hl">導体・絶縁体・半導体</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 260">
+          <!-- conductor -->
+          <g class="fin" style="--d:.2s">
+            <text x="30" y="46" class="svgcap w" style="font-weight:700">導体（銅）</text>
+            <rect x="30" y="54" width="280" height="30" rx="6" fill="#3a2a22" stroke="#e8a06a"/>
+            <g fill="#ffd28a" filter="url(#glow)">
+              <circle r="4"><animateMotion dur="1.3s" repeatCount="indefinite" path="M40,69 H300"/></circle>
+              <circle r="4"><animateMotion dur="1.3s" begin="-.4s" repeatCount="indefinite" path="M40,69 H300"/></circle>
+              <circle r="4"><animateMotion dur="1.3s" begin="-.8s" repeatCount="indefinite" path="M40,69 H300"/></circle>
+            </g>
+            <text x="330" y="73" class="svgcap" fill="#ffd28a">よく流れる</text>
+          </g>
+          <!-- insulator -->
+          <g class="fin" style="--d:1.0s">
+            <text x="30" y="126" class="svgcap w" style="font-weight:700">絶縁体（ゴム・ガラス）</text>
+            <rect x="30" y="134" width="280" height="30" rx="6" fill="#23303f" stroke="#5f6f8f"/>
+            <line x1="168" y1="138" x2="168" y2="160" stroke="#ff6b6b" stroke-width="3"/>
+            <circle cx="120" cy="149" r="4" fill="#7a90b0"/><circle cx="95" cy="149" r="4" fill="#7a90b0"/>
+            <text x="330" y="153" class="svgcap" fill="#ff9c9c">流れない</text>
+          </g>
+          <!-- semiconductor -->
+          <g class="fin" style="--d:1.8s">
+            <text x="30" y="206" class="svgcap w" style="font-weight:700">半導体（シリコン）</text>
+            <rect x="30" y="214" width="280" height="30" rx="6" fill="#1f3050" stroke="#4ea1ff"/>
+            <g opacity="0">
+              <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.45;0.5;0.95;1" dur="3.4s" repeatCount="indefinite" begin="2.2s"/>
+              <g fill="#9bffce" filter="url(#glow)">
+                <circle r="4"><animateMotion dur="1.2s" repeatCount="indefinite" path="M40,229 H300"/></circle>
+                <circle r="4"><animateMotion dur="1.2s" begin="-.5s" repeatCount="indefinite" path="M40,229 H300"/></circle>
+              </g>
+            </g>
+            <text x="330" y="233" class="svgcap" fill="#7fd0ff">通す/止めるを<tspan font-weight="700">操れる</tspan></text>
+            <text x="330" y="248" class="svgcap sm" fill="#7fd0ff">↑ON/OFFが切替わる</text>
+          </g>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt"><span class="term">導体</span>＝電気をよく通す（銅など金属）。</p>
+        <p class="pt"><span class="term">絶縁体</span>＝電気を通さない（ゴム・ガラス）。</p>
+        <p class="pt"><span class="g">半導体</span>＝その中間。<b>通す・止めるを操れる</b>のが最大の特徴。これが回路の出発点。</p>
+        <p class="pt">代表材料は<b>シリコン</b>（砂の主成分）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S120 半導体の地図 ========== -->
+  <section class="scene" data-vid="s120"
+    data-narration="ひとくちに半導体といっても、役割によって大きく分かれます。計算する頭脳がロジック。データを覚えるのがメモリ。大きな電力を制御するのがパワー半導体。現実世界のなめらかな信号を扱うのがアナログ。光や音を感じ取るのがセンサです。この章の主役はAIを動かすロジックとメモリですが、パワー半導体や、基板を支える小さな部品にも、日本企業が深く関わっています。"
+    data-tts="ひとくちに半導体といっても、役割によって大きく分かれます。計算する頭脳がロジック。データを覚えるのがメモリ。大きな電力を制御するのがパワー半導体。現実世界のなめらかな信号を扱うのがアナログ。光や音を感じ取るのがセンサです。この章の主役はエーアイを動かすロジックとメモリですが、パワー半導体や、基板を支える小さな部品にも、日本企業が深く関わっています。">
+    <div class="s-kicker fin">全体像 ／ 半導体の地図</div>
+    <h2 class="s-title fin">② 半導体の<span class="hl">5つの種類</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 260">
+          <g stroke="#3a4a72" stroke-width="2" class="fin" style="--d:.3s"><line x1="230" y1="100" x2="230" y2="58"/><line x1="262" y1="115" x2="350" y2="84"/><line x1="262" y1="145" x2="350" y2="196"/><line x1="198" y1="145" x2="110" y2="196"/><line x1="198" y1="115" x2="110" y2="84"/></g>
+          <circle class="pop" style="--d:.2s" cx="230" cy="130" r="36" fill="#1f3050" stroke="#4ea1ff" stroke-width="2"/>
+          <text x="230" y="126" text-anchor="middle" class="svgcap w" style="font-weight:800">半導体</text><text x="230" y="142" text-anchor="middle" class="svgcap sm">5つの顔</text>
+          <g class="pop" style="--d:.6s"><rect x="175" y="20" width="110" height="38" rx="7" fill="#23304a" stroke="#39d98a"/><text x="230" y="38" text-anchor="middle" class="svgcap w" style="font-weight:700">ロジック</text><text x="230" y="52" text-anchor="middle" class="svgcap sm" fill="#7df0b0">計算する頭脳</text></g>
+          <g class="pop" style="--d:.9s"><rect x="300" y="64" width="120" height="38" rx="7" fill="#23304a" stroke="#7fd0ff"/><text x="360" y="82" text-anchor="middle" class="svgcap w" style="font-weight:700">メモリ</text><text x="360" y="96" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">記憶する</text></g>
+          <g class="pop" style="--d:1.2s"><rect x="300" y="180" width="120" height="38" rx="7" fill="#23304a" stroke="#ff8a8a"/><text x="360" y="198" text-anchor="middle" class="svgcap w" style="font-weight:700">パワー</text><text x="360" y="212" text-anchor="middle" class="svgcap sm" fill="#ff9c9c">電力を制御</text></g>
+          <g class="pop" style="--d:1.5s"><rect x="40" y="180" width="120" height="38" rx="7" fill="#23304a" stroke="#f4c542"/><text x="100" y="198" text-anchor="middle" class="svgcap w" style="font-weight:700">アナログ</text><text x="100" y="212" text-anchor="middle" class="svgcap sm" fill="#f4d97a">信号を扱う</text></g>
+          <g class="pop" style="--d:1.8s"><rect x="40" y="64" width="120" height="38" rx="7" fill="#23304a" stroke="#c4a6ff"/><text x="100" y="82" text-anchor="middle" class="svgcap w" style="font-weight:700">センサ</text><text x="100" y="96" text-anchor="middle" class="svgcap sm" fill="#d9b6ff">感じ取る</text></g>
+          <g fill="#7fd0ff" filter="url(#glow)">
+            <circle r="3"><animateMotion dur="2s" begin="2s" repeatCount="indefinite" path="M230,130 L230,40"/></circle>
+            <circle r="3" fill="#39d98a"><animateMotion dur="2s" begin="-.4s" repeatCount="indefinite" path="M230,130 L360,84"/></circle>
+            <circle r="3" fill="#ff9c9c"><animateMotion dur="2s" begin="-.8s" repeatCount="indefinite" path="M230,130 L360,198"/></circle>
+            <circle r="3" fill="#f4d97a"><animateMotion dur="2s" begin="-1.2s" repeatCount="indefinite" path="M230,130 L100,198"/></circle>
+            <circle r="3" fill="#c4a6ff"><animateMotion dur="2s" begin="-1.6s" repeatCount="indefinite" path="M230,130 L100,84"/></circle>
+          </g>
+          <text x="230" y="250" text-anchor="middle" class="svgcap sm fin" style="--d:2.2s">この章の主役は ロジック ＋ メモリ</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt"><span class="g">ロジック</span>＝計算（CPU/GPU）／<span class="term">メモリ</span>＝記憶。</p>
+        <p class="pt"><span class="term">パワー</span>＝電力制御／<span class="term">アナログ</span>＝信号／<span class="term">センサ</span>＝感知。</p>
+        <p class="pt">本章の主役はロジック＋メモリ。後半でメモリ・パワー・部品も解説。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S102 ドーピング ========== -->
+  <section class="scene" data-vid="s102"
+    data-narration="ではどうやって電気を操るのか。純粋なシリコンは、原子がきれいに手をつなぎ合った結晶で、このままではほとんど電気を通しません。そこで、ごく微量の別の元素を混ぜます。これをドーピングと呼びます。たとえばリンを少し加えると電子が一個余り、これが自由に動いてマイナスの電気を運ぶエヌ型に。逆にホウ素を加えると電子が一個足りず、その空席である正孔がプラスの電気を運ぶピー型になります。ほんの百万分の一ほどの不純物が、性質をがらりと変えるのです。この土台となる高純度シリコンウェハは、日本の信越化学とサムコの二社で世界のおよそ半分を占めます。"
+    data-tts="ではどうやって電気を操るのか。純粋なシリコンは、原子がきれいに手をつなぎ合った結晶で、このままではほとんど電気を通しません。そこで、ごく微量の別の元素を混ぜます。これをドーピングと呼びます。たとえばリンを少し加えると電子が一個余り、これが自由に動いてマイナスの電気を運ぶエヌ型に。逆にホウ素を加えると電子が一個足りず、その空席である正孔がプラスの電気を運ぶピー型になります。ほんの百万分の一ほどの不純物が、性質をがらりと変えるのです。この土台となる高純度シリコンウェハは、日本の信越化学とサムコの二社で世界のおよそ半分を占めます。">
+    <div class="s-kicker fin">SCALE ≈ 0.2 nm</div>
+    <h2 class="s-title fin">③ シリコン結晶と<span class="hl">ドーピング</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 300">
+          <g stroke="#33415f" stroke-width="2" class="fin" style="--d:.1s">
+            <line x1="70" y1="70" x2="340" y2="70"/><line x1="70" y1="160" x2="340" y2="160"/><line x1="70" y1="250" x2="340" y2="250"/>
+            <line x1="70" y1="70" x2="70" y2="250"/><line x1="160" y1="70" x2="160" y2="250"/><line x1="250" y1="70" x2="250" y2="250"/><line x1="340" y1="70" x2="340" y2="250"/>
+          </g>
+          <g>
+            <circle class="pop" style="--d:.2s" cx="70" cy="70" r="15" fill="url(#gSi)"/><circle class="pop" style="--d:.3s" cx="160" cy="70" r="15" fill="url(#gSi)"/>
+            <circle class="pop" style="--d:.4s" cx="250" cy="70" r="15" fill="url(#gSi)"/><circle class="pop" style="--d:.5s" cx="340" cy="70" r="15" fill="url(#gSi)"/>
+            <circle class="pop" style="--d:.3s" cx="70" cy="160" r="15" fill="url(#gSi)"/><circle class="pop" style="--d:.6s" cx="340" cy="160" r="15" fill="url(#gSi)"/>
+            <circle class="pop" style="--d:.4s" cx="70" cy="250" r="15" fill="url(#gSi)"/><circle class="pop" style="--d:.5s" cx="160" cy="250" r="15" fill="url(#gSi)"/>
+            <circle class="pop" style="--d:.6s" cx="250" cy="250" r="15" fill="url(#gSi)"/><circle class="pop" style="--d:.7s" cx="340" cy="250" r="15" fill="url(#gSi)"/>
+          </g>
+          <text x="70" y="40" text-anchor="middle" class="svgcap w fin" style="--d:.6s;font-weight:700">Si(4価)</text>
+          <g class="pop" style="--d:1.8s">
+            <circle cx="160" cy="160" r="15" fill="url(#gP)"/><text x="160" y="164" text-anchor="middle" class="svgcap w sm" style="font-weight:700">P</text>
+            <circle r="4" fill="#ff8a8a" filter="url(#glow)"><animateMotion dur="2.2s" repeatCount="indefinite" path="M160,160 m0,-28 a28,28 0 1,1 -0.1,0 z"/></circle>
+          </g>
+          <text x="200" y="120" class="svgcap sm fin" style="--d:2.2s" fill="#ff9c9c">余分なe⁻が動く</text>
+          <g class="pop" style="--d:2.4s">
+            <circle cx="250" cy="160" r="15" fill="url(#gB)"/><text x="250" y="164" text-anchor="middle" class="svgcap w sm" style="font-weight:700">B</text>
+            <circle cx="250" cy="160" r="0" fill="none" stroke="#8fdcff" stroke-width="2"><animate attributeName="r" values="20;30;20" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".9;.2;.9" dur="2.4s" repeatCount="indefinite"/></circle>
+          </g>
+          <text x="250" y="292" text-anchor="middle" class="svgcap sm fin" style="--d:2.6s" fill="#8fdcff">正孔(穴)が空く</text>
+          <text x="120" y="292" text-anchor="middle" class="svgcap sm fin" style="--d:2.0s" fill="#ff9c9c">n型</text>
+          <text x="305" y="292" text-anchor="middle" class="svgcap sm fin" style="--d:2.6s" fill="#8fdcff">p型</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">純粋な結晶のままでは<b>ほぼ電気を通さない</b>。</p>
+        <p class="pt"><span class="g">ドーピング</span>＝微量の不純物を混ぜる操作。</p>
+        <p class="pt"><span class="term">n型</span>＝電子(−)が運ぶ／<span class="term">p型</span>＝正孔(+)が運ぶ。たった百万分の一で激変。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（ウェハ・材料）</div>
+          <div class="chips"><span class="chip-s jp">信越化学 4063</span><span class="chip-s jp">SUMCO 3436</span><span class="chip-s jp">日本酸素HD 4091</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S103 pn接合・ダイオード ========== -->
+  <section class="scene" data-vid="s103"
+    data-narration="このエヌ型とピー型を貼り合わせると、面白いことが起きます。電気が一方向にしか流れない、一方通行の門ができるのです。これをダイオードと呼びます。順方向に電圧をかければ電流は流れ、逆向きにはほとんど流れない。電気の逆流を防ぐ、最も基本的な部品です。そしてこの仕組みをもう一歩進めて、電気のながれそのものを、外から自在に切り替えられるようにしたものが、次に見るトランジスタです。"
+    data-tts="このエヌ型とピー型を貼り合わせると、面白いことが起きます。電気が一方向にしか流れない、一方通行の門ができるのです。これをダイオードと呼びます。順方向に電圧をかければ電流は流れ、逆向きにはほとんど流れない。電気の逆流を防ぐ、最も基本的な部品です。そしてこの仕組みをもう一歩進めて、電気のながれそのものを、外から自在に切り替えられるようにしたものが、次に見るトランジスタです。">
+    <div class="s-kicker fin">pn接合 ／ 一方通行の門</div>
+    <h2 class="s-title fin">④ <span class="hl">ダイオード</span>＝電気の逆流を防ぐ</h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 240">
+          <rect class="gh" style="--d:.3s" x="120" y="92" width="110" height="56" fill="url(#gP)"/>
+          <rect class="gh" style="--d:.5s" x="230" y="92" width="110" height="56" fill="url(#gB)" transform="translate(0,0)"/>
+          <rect x="230" y="92" width="110" height="56" fill="url(#gSi)" opacity="0"/>
+          <text x="175" y="124" text-anchor="middle" class="svgcap w" style="font-weight:700">p型</text>
+          <text x="285" y="124" text-anchor="middle" class="svgcap w" style="font-weight:700">n型</text>
+          <line x1="230" y1="86" x2="230" y2="154" stroke="#0a0f1a" stroke-width="2" class="fin" style="--d:.7s"/>
+          <text x="230" y="172" text-anchor="middle" class="svgcap sm fin" style="--d:.9s">接合面（pn接合）</text>
+          <!-- wires -->
+          <line x1="40" y1="120" x2="120" y2="120" stroke="#8aa0c8" stroke-width="3" class="fin" style="--d:.4s"/>
+          <line x1="340" y1="120" x2="420" y2="120" stroke="#8aa0c8" stroke-width="3" class="fin" style="--d:.4s"/>
+          <!-- forward phase: electrons flow L->R ; reverse phase: blocked with barrier -->
+          <g opacity="0"><animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.45;0.5;0.95;1" dur="4s" repeatCount="indefinite" begin="2s"/>
+            <g fill="#9bffce" filter="url(#glow)">
+              <circle r="4"><animateMotion dur="1.1s" repeatCount="indefinite" path="M44,120 H416"/></circle>
+              <circle r="4"><animateMotion dur="1.1s" begin="-.4s" repeatCount="indefinite" path="M44,120 H416"/></circle>
+              <circle r="4"><animateMotion dur="1.1s" begin="-.8s" repeatCount="indefinite" path="M44,120 H416"/></circle>
+            </g>
+            <text x="230" y="58" text-anchor="middle" class="svgcap" fill="#7df0b0" style="font-weight:700">順方向 → 流れる（ON）</text>
+          </g>
+          <g opacity="0"><animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.45;0.5;0.95;1" dur="4s" repeatCount="indefinite" begin="2s"/>
+            <line x1="230" y1="80" x2="230" y2="160" stroke="#ff5d6c" stroke-width="5" filter="url(#glow)"/>
+            <circle cx="380" cy="120" r="4" fill="#7a90b0"/><circle cx="405" cy="120" r="4" fill="#7a90b0"/>
+            <text x="230" y="58" text-anchor="middle" class="svgcap" fill="#ff9c9c" style="font-weight:700">逆方向 → 流れない（壁）</text>
+          </g>
+          <text x="230" y="206" text-anchor="middle" class="svgcap w fin" style="--d:2.4s;font-size:13px">電気は一方通行 ＝ ダイオード（整流）</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt"><span class="term">pn接合</span>＝n型とp型を貼り合わせた境目。</p>
+        <p class="pt">順方向は流れ、逆方向は流れない＝<span class="g">ダイオード</span>。電気の逆流を防ぐ基本部品。</p>
+        <p class="pt">この流れを<b>外から切り替え</b>られるようにしたのが、次のトランジスタ。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S104 トランジスタ ========== -->
+  <section class="scene" data-vid="s104"
+    data-narration="トランジスタは、電気で開け閉めする蛇口のようなものです。三つの端子があり、電気の入口がソース、出口がドレイン、そして蛇口のハンドルにあたるのがゲートです。ゲートに電圧をかけると、ソースからドレインへ電流が流れてオン。電圧を切ると、流れが止まってオフ。このオンとオフ、つまり一とゼロを、一秒間に何十億回も切り替えます。この一とゼロの組み合わせこそが、デジタル計算のすべての土台です。こうした極めて微細なパターンを描く露光装置は、オランダのASMLが世界で独占しています。"
+    data-tts="トランジスタは、電気で開け閉めする蛇口のようなものです。三つの端子があり、電気の入口がソース、出口がドレイン、そして蛇口のハンドルにあたるのがゲートです。ゲートに電圧をかけると、ソースからドレインへ電流が流れてオン。電圧を切ると、流れが止まってオフ。このオンとオフ、つまりいちとゼロを、一秒間に何十億回も切り替えます。このいちとゼロの組み合わせこそが、デジタル計算のすべての土台です。こうした極めて微細なパターンを描く露光装置は、オランダのエーエスエムエルが世界で独占しています。">
+    <div class="s-kicker fin">SCALE ≈ 数 nm ／ 動作デモ</div>
+    <h2 class="s-title fin">⑤ トランジスタ＝<span class="hl">電気のスイッチ</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 280">
+          <rect class="gh" style="--d:.2s" x="40" y="150" width="380" height="80" fill="#2c3a57"/>
+          <text x="230" y="205" text-anchor="middle" class="svgcap fin" style="--d:.5s">p型シリコン基板</text>
+          <rect class="pop" style="--d:.6s" x="55" y="150" width="80" height="34" fill="#d24848"/>
+          <rect class="pop" style="--d:.7s" x="325" y="150" width="80" height="34" fill="#d24848"/>
+          <text x="95" y="172" text-anchor="middle" class="svgcap w sm fin" style="--d:.9s">ソース(入口)</text>
+          <text x="365" y="172" text-anchor="middle" class="svgcap w sm fin" style="--d:.9s">ドレイン(出口)</text>
+          <rect class="pop" style="--d:1.1s" x="175" y="128" width="110" height="14" fill="url(#gGold)"><animate attributeName="opacity" values="1;1;0.35;0.35;1" keyTimes="0;0.45;0.5;0.95;1" dur="3s" repeatCount="indefinite" begin="2s"/></rect>
+          <rect class="pop" style="--d:1.1s" x="175" y="142" width="110" height="6" fill="#7a86a8"/>
+          <text x="230" y="120" text-anchor="middle" class="svgcap fin" style="--d:1.3s" fill="#f4c542">ゲート(ハンドル)</text>
+          <line x1="230" y1="100" x2="230" y2="128" stroke="#f4c542" stroke-width="3" class="fin" style="--d:1.3s"/>
+          <g opacity="0"><animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.45;0.5;0.95;1" dur="3s" repeatCount="indefinite" begin="2s"/>
+            <line x1="135" y1="167" x2="325" y2="167" stroke="#39d98a" stroke-width="4" filter="url(#glow)"/>
+            <g fill="#9bffce" filter="url(#glow)"><circle r="4"><animateMotion dur="1s" repeatCount="indefinite" path="M135,167 H325"/></circle><circle r="4"><animateMotion dur="1s" begin="-0.33s" repeatCount="indefinite" path="M135,167 H325"/></circle><circle r="4"><animateMotion dur="1s" begin="-0.66s" repeatCount="indefinite" path="M135,167 H325"/></circle></g>
+          </g>
+          <text x="230" y="158" text-anchor="middle" class="svgcap sm fin" style="--d:1.8s" fill="#39d98a">チャネル＝電流の通り道</text>
+          <g class="fin" style="--d:2.0s"><rect x="340" y="36" width="80" height="40" rx="8" fill="#14331f" stroke="#39d98a" stroke-width="2"/><text x="380" y="62" text-anchor="middle" class="svgcap w" fill="#7df0b0" style="font-weight:800;font-size:15px">ON · 1</text><rect x="340" y="36" width="80" height="40" rx="8" fill="#0a0f1a"><animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.45;0.5;0.95;1" dur="3s" repeatCount="indefinite" begin="2s"/></rect></g>
+          <g class="fin" style="--d:2.0s"><rect x="40" y="36" width="80" height="40" rx="8" fill="#2a1a1a" stroke="#ff6b6b" stroke-width="2"/><text x="80" y="62" text-anchor="middle" class="svgcap w" fill="#ff9c9c" style="font-weight:800;font-size:15px">OFF · 0</text><rect x="40" y="36" width="80" height="40" rx="8" fill="#0a0f1a"><animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.45;0.5;0.95;1" dur="3s" repeatCount="indefinite" begin="2s"/></rect></g>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">蛇口にたとえると：<span class="term">ソース</span>=入口、<span class="term">ドレイン</span>=出口、<span class="term">ゲート</span>=ハンドル。</p>
+        <p class="pt">ゲート電圧で電流が<span class="g">ON(1)／OFF(0)</span>。右上の表示が切替わる動作デモ。</p>
+        <p class="pt">この0と1が<b>デジタル計算の土台</b>。1チップに数百億〜1000億個。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（露光）</div>
+          <div class="chips"><span class="chip-s">ASML</span><span class="chip-s jp">東京エレクトロン 8035</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S105 微細化・ムーアの法則 ========== -->
+  <section class="scene" data-vid="s105"
+    data-narration="トランジスタは、小さく作るほど、たくさん詰め込め、動作も速く、消費電力も下がります。だから半導体の歴史は、ひたすら小さくする歴史でした。およそ二年ごとに集積度が倍になる、この経験則はムーアの法則と呼ばれます。今の最先端は二ナノメートル世代。一ナノメートルは一ミリメートルの百万分の一で、髪の毛の太さのおよそ五万分の一です。ウイルスよりも小さな世界で、原子を数十個ならべる精度の勝負になっています。"
+    data-tts="トランジスタは、小さく作るほど、たくさん詰め込め、動作も速く、消費電力も下がります。だから半導体の歴史は、ひたすら小さくする歴史でした。およそ二年ごとに集積度が倍になる、この経験則はムーアの法則と呼ばれます。今の最先端は二ナノメートル世代。一ナノメートルは一ミリメートルの百万分の一で、髪の毛の太さのおよそ五万分の一です。ウイルスよりも小さな世界で、原子を数十個ならべる精度の勝負になっています。">
+    <div class="s-kicker fin">なぜ小さくするのか</div>
+    <h2 class="s-title fin">⑥ <span class="hl">微細化</span>とムーアの法則</h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 260">
+          <!-- scale comparison -->
+          <text x="230" y="26" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:700">どれくらい小さい？（スケール比較）</text>
+          <g class="pop" style="--d:.6s"><circle cx="80" cy="110" r="46" fill="none" stroke="#8aa0c8" stroke-width="3"/><text x="80" y="114" text-anchor="middle" class="svgcap">髪の毛</text><text x="80" y="174" text-anchor="middle" class="svgcap sm">約80,000nm</text></g>
+          <text x="150" y="114" class="svgcap fin" style="--d:1.2s;font-size:15px" fill="#9b6de8">≫</text>
+          <g class="pop" style="--d:1.4s"><circle cx="230" cy="110" r="20" fill="none" stroke="#7fd0ff" stroke-width="3"/><text x="230" y="114" text-anchor="middle" class="svgcap sm">ウイルス</text><text x="230" y="174" text-anchor="middle" class="svgcap sm">約100nm</text></g>
+          <text x="290" y="114" class="svgcap fin" style="--d:2.0s;font-size:15px" fill="#9b6de8">≫</text>
+          <g class="pop" style="--d:2.2s"><circle cx="360" cy="110" r="5" fill="#f4c542" filter="url(#glow)"><animate attributeName="r" values="4;6;4" dur="1.6s" repeatCount="indefinite"/></circle><text x="360" y="140" text-anchor="middle" class="svgcap sm" fill="#f4c542">トランジスタ</text><text x="360" y="174" text-anchor="middle" class="svgcap sm" fill="#f4c542">約2nm</text></g>
+          <!-- Moore doubling bar -->
+          <g class="fin" style="--d:2.8s">
+            <text x="230" y="210" text-anchor="middle" class="svgcap" fill="#9fb0d0">ムーアの法則：約2年で集積度が倍々に</text>
+            <g fill="#4ea1ff"><rect x="120" y="232" width="10" height="8"/><rect x="140" y="228" width="10" height="12"/><rect x="160" y="222" width="10" height="18"/><rect x="180" y="214" width="10" height="26"/><rect x="200" y="202" width="10" height="38"/><rect x="220" y="186" width="10" height="54"/><rect x="240" y="166" width="10" height="74"/><rect x="260" y="140" width="10" height="100"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">小さくするほど<b>多く・速く・省電力</b>。</p>
+        <p class="pt"><span class="g">ムーアの法則</span>＝約2年で集積度が倍。半導体進歩の原動力。</p>
+        <p class="pt">最先端<b>2nm</b>＝髪の毛の約5万分の一。<b>原子数十個</b>を並べる精度の世界。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S106 進化 ========== -->
+  <section class="scene" data-vid="s106"
+    data-narration="ところが、小さくしすぎると問題が起きます。蛇口を閉めても水がにじむように、オフのときも電気がわずかに漏れてしまうのです。これを抑えるため、ゲートでチャネル、つまり電流の通り道を、より強く囲い込む方向に構造が進化しました。平らな平面型から、ヒレを立てて三方向から囲むFinFET、さらに板状の通り道を全方向から包み込むGAAナノシートへ。これが最先端、二ナノメートル世代の構造です。"
+    data-tts="ところが、小さくしすぎると問題が起きます。蛇口を閉めても水がにじむように、オフのときも電気がわずかに漏れてしまうのです。これを抑えるため、ゲートでチャネル、つまり電流の通り道を、より強く囲い込む方向に構造が進化しました。平らな平面型から、ヒレを立てて三方向から囲むフィンフェット、さらに板状の通り道を全方向から包み込むゲートオールアラウンドへ。これが最先端、二ナノメートル世代の構造です。">
+    <div class="s-kicker fin">構造の進化</div>
+    <h2 class="s-title fin">⑦ トランジスタの<span class="hl">3次元化</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 250">
+          <g class="fin" style="--d:.2s"><text x="75" y="28" text-anchor="middle" class="svgcap w" style="font-weight:700">平面型</text><text x="75" y="42" text-anchor="middle" class="svgcap sm">〜28nm</text>
+            <rect x="25" y="60" width="100" height="40" fill="#2c3a57"/><rect x="55" y="52" width="40" height="8" fill="url(#gGold)"/><line x1="33" y1="80" x2="117" y2="80" stroke="#39d98a" stroke-width="2"/>
+            <circle r="3" fill="#9bffce" filter="url(#glow)"><animateMotion dur="1.4s" repeatCount="indefinite" path="M33,80 H117"/></circle></g>
+          <text x="150" y="80" class="svgcap fin" style="--d:1.0s;font-size:18px" fill="#9b6de8">→</text>
+          <g class="fin" style="--d:1.2s"><text x="230" y="28" text-anchor="middle" class="svgcap w" style="font-weight:700">FinFET</text><text x="230" y="42" text-anchor="middle" class="svgcap sm">22〜5nm</text>
+            <rect x="180" y="80" width="100" height="22" fill="#2c3a57"/><rect x="198" y="56" width="12" height="46" fill="#3f5f93"/><rect x="224" y="56" width="12" height="46" fill="#3f5f93"/><rect x="250" y="56" width="12" height="46" fill="#3f5f93"/>
+            <rect x="188" y="66" width="84" height="22" fill="#9b6de8"><animate attributeName="opacity" values=".4;.75;.4" dur="2.2s" repeatCount="indefinite"/></rect>
+            <text x="230" y="80" text-anchor="middle" class="svgcap sm" fill="#fff">3面で囲む</text>
+            <circle r="3" fill="#9bffce" filter="url(#glow)"><animateMotion dur="1.4s" begin="-.4s" repeatCount="indefinite" path="M186,92 H274"/></circle></g>
+          <text x="305" y="80" class="svgcap fin" style="--d:2.0s;font-size:18px" fill="#9b6de8">→</text>
+          <g class="fin" style="--d:2.2s"><text x="390" y="28" text-anchor="middle" class="svgcap w" style="font-weight:700">GAAナノシート</text><text x="390" y="42" text-anchor="middle" class="svgcap sm" fill="#f4c542">3nm/2nm〜 最先端</text>
+            <rect x="345" y="92" width="90" height="14" fill="#2c3a57"/><rect x="355" y="58" width="70" height="9" rx="3" fill="#5b7fb5"/><rect x="355" y="72" width="70" height="9" rx="3" fill="#5b7fb5"/><rect x="355" y="86" width="70" height="6" rx="3" fill="#5b7fb5"/>
+            <rect x="346" y="52" width="88" height="46" fill="#9b6de8"><animate attributeName="opacity" values=".22;.5;.22" dur="2.2s" repeatCount="indefinite"/></rect>
+            <g fill="#9bffce" filter="url(#glow)"><circle r="2.6"><animateMotion dur="1.4s" repeatCount="indefinite" path="M355,62 H425"/></circle><circle r="2.6"><animateMotion dur="1.4s" begin="-.5s" repeatCount="indefinite" path="M355,76 H425"/></circle></g>
+            <text x="390" y="122" text-anchor="middle" class="svgcap sm" fill="#d9b6ff">全周で包囲</text></g>
+          <rect x="0" y="48" width="40" height="90" fill="#ffffff" opacity="0.05" filter="url(#softglow)"><animateTransform attributeName="transform" type="translate" from="0 0" to="430 0" dur="4s" repeatCount="indefinite"/></rect>
+          <g class="fin" style="--d:3.0s"><text x="230" y="172" text-anchor="middle" class="svgcap w" style="font-size:13px">小さくすると「オフでも漏れる」→ ゲートで囲って抑える</text><text x="230" y="200" text-anchor="middle" class="svgcap" fill="#f4c542" style="font-size:13px">平面 → 3面(FinFET) → 全周(GAA)</text></g>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">小さくしすぎると<b>オフでも電気が漏れる</b>（蛇口のにじみ）。</p>
+        <p class="pt">対策はゲートで<span class="term">チャネル</span>（通り道）を<span class="g">囲う</span>こと。</p>
+        <p class="pt">平面 → <b>FinFET</b>(3面) → <b>GAA</b>(全周)。2nm世代の主役。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（最先端装置・検査）</div>
+          <div class="chips"><span class="chip-s jp">東京エレクトロン 8035</span><span class="chip-s jp">レーザーテック 6920</span><span class="chip-s jp">国際電気 6525</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S107 露光 ========== -->
+  <section class="scene" data-vid="s107"
+    data-narration="では、髪の毛の何万分の一という回路を、どうやって描くのでしょうか。鍵は、写真の現像に似た露光という技術です。シリコンの上に感光材、レジストを塗り、回路の設計図を写したマスクを通して、極端紫外線、EUVという特別な光を当てます。光が当たった部分だけ性質が変わり、まるでハンコのように、回路パターンが転写されるのです。このEUV露光装置を作れるのは、世界でASML一社だけ。感光材のレジストは東京応化やJSR、光の欠陥を映すマスクの検査はレーザーテックと、ここは日本企業の独壇場です。"
+    data-tts="では、髪の毛の何万分の一という回路を、どうやって描くのでしょうか。鍵は、写真の現像に似た露光という技術です。シリコンの上に感光材、レジストを塗り、回路の設計図を写したマスクを通して、極端紫外線、イーユーブイという特別な光を当てます。光が当たった部分だけ性質が変わり、まるでハンコのように、回路パターンが転写されるのです。このイーユーブイ露光装置を作れるのは、世界でエーエスエムエル一社だけ。感光材のレジストは東京応化やジェイエスアール、光の欠陥を映すマスクの検査はレーザーテックと、ここは日本企業の独壇場です。">
+    <div class="s-kicker fin">回路の描き方</div>
+    <h2 class="s-title fin">⑧ <span class="hl">露光</span>＝光で回路を焼き付ける</h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 270">
+          <!-- light source -->
+          <circle class="pop" style="--d:.3s" cx="230" cy="40" r="26" fill="url(#gSun)" filter="url(#glow)"><animate attributeName="r" values="24;28;24" dur="2s" repeatCount="indefinite"/></circle>
+          <text x="290" y="44" class="svgcap fin" style="--d:.6s" fill="#ffd86b">EUV光</text>
+          <!-- beam -->
+          <g stroke="#ffe9a0" stroke-width="2" opacity=".7" class="fin" style="--d:.8s"><line x1="210" y1="62" x2="190" y2="110" stroke-dasharray="5 5"><animate attributeName="stroke-dashoffset" values="20;0" dur=".6s" repeatCount="indefinite"/></line><line x1="250" y1="62" x2="270" y2="110" stroke-dasharray="5 5"><animate attributeName="stroke-dashoffset" values="20;0" dur=".6s" repeatCount="indefinite"/></line><line x1="230" y1="62" x2="230" y2="110" stroke-dasharray="5 5"><animate attributeName="stroke-dashoffset" values="20;0" dur=".6s" repeatCount="indefinite"/></line></g>
+          <!-- mask -->
+          <g class="fin" style="--d:1.0s"><rect x="150" y="110" width="160" height="16" fill="#3a4a72"/><rect x="170" y="110" width="14" height="16" fill="#0a0f1a"/><rect x="210" y="110" width="14" height="16" fill="#0a0f1a"/><rect x="250" y="110" width="14" height="16" fill="#0a0f1a"/><text x="330" y="122" class="svgcap sm">マスク(設計図)</text></g>
+          <!-- lens -->
+          <ellipse class="fin" style="--d:1.2s" cx="230" cy="150" rx="70" ry="12" fill="#2a4a7a" opacity=".6" stroke="#4ea1ff"/><text x="330" y="154" class="svgcap sm fin" style="--d:1.2s">レンズ(縮小)</text>
+          <!-- wafer with resist -->
+          <rect class="gh" style="--d:1.5s" x="120" y="200" width="220" height="34" fill="url(#gWafer)" stroke="#6a8fc0"/><text x="230" y="252" text-anchor="middle" class="svgcap sm fin" style="--d:1.7s">ウェハ＋レジスト(感光材)</text>
+          <!-- pattern stamped flashes -->
+          <g fill="#9bffce" filter="url(#glow)" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.35;0.4;0.7;0.75;1" dur="3s" repeatCount="indefinite" begin="2s"/>
+            <rect x="168" y="206" width="8" height="22"/><rect x="200" y="206" width="8" height="22"/><rect x="232" y="206" width="8" height="22"/><rect x="264" y="206" width="8" height="22"/></g>
+          <!-- exposure flash beam -->
+          <line x1="230" y1="162" x2="230" y2="200" stroke="#ffe9a0" stroke-width="3" opacity="0"><animate attributeName="opacity" values="0;0;.9;0;0" keyTimes="0;0.33;0.4;0.5;1" dur="3s" repeatCount="indefinite" begin="2s"/></line>
+          <text x="230" y="186" text-anchor="middle" class="svgcap sm fin" style="--d:2.2s" fill="#9bffce">↓ ハンコのように転写</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt"><span class="g">露光</span>＝写真の現像に似た原理で回路を焼き付ける。</p>
+        <p class="pt"><span class="term">レジスト</span>(感光材)＋<span class="term">マスク</span>(設計図)＋<span class="term">EUV</span>(特別な光)でパターンを転写。</p>
+        <p class="pt">EUV装置はASMLが<b>独占</b>。日本は材料・検査で要を握る。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（露光エコシステム）</div>
+          <div class="chips"><span class="chip-s">ASML</span><span class="chip-s jp">東京応化 4186</span><span class="chip-s jp">JSR(非上場)</span><span class="chip-s jp">レーザーテック 6920</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S108 論理ゲート ========== -->
+  <section class="scene" data-vid="s108"
+    data-narration="一個のトランジスタは、ただのスイッチです。けれど、組み合わせると「考える」ことができるようになります。ピー型とエヌ型のトランジスタをペアにした回路をCMOSと呼び、待機中はほとんど電気を使わないのが大きな特長です。たとえば、入力を逆さまにするインバータ。入力が一なら出力はゼロ、ゼロなら一を返します。こうした基本回路を論理ゲートと呼び、標準セルという部品にまとめて、何十億個も敷き詰めます。設計するのはNVIDIAなどの企業で、設計ソフトはSynopsysとCadence、回路の土台となる設計資産はArmが握ります。"
+    data-tts="一個のトランジスタは、ただのスイッチです。けれど、組み合わせると、考えることができるようになります。ピー型とエヌ型のトランジスタをペアにした回路をシーモスと呼び、待機中はほとんど電気を使わないのが大きな特長です。たとえば、入力を逆さまにするインバータ。入力がいちなら出力はゼロ、ゼロならいちを返します。こうした基本回路を論理ゲートと呼び、標準セルという部品にまとめて、何十億個も敷き詰めます。設計するのはエヌビディアなどの企業で、設計ソフトはシノプシスとケイデンス、回路の土台となる設計資産はアームが握ります。">
+    <div class="s-kicker fin">SCALE ≈ 0.1 µm ／ 動作デモ</div>
+    <h2 class="s-title fin">⑨ ゲートを組んで<span class="hl">論理</span>を作る</h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 250">
+          <line class="gh" style="--d:.2s" x1="90" y1="34" x2="380" y2="34" stroke="#ff6b6b" stroke-width="2"/><text x="385" y="38" class="svgcap sm fin" style="--d:.4s" fill="#ff9c9c">電源</text>
+          <line class="gh" style="--d:.2s" x1="90" y1="214" x2="380" y2="214" stroke="#8fdcff" stroke-width="2"/><text x="385" y="218" class="svgcap sm fin" style="--d:.4s" fill="#8fdcff">接地</text>
+          <rect class="pop" style="--d:.7s" x="180" y="60" width="64" height="44" rx="6" fill="none" stroke="#4ec1ff" stroke-width="2"/><text x="212" y="86" text-anchor="middle" class="svgcap w sm fin" style="--d:.9s">PMOS</text>
+          <rect class="pop" style="--d:.9s" x="180" y="146" width="64" height="44" rx="6" fill="none" stroke="#ff8a8a" stroke-width="2"/><text x="212" y="172" text-anchor="middle" class="svgcap w sm fin" style="--d:1.1s">NMOS</text>
+          <line x1="212" y1="34" x2="212" y2="60" stroke="#8aa0c8" stroke-width="2" class="fin" style="--d:.7s"/><line x1="212" y1="190" x2="212" y2="214" stroke="#8aa0c8" stroke-width="2" class="fin" style="--d:.9s"/>
+          <line x1="212" y1="104" x2="212" y2="146" stroke="#39d98a" stroke-width="2" class="fin" style="--d:1.3s"/><line x1="212" y1="125" x2="330" y2="125" stroke="#39d98a" stroke-width="2" class="fin" style="--d:1.5s"/>
+          <line x1="95" y1="125" x2="180" y2="82" stroke="#f4c542" stroke-width="2" class="fin" style="--d:.6s"/><line x1="95" y1="125" x2="180" y2="168" stroke="#f4c542" stroke-width="2" class="fin" style="--d:.6s"/>
+          <g class="fin" style="--d:1.8s"><circle cx="70" cy="125" r="14" fill="#1a2336" stroke="#f4c542"/><text x="70" y="130" text-anchor="middle" class="svgcap w" style="font-weight:800;font-size:13px" fill="#f4d97a">1</text>
+            <text x="70" y="130" text-anchor="middle" class="svgcap w" style="font-weight:800;font-size:13px" fill="#f4d97a" opacity="0">0<animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.48;0.52;0.98;1" dur="3.2s" repeatCount="indefinite" begin="2s"/></text><text x="36" y="129" class="svgcap sm" fill="#f4c542">入力</text></g>
+          <circle r="4" fill="#fff" filter="url(#glow)"><animateMotion dur="3.2s" repeatCount="indefinite" begin="2s" path="M70,125 L180,82 M212,104 L212,146 M212,125 L330,125" keyPoints="0;0.5;1" keyTimes="0;0.5;1" calcMode="linear"/></circle>
+          <g class="fin" style="--d:2.0s"><circle cx="350" cy="125" r="14" fill="#14331f" stroke="#39d98a"/><text x="350" y="130" text-anchor="middle" class="svgcap w" style="font-weight:800;font-size:13px" fill="#7df0b0">0</text>
+            <text x="350" y="130" text-anchor="middle" class="svgcap w" style="font-weight:800;font-size:13px" fill="#7df0b0" opacity="0">1<animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.48;0.52;0.98;1" dur="3.2s" repeatCount="indefinite" begin="2s"/></text><text x="350" y="158" text-anchor="middle" class="svgcap sm" fill="#39d98a">出力(反転)</text></g>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt"><span class="term">CMOS</span>＝PMOS+NMOSのペア。待機時ほぼ無電流＝<span class="g">低消費電力</span>。</p>
+        <p class="pt">入力1→出力0、0→1。信号が走る<b>インバータ</b>の動作デモ。</p>
+        <p class="pt">基本回路＝<span class="term">論理ゲート</span>を<b>標準セル</b>として大量配置。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（設計・EDA・IP）</div>
+          <div class="chips"><span class="chip-s">NVIDIA</span><span class="chip-s">Synopsys</span><span class="chip-s">Cadence</span><span class="chip-s">Arm</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S109 計算になる仕組み ========== -->
+  <section class="scene" data-vid="s109"
+    data-narration="では、ただのオンとオフが、どうして計算になるのでしょうか。論理ゲートをうまく組み合わせると、足し算や引き算ができる回路が作れます。それをさらに積み上げると、記憶する、くらべる、条件で枝分かれする、といった処理ができるようになる。これを膨大に集めたものが、CPUやGPUといった頭脳です。つまり、一とゼロという単純なスイッチの集まりが、文章を書いたり、絵を描いたり、AIを動かしたりしているのです。"
+    data-tts="では、ただのオンとオフが、どうして計算になるのでしょうか。論理ゲートをうまく組み合わせると、足し算や引き算ができる回路が作れます。それをさらに積み上げると、記憶する、くらべる、条件で枝分かれする、といった処理ができるようになる。これを膨大に集めたものが、シーピーユーやジーピーユーといった頭脳です。つまり、いちとゼロという単純なスイッチの集まりが、文章を書いたり、絵を描いたり、エーアイを動かしたりしているのです。">
+    <div class="s-kicker fin">なぜ0と1が計算になるのか</div>
+    <h2 class="s-title fin">⑩ スイッチの集まりが<span class="hl">頭脳</span>になる</h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 260">
+          <!-- pyramid of abstraction -->
+          <g class="gh" style="--d:.3s"><rect x="60" y="210" width="340" height="34" rx="5" fill="#1f3050" stroke="#4ea1ff"/><text x="230" y="232" text-anchor="middle" class="svgcap w">トランジスタ（0/1スイッチ）</text></g>
+          <g class="gh" style="--d:.8s"><rect x="95" y="166" width="270" height="34" rx="5" fill="#23304a" stroke="#7fd0ff"/><text x="230" y="188" text-anchor="middle" class="svgcap w">論理ゲート（AND・OR・NOT）</text></g>
+          <g class="gh" style="--d:1.3s"><rect x="130" y="122" width="200" height="34" rx="5" fill="#26314f" stroke="#9b6de8"/><text x="230" y="144" text-anchor="middle" class="svgcap w">加算器・記憶・比較</text></g>
+          <g class="gh" style="--d:1.8s"><rect x="160" y="78" width="140" height="34" rx="5" fill="#2a3a5a" stroke="#39d98a"/><text x="230" y="100" text-anchor="middle" class="svgcap w">CPU・GPU（頭脳）</text></g>
+          <g class="pop" style="--d:2.3s"><rect x="185" y="36" width="90" height="32" rx="16" fill="#14331f" stroke="#7df0b0"/><text x="230" y="56" text-anchor="middle" class="svgcap w" fill="#7df0b0" style="font-weight:700">文章・絵・AI</text></g>
+          <!-- bits rising -->
+          <g fill="#7fd0ff" filter="url(#glow)" font-size="9"><circle r="3"><animateMotion dur="2.4s" begin="2s" repeatCount="indefinite" path="M230,210 V52"/></circle><circle r="3" fill="#9bffce"><animateMotion dur="2.4s" begin="-.8s" repeatCount="indefinite" path="M150,227 V90"/></circle><circle r="3" fill="#f4d97a"><animateMotion dur="2.4s" begin="-1.6s" repeatCount="indefinite" path="M320,227 V90"/></circle></g>
+          <text x="40" y="160" class="svgcap sm fin" style="--d:2.6s" fill="#9fb0d0" transform="rotate(-90 40 160)">積み上げ →</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">論理ゲートを組むと<b>足し算・記憶・分岐</b>ができる。</p>
+        <p class="pt">それを膨大に積み上げたのが<span class="term">CPU・GPU</span>という頭脳。</p>
+        <p class="pt"><span class="g">0と1の集まり</span>が、文章・画像・AIを生み出す。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S110 配線 ========== -->
+  <section class="scene" data-vid="s110"
+    data-narration="数十億個のスイッチも、つながなければ、ただの点の集まりです。トランジスタの上に、銅でできた配線を十数層も積み上げて、すべてを結びます。下の層は細い路地のような信号線、上の層は太い幹線道路のような電源線。まるで立体交差した都市の道路網で、銅の摩天楼とも呼ばれます。全部の配線を一本につなぐと、最新のチップでは数十キロメートルにもなります。この成膜やエッチングは東京エレクトロンやLam、洗浄はSCREEN、研磨に使うスラリーはフジミインコーポレーテッドなど、日本企業が多くの工程で強みを持ちます。"
+    data-tts="数十億個のスイッチも、つながなければ、ただの点の集まりです。トランジスタの上に、銅でできた配線を十数層も積み上げて、すべてを結びます。下の層は細い路地のような信号線、上の層は太い幹線道路のような電源線。まるで立体交差した都市の道路網で、銅の摩天楼とも呼ばれます。全部の配線を一本につなぐと、最新のチップでは数十キロメートルにもなります。この成膜やエッチングは東京エレクトロンやラムリサーチ、洗浄はスクリーン、研磨に使うスラリーはフジミインコーポレーテッドなど、日本企業が多くの工程で強みを持ちます。">
+    <div class="s-kicker fin">SCALE ≈ 数 µm 厚</div>
+    <h2 class="s-title fin">⑪ 全部をつなぐ<span class="hl">銅の摩天楼</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 420 270">
+          <rect class="gh" style="--d:.1s" x="20" y="232" width="380" height="32" fill="#2c3a57"/><text x="210" y="252" text-anchor="middle" class="svgcap sm fin" style="--d:.3s">トランジスタ層 (FEOL)</text>
+          <g fill="#9b6de8" class="fin" style="--d:.3s"><rect x="70" y="224" width="18" height="8"/><rect x="160" y="224" width="18" height="8"/><rect x="250" y="224" width="18" height="8"/><rect x="330" y="224" width="18" height="8"/></g>
+          <g class="gv" style="--d:.7s"><rect x="20" y="200" width="380" height="24" fill="#141b2b" stroke="#27314c"/><g fill="url(#gMetal)"><rect x="55" y="208" width="30" height="8"/><rect x="130" y="208" width="30" height="8"/><rect x="210" y="208" width="30" height="8"/><rect x="300" y="208" width="40" height="8"/></g><text x="406" y="216" class="svgcap sm">M1</text></g>
+          <g class="gv" style="--d:1.0s"><rect x="20" y="168" width="380" height="28" fill="#141b2b" stroke="#27314c"/><g fill="url(#gMetal)"><rect x="50" y="177" width="55" height="10"/><rect x="170" y="177" width="70" height="10"/><rect x="300" y="177" width="70" height="10"/></g><text x="406" y="188" class="svgcap sm">M2-5</text></g>
+          <g class="gv" style="--d:1.3s"><rect x="20" y="132" width="380" height="32" fill="#141b2b" stroke="#27314c"/><g fill="url(#gMetal)"><rect x="45" y="142" width="120" height="13"/><rect x="210" y="142" width="160" height="13"/></g><text x="406" y="154" class="svgcap sm">上層</text></g>
+          <g class="gv" style="--d:1.6s"><rect x="20" y="100" width="380" height="28" fill="#0f1420" stroke="#27314c"/><rect x="70" y="92" width="70" height="20" rx="3" fill="#cfd6e6"/><rect x="270" y="92" width="70" height="20" rx="3" fill="#cfd6e6"/><text x="210" y="116" text-anchor="middle" class="svgcap sm">バンプ下地・パッド</text></g>
+          <g fill="#7fd0ff" filter="url(#glow)"><circle r="3"><animateMotion dur="2.4s" repeatCount="indefinite" begin="1.8s" path="M55,212 H340 M340,212 V182 M170,182 H370 M370,182 V148 M210,148 H370"/></circle><circle r="3"><animateMotion dur="2.4s" begin="0.6s" repeatCount="indefinite" path="M55,212 H340 M340,212 V182 M170,182 H370 M370,182 V148 M210,148 H370"/></circle></g>
+          <text x="210" y="84" text-anchor="middle" class="svgcap w fin" style="--d:2.0s;font-size:12px">下=細い信号線 / 上=太い電源線｜信号が走る</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt"><span class="term">FEOL</span>＝トランジスタ／<span class="term">BEOL</span>＝銅配線10〜18層。</p>
+        <p class="pt">立体交差した<b>都市の道路網</b>。全部つなぐと数十km。</p>
+        <p class="pt">層間は縦穴<span class="term">ビア</span>で接続。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（成膜・洗浄・CMP）</div>
+          <div class="chips"><span class="chip-s jp">東京エレクトロン 8035</span><span class="chip-s jp">SCREEN 7735</span><span class="chip-s jp">フジミ 5384</span><span class="chip-s">Lam / AMAT</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S111 ダイ ========== -->
+  <section class="scene" data-vid="s111"
+    data-narration="配線まで完成した、一個分のチップをダイと呼びます。その中身は、機能ごとに区画整理された都市計画のようなもの。計算を担う演算コア、よく使うデータを置くキャッシュ、外部のメモリとやりとりするメモリ制御、信号の出入口となる入出力などが、面積と配線を考えて最適に配置されます。最近は、一枚の大きなダイをやめ、小さなチップレットに分けて後で組み合わせる設計が主流になりつつあります。製造を受託するファウンドリは台湾のTSMCが先端の九割を握り、日本ではソニーがイメージセンサで世界首位に立ちます。"
+    data-tts="配線まで完成した、一個分のチップをダイと呼びます。その中身は、機能ごとに区画整理された都市計画のようなもの。計算を担う演算コア、よく使うデータを置くキャッシュ、外部のメモリとやりとりするメモリ制御、信号の出入口となる入出力などが、面積と配線を考えて最適に配置されます。最近は、一枚の大きなダイをやめ、小さなチップレットに分けて後で組み合わせる設計が主流になりつつあります。製造を受託するファウンドリは台湾のティーエスエムシーが先端の九割を握り、日本ではソニーがイメージセンサで世界首位に立ちます。">
+    <div class="s-kicker fin">SCALE ≈ 5〜30 mm 角</div>
+    <h2 class="s-title fin">⑫ ダイ＝機能ブロックの<span class="hl">都市計画</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 360 300">
+          <rect class="fin" style="--d:.1s" x="30" y="30" width="300" height="240" rx="6" fill="url(#gDie)" stroke="#3a4a72" stroke-width="2"/>
+          <g><rect class="pop" style="--d:.5s" x="44" y="44" width="58" height="58" rx="4" fill="#2a4a7a"><animate attributeName="fill" values="#2a4a7a;#3f74c0;#2a4a7a" dur="2.4s" begin="2s" repeatCount="indefinite"/></rect>
+            <rect class="pop" style="--d:.6s" x="108" y="44" width="58" height="58" rx="4" fill="#2a4a7a"><animate attributeName="fill" values="#2a4a7a;#3f74c0;#2a4a7a" dur="2.4s" begin="2.6s" repeatCount="indefinite"/></rect>
+            <rect class="pop" style="--d:.7s" x="44" y="108" width="58" height="58" rx="4" fill="#2a4a7a"><animate attributeName="fill" values="#2a4a7a;#3f74c0;#2a4a7a" dur="2.4s" begin="3.2s" repeatCount="indefinite"/></rect>
+            <rect class="pop" style="--d:.8s" x="108" y="108" width="58" height="58" rx="4" fill="#2a4a7a"><animate attributeName="fill" values="#2a4a7a;#3f74c0;#2a4a7a" dur="2.4s" begin="3.8s" repeatCount="indefinite"/></rect>
+            <text x="105" y="80" text-anchor="middle" class="svgcap w sm fin" style="--d:1.0s">演算コア</text></g>
+          <rect class="pop" style="--d:1.0s" x="44" y="172" width="122" height="44" rx="4" fill="#3a6a4a"/><text x="105" y="198" text-anchor="middle" class="svgcap w sm fin" style="--d:1.2s">キャッシュ(SRAM)</text>
+          <rect class="pop" style="--d:1.1s" x="176" y="44" width="64" height="80" rx="4" fill="#6a4a7a"/><text x="208" y="88" text-anchor="middle" class="svgcap w sm fin" style="--d:1.3s">メモリ制御</text>
+          <rect class="pop" style="--d:1.2s" x="176" y="130" width="64" height="86" rx="4" fill="#7a5a3a"/><text x="208" y="175" text-anchor="middle" class="svgcap w sm fin" style="--d:1.4s">I/O</text>
+          <rect class="pop" style="--d:1.3s" x="250" y="44" width="66" height="172" rx="4" fill="#7a3a5a"/><text x="283" y="132" text-anchor="middle" class="svgcap w sm fin" style="--d:1.5s">アクセラ</text>
+          <g fill="#7fd0ff" filter="url(#glow)"><circle r="3"><animateMotion dur="2s" begin="2.2s" repeatCount="indefinite" path="M105,166 V172 M105,194 H176 M208,150 V44"/></circle><circle r="3" fill="#9bffce"><animateMotion dur="2.4s" begin="2.6s" repeatCount="indefinite" path="M166,130 H250 M283,130 V216"/></circle></g>
+          <g fill="#cfd6e6" class="fin" style="--d:1.8s"><circle cx="70" cy="232" r="3"><animate attributeName="opacity" values="1;.3;1" dur="1.6s" repeatCount="indefinite"/></circle><circle cx="110" cy="232" r="3"><animate attributeName="opacity" values="1;.3;1" dur="1.6s" begin="-.4s" repeatCount="indefinite"/></circle><circle cx="150" cy="232" r="3"><animate attributeName="opacity" values="1;.3;1" dur="1.6s" begin="-.8s" repeatCount="indefinite"/></circle><circle cx="190" cy="232" r="3"/><circle cx="230" cy="232" r="3"/><circle cx="270" cy="232" r="3"/></g>
+          <text x="180" y="256" text-anchor="middle" class="svgcap sm fin" style="--d:1.9s">入出力パッド列</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt"><span class="term">ダイ</span>＝配線まで完成した1個分のチップ。ブロックが処理で点滅。</p>
+        <p class="pt">演算コア・キャッシュ・メモリ制御・I/Oを最適配置。</p>
+        <p class="pt"><span class="g">チップレット</span>＝機能ごとに分けて後で結合。歩留まり改善。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（製造・IDM）</div>
+          <div class="chips"><span class="chip-s">TSMC</span><span class="chip-s jp">ソニーG 6758</span><span class="chip-s jp">ルネサス 6723</span><span class="chip-s jp">Rapidus</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S112 ウェハ ========== -->
+  <section class="scene" data-vid="s112"
+    data-narration="チップは一個ずつ作るのではありません。直径三百ミリのシリコンの円盤、ウェハの上に、クッキーの抜き型のように、何百個ものダイを一度に作り込みます。これが、半導体を安く大量に作れる理由です。完成すると、ウェハのまま全部のダイを電気的に検査し、合格した良品だけを次の工程へ送ります。一枚のウェハから良品が何個取れるか。この比率を歩留まりと呼び、コストを大きく左右します。この検査やテストでは、アドバンテストや東京精密といった日本企業が世界の中心にいます。"
+    data-tts="チップは一個ずつ作るのではありません。直径三百ミリのシリコンの円盤、ウェハの上に、クッキーの抜き型のように、何百個ものダイを一度に作り込みます。これが、半導体を安く大量に作れる理由です。完成すると、ウェハのまま全部のダイを電気的に検査し、合格した良品だけを次の工程へ送ります。一枚のウェハから良品が何個取れるか。この比率を歩留まりと呼び、コストを大きく左右します。この検査やテストでは、アドバンテストや東京精密といった日本企業が世界の中心にいます。">
+    <div class="s-kicker fin">SCALE ≈ 直径 300 mm ／ 検査デモ</div>
+    <h2 class="s-title fin">⑬ ウェハ＝<span class="hl">一度に数百個</span>作る円盤</h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 320 300">
+          <defs><clipPath id="wclip"><circle cx="160" cy="150" r="128"/></clipPath></defs>
+          <circle class="pop" style="--d:.2s" cx="160" cy="150" r="130" fill="url(#gWafer)" stroke="#6a8fc0" stroke-width="2"/>
+          <g clip-path="url(#wclip)">
+            <ellipse cx="120" cy="110" rx="150" ry="60" fill="#ffffff" opacity="0.06" filter="url(#softglow)"><animateTransform attributeName="transform" type="rotate" from="0 160 150" to="360 160 150" dur="12s" repeatCount="indefinite"/></ellipse>
+            <g id="waferdies"></g>
+            <rect x="32" y="20" width="6" height="260" fill="#39d98a" opacity="0.85" filter="url(#glow)"><animateTransform attributeName="transform" type="translate" from="0 0" to="252 0" dur="3.4s" repeatCount="indefinite" begin="2s"/></rect>
+          </g>
+          <path class="fin" style="--d:1.8s" d="M160 280 l-10 -16 l20 0 z" fill="#070b12"/>
+          <text x="160" y="296" text-anchor="middle" class="svgcap sm fin" style="--d:1.9s">緑=良品 / 赤=不良 を検査ビームが走査</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt"><b>300mm</b>円盤に<b>クッキーの抜き型</b>のように数百個を同時製造。</p>
+        <p class="pt">完成後に全ダイを<b>プローブ検査</b>、良品だけ次へ。</p>
+        <p class="pt">良品比率＝<span class="g">歩留まり</span>がコストを決める。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（ウェハ・検査）</div>
+          <div class="chips"><span class="chip-s jp">信越化学 4063</span><span class="chip-s jp">SUMCO 3436</span><span class="chip-s jp">アドバンテスト 6857</span><span class="chip-s jp">東京精密 7729</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S113 パッケージ ========== -->
+  <section class="scene" data-vid="s113"
+    data-narration="ウェハから切り出したダイは、とても繊細で、そのままでは使えません。そこで、外界から守り、外部の端子につなぐ、パッケージングという後工程を行います。昔は、ダイの上面から細い金属のワイヤで一本ずつつないでいました。今の高性能チップは、ダイを裏返して、面全体にならべた無数のはんだバンプで一気に直結する、フリップチップが主流です。これで端子の数を桁違いに増やせ、高速になります。この切断と薄化はディスコが世界のおよそ七割を握り、封止材は住友ベークライト、パッケージ基板はイビデンと、ここでも日本企業が要所を押さえています。"
+    data-tts="ウェハから切り出したダイは、とても繊細で、そのままでは使えません。そこで、外界から守り、外部の端子につなぐ、パッケージングという後工程を行います。昔は、ダイの上面から細い金属のワイヤで一本ずつつないでいました。今の高性能チップは、ダイを裏返して、面全体にならべた無数のはんだバンプで一気に直結する、フリップチップが主流です。これで端子の数を桁違いに増やせ、高速になります。この切断と薄化はディスコが世界のおよそ七割を握り、封止材は住友ベークライト、パッケージ基板はイビデンと、ここでも日本企業が要所を押さえています。">
+    <div class="s-kicker fin">SCALE ≈ 十数 mm ／ 実装デモ</div>
+    <h2 class="s-title fin">⑭ 切り出して<span class="hl">守って・つなぐ</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 440 250">
+          <text x="220" y="26" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:700">フリップチップ（現代の主流）</text>
+          <rect class="gh" style="--d:.5s" x="90" y="150" width="260" height="22" fill="#3a4a72"/><text x="220" y="166" text-anchor="middle" class="svgcap sm fin" style="--d:.7s" fill="#cdd6ea">パッケージ基板</text>
+          <g><animateTransform attributeName="transform" type="translate" values="0 -36; 0 0; 0 0; 0 -36" keyTimes="0;0.3;0.85;1" dur="3.6s" repeatCount="indefinite" begin="2s"/>
+            <rect x="150" y="108" width="140" height="34" fill="#5b7fb5"/><text x="220" y="130" text-anchor="middle" class="svgcap sm" fill="#fff">ダイ(裏返し)</text>
+            <g fill="url(#gMetal)"><circle cx="168" cy="146" r="5"/><circle cx="190" cy="146" r="5"/><circle cx="212" cy="146" r="5"/><circle cx="234" cy="146" r="5"/><circle cx="256" cy="146" r="5"/><circle cx="278" cy="146" r="5"/></g></g>
+          <g fill="#9bffce" filter="url(#glow)" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.3;0.34;0.8;0.85;1" dur="3.6s" repeatCount="indefinite" begin="2s"/><circle cx="168" cy="148" r="3"/><circle cx="212" cy="148" r="3"/><circle cx="256" cy="148" r="3"/></g>
+          <text x="330" y="128" class="svgcap sm fin" style="--d:1.7s" fill="#d8b24a">はんだバンプで直結</text>
+          <g fill="#cfd6e6" class="fin" style="--d:2.0s"><circle cx="130" cy="182" r="7"/><circle cx="175" cy="182" r="7"/><circle cx="220" cy="182" r="7"/><circle cx="265" cy="182" r="7"/><circle cx="310" cy="182" r="7"/></g>
+          <text x="220" y="210" text-anchor="middle" class="svgcap sm fin" style="--d:2.2s">↓ BGAボールで回路基板へ</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt"><span class="term">後工程(OSAT)</span>＝切り出し→保護→端子接続。</p>
+        <p class="pt"><span class="g">フリップチップ</span>＝裏返して面全体のバンプで直結＝多ピン・高速。</p>
+        <p class="pt">薄化・切断は<b>ディスコ</b>、封止材<b>住友ベークライト</b>、基板<b>イビデン</b>。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（後工程・基板）</div>
+          <div class="chips"><span class="chip-s jp">DISCO 6146</span><span class="chip-s jp">住友ベークライト 4203</span><span class="chip-s jp">イビデン 4062</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S114 CoWoS / HBM ========== -->
+  <section class="scene" data-vid="s114"
+    data-narration="AI向けのGPUでは、もう一段すごいことをします。計算するロジックのチップと、超高速メモリであるHBMを、一枚のシリコンの土台、インターポーザの上に横並びに載せ、極太の配線で直接結ぶのです。これがTSMCのコワスという技術。データの通り道を、何車線もある高速道路のように太くすることで、AIに必要な莫大なデータを一気に運びます。HBMは、DRAMという記憶チップを高層ビルのように縦に積み上げ、シリコン貫通ビアという縦穴で串刺しにしたもの。実は今、微細化よりも、このパッケージングの能力こそが、AI半導体の供給を決める最大の関所になっています。HBMはSK Hynixが首位、絶縁材は味の素がほぼ独占し、テストはアドバンテストです。"
+    data-tts="エーアイ向けのジーピーユーでは、もう一段すごいことをします。計算するロジックのチップと、超高速メモリであるエイチビーエムを、一枚のシリコンの土台、インターポーザの上に横並びに載せ、極太の配線で直接結ぶのです。これがティーエスエムシーのコワスという技術。データの通り道を、何車線もある高速道路のように太くすることで、エーアイに必要な莫大なデータを一気に運びます。エイチビーエムは、ディーラムという記憶チップを高層ビルのように縦に積み上げ、シリコン貫通ビアという縦穴で串刺しにしたもの。実は今、微細化よりも、このパッケージングの能力こそが、エーアイ半導体の供給を決める最大の関所になっています。エイチビーエムはエスケイハイニックスが首位、絶縁材は味の素がほぼ独占し、テストはアドバンテストです。">
+    <div class="s-kicker fin">AIチップの核心 ／ 帯域デモ</div>
+    <h2 class="s-title fin">⑮ <span class="hl">CoWoS と HBM</span>＝AIの真の関所</h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 440 270">
+          <rect class="gh" style="--d:.2s" x="40" y="220" width="360" height="20" fill="#23406a"/><text x="220" y="234" text-anchor="middle" class="svgcap sm fin" style="--d:.4s" fill="#cdd6ea">パッケージ基板</text>
+          <rect class="gh" style="--d:.6s" x="70" y="192" width="300" height="20" fill="#3a4a72"/><text x="220" y="206" text-anchor="middle" class="svgcap sm fin" style="--d:.8s" fill="#cdd6ea">シリコンインターポーザ(TSV)</text>
+          <rect class="pop" style="--d:1.1s" x="170" y="138" width="100" height="50" fill="#2a4a7a" stroke="#4ea1ff"><animate attributeName="stroke" values="#4ea1ff;#9fd0ff;#4ea1ff" dur="1.6s" begin="2s" repeatCount="indefinite"/></rect><text x="220" y="166" text-anchor="middle" class="svgcap w sm fin" style="--d:1.3s">ロジック(GPU)</text>
+          <g class="pop" style="--d:1.6s"><rect x="62" y="96" width="80" height="92" fill="#1a2236" stroke="#39d98a"/><g fill="#27406a"><rect x="66" y="102" width="72" height="12"/><rect x="66" y="117" width="72" height="12"/><rect x="66" y="132" width="72" height="12"/><rect x="66" y="147" width="72" height="12"/><rect x="66" y="162" width="72" height="12"/></g><text x="102" y="90" text-anchor="middle" class="svgcap sm" fill="#39d98a">HBM</text>
+            <g fill="#9bffce" filter="url(#glow)"><circle r="2.4"><animateMotion dur="1.1s" begin="2s" repeatCount="indefinite" path="M82,186 V102"/></circle><circle r="2.4"><animateMotion dur="1.1s" begin="-.5s" repeatCount="indefinite" path="M122,102 V186"/></circle></g></g>
+          <g class="pop" style="--d:1.8s"><rect x="298" y="96" width="80" height="92" fill="#1a2236" stroke="#39d98a"/><g fill="#27406a"><rect x="302" y="102" width="72" height="12"/><rect x="302" y="117" width="72" height="12"/><rect x="302" y="132" width="72" height="12"/><rect x="302" y="147" width="72" height="12"/><rect x="302" y="162" width="72" height="12"/></g><text x="338" y="90" text-anchor="middle" class="svgcap sm" fill="#39d98a">HBM</text>
+            <g fill="#9bffce" filter="url(#glow)"><circle r="2.4"><animateMotion dur="1.1s" begin="2.2s" repeatCount="indefinite" path="M318,102 V186"/></circle><circle r="2.4"><animateMotion dur="1.1s" begin="-.3s" repeatCount="indefinite" path="M358,186 V102"/></circle></g></g>
+          <g fill="#7fd0ff" filter="url(#glow)"><circle r="3.2"><animateMotion dur="0.7s" begin="2s" repeatCount="indefinite" path="M142,200 H170"/></circle><circle r="3.2"><animateMotion dur="0.7s" begin="-.2s" repeatCount="indefinite" path="M142,204 H170"/></circle><circle r="3.2" fill="#f4d97a"><animateMotion dur="0.7s" begin="-.4s" repeatCount="indefinite" path="M170,200 H142"/></circle><circle r="3.2"><animateMotion dur="0.7s" begin="2.1s" repeatCount="indefinite" path="M298,200 H270"/></circle><circle r="3.2"><animateMotion dur="0.7s" begin="-.25s" repeatCount="indefinite" path="M298,204 H270"/></circle><circle r="3.2" fill="#f4d97a"><animateMotion dur="0.7s" begin="-.45s" repeatCount="indefinite" path="M270,200 H298"/></circle></g>
+          <text x="220" y="55" text-anchor="middle" class="svgcap w fin" style="--d:2.6s;font-size:12px">DRAMを縦積み＋TSV貫通｜ロジックと極太バスで高速通信</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt"><span class="term">CoWoS</span>＝ロジック+HBMを1枚の土台に横並び実装。</p>
+        <p class="pt"><span class="term">HBM</span>＝DRAMを高層ビルのように縦積み＋TSV貫通＝<span class="g">広帯域</span>（何車線もの高速道路）。</p>
+        <p class="pt">微細化でなく<b>この後工程能力</b>がAI供給の律速。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（AIの関所）</div>
+          <div class="chips"><span class="chip-s">TSMC</span><span class="chip-s">SK Hynix</span><span class="chip-s jp">アドバンテスト 6857</span><span class="chip-s jp">味の素 2802</span><span class="chip-s jp">DISCO 6146</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S121 メモリ DRAM/NAND ========== -->
+  <section class="scene" data-vid="s121"
+    data-narration="メモリには大きく二種類あります。ひとつはDRAM。電源を切ると消えてしまうかわりに高速で、計算中のデータを一時的に置く主記憶として働きます。さきほど登場したHBMは、このDRAMを積み上げた特別版でした。もうひとつがNAND型フラッシュメモリ。こちらは電源を切っても消えず、写真やアプリを保存するストレージになります。NANDは今、記憶素子を縦に何百層も積み上げる3D化で容量を伸ばし、AIが生み出す膨大なデータをためる大容量SSDの需要が急増しています。NANDでは日本のキオクシアが世界三位、ほかにSamsung、SK Hynix、Micronが競います。"
+    data-tts="メモリには大きく二種類あります。ひとつはディーラム。電源を切ると消えてしまうかわりに高速で、計算中のデータを一時的に置く主記憶として働きます。さきほど登場したエイチビーエムは、このディーラムを積み上げた特別版でした。もうひとつがナンド型フラッシュメモリ。こちらは電源を切っても消えず、写真やアプリを保存するストレージになります。ナンドは今、記憶素子を縦に何百層も積み上げる立体化で容量を伸ばし、エーアイが生み出す膨大なデータをためる大容量エスエスディーの需要が急増しています。ナンドでは日本のキオクシアが世界三位、ほかにサムスン、エスケイハイニックス、マイクロンが競います。">
+    <div class="s-kicker fin">メモリ ／ ホットテーマ</div>
+    <h2 class="s-title fin">⑯ メモリ ── <span class="hl">DRAM と NAND</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 260">
+          <text x="120" y="28" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:700">DRAM ＝ 主記憶</text>
+          <rect class="pop" style="--d:.4s" x="45" y="44" width="150" height="118" rx="6" fill="#1f3050" stroke="#7fd0ff"/>
+          <g opacity="1"><animate attributeName="opacity" values="1;1;0.08;0.08;1" keyTimes="0;0.5;0.55;0.95;1" dur="4s" repeatCount="indefinite" begin="2s"/>
+            <g fill="#7fd0ff"><rect x="62" y="60" width="26" height="26" rx="3"/><rect x="98" y="60" width="26" height="26" rx="3"/><rect x="134" y="60" width="26" height="26" rx="3"/>
+              <rect x="62" y="94" width="26" height="26" rx="3"/><rect x="98" y="94" width="26" height="26" rx="3"/><rect x="134" y="94" width="26" height="26" rx="3"/>
+              <rect x="62" y="128" width="26" height="26" rx="3"/><rect x="98" y="128" width="26" height="26" rx="3"/><rect x="134" y="128" width="26" height="26" rx="3"/></g></g>
+          <text x="120" y="182" text-anchor="middle" class="svgcap sm fin" style="--d:1s">高速・揮発</text>
+          <text x="120" y="198" text-anchor="middle" class="svgcap sm fin" style="--d:1.2s" fill="#ff9c9c">電源OFFで消える</text>
+          <text x="120" y="220" text-anchor="middle" class="svgcap sm fin" style="--d:1.4s" fill="#9fd0ff">※HBMはDRAMの積層版</text>
+          <text x="230" y="112" text-anchor="middle" class="svgcap w" style="font-size:14px" fill="#9b6de8">対</text>
+          <text x="345" y="28" text-anchor="middle" class="svgcap w fin" style="--d:.4s;font-weight:700">NAND ＝ ストレージ</text>
+          <g>
+            <rect class="gv" style="--d:.7s" x="285" y="150" width="120" height="14" fill="#3a6a4a"/>
+            <rect class="gv" style="--d:.9s" x="290" y="136" width="110" height="12" fill="#27406a"/><rect class="gv" style="--d:1.05s" x="290" y="122" width="110" height="12" fill="#27406a"/>
+            <rect class="gv" style="--d:1.2s" x="290" y="108" width="110" height="12" fill="#27406a"/><rect class="gv" style="--d:1.35s" x="290" y="94" width="110" height="12" fill="#27406a"/>
+            <rect class="gv" style="--d:1.5s" x="290" y="80" width="110" height="12" fill="#27406a"/><rect class="gv" style="--d:1.65s" x="290" y="66" width="110" height="12" fill="#27406a"/>
+            <rect class="gv" style="--d:1.8s" x="290" y="52" width="110" height="12" fill="#27406a"/>
+            <g stroke="#9bffce" stroke-width="1.4" filter="url(#glow)"><line x1="320" y1="56" x2="320" y2="162"/><line x1="372" y1="56" x2="372" y2="162"/></g>
+          </g>
+          <text x="345" y="182" text-anchor="middle" class="svgcap sm fin" style="--d:2s">不揮発・縦に数百層(3D)</text>
+          <text x="345" y="198" text-anchor="middle" class="svgcap sm fin" style="--d:2.2s" fill="#7df0b0">OFFでも保持＝SSD</text>
+          <text x="345" y="220" text-anchor="middle" class="svgcap sm fin" style="--d:2.4s" fill="#f4d97a">AIの大容量データを保管</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt"><span class="term">DRAM</span>＝高速だが<b>揮発</b>（電源OFFで消える）＝主記憶。HBMはその積層版。</p>
+        <p class="pt"><span class="term">NAND</span>＝<b>不揮発</b>のストレージ。<span class="g">3D化</span>で数百層へ高層化。</p>
+        <p class="pt">AI推論で<b>大容量SSD</b>需要が急増。NANDは<b>キオクシア</b>が世界3位。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（メモリ・NAND）</div>
+          <div class="chips"><span class="chip-s jp">キオクシア 285A</span><span class="chip-s">SK Hynix</span><span class="chip-s">Micron</span><span class="chip-s">Samsung</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S122 パワー半導体 ========== -->
+  <section class="scene" data-vid="s122"
+    data-narration="ここまでは情報をあつかう半導体でした。一方、大きな電力そのものを、効率よくオン・オフして制御するのがパワー半導体です。電気自動車のモーター、電車、工場の機械、そして大量の電気を使うデータセンターの電源まで、あらゆる電力変換の心臓部になります。従来のシリコンに加え、より高い電圧や熱に強い、炭化ケイ素やチッカガリウムといった新しい材料が、次世代として注目されています。この分野ではドイツのInfineonが世界首位で、日本でもローム、三菱電機、富士電機、ルネサスが有力です。"
+    data-tts="ここまでは情報をあつかう半導体でした。一方、大きな電力そのものを、効率よくオン・オフして制御するのがパワー半導体です。電気自動車のモーター、電車、工場の機械、そして大量の電気を使うデータセンターの電源まで、あらゆる電力変換の心臓部になります。従来のシリコンに加え、より高い電圧や熱に強い、炭化ケイ素やチッカガリウムといった新しい材料が、次世代として注目されています。この分野ではドイツのインフィニオンが世界首位で、日本でもローム、三菱電機、富士電機、ルネサスが有力です。">
+    <div class="s-kicker fin">パワー半導体 ／ EV・電源</div>
+    <h2 class="s-title fin">⑰ <span class="hl">パワー半導体</span> ── 電気を操る</h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 260">
+          <text x="230" y="28" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:700">大きな電力を効率よく ON / OFF</text>
+          <rect class="pop" style="--d:.4s" x="30" y="100" width="70" height="60" rx="6" fill="#3a2a1a" stroke="#f4a04e"/><text x="65" y="134" text-anchor="middle" class="svgcap sm" fill="#ffd9a8">電源</text>
+          <rect class="pop" style="--d:.8s" x="180" y="104" width="100" height="52" rx="6" fill="#2a1a2a" stroke="#ff8a8a"/><text x="230" y="126" text-anchor="middle" class="svgcap w sm">パワー半導体</text><text x="230" y="142" text-anchor="middle" class="svgcap sm" fill="#ff9c9c">SiC / GaN</text>
+          <circle class="pop" style="--d:1.2s" cx="390" cy="130" r="34" fill="#14331f" stroke="#39d98a"/>
+          <g class="spin" style="transform-origin:390px 130px"><line x1="390" y1="106" x2="390" y2="154" stroke="#7df0b0" stroke-width="3"/><line x1="366" y1="130" x2="414" y2="130" stroke="#7df0b0" stroke-width="3"/></g>
+          <text x="390" y="184" text-anchor="middle" class="svgcap sm fin" style="--d:1.4s">モーター/負荷</text>
+          <g opacity="1"><animate attributeName="opacity" values="1;1;0.15;0.15;1" keyTimes="0;0.45;0.5;0.95;1" dur="3s" repeatCount="indefinite" begin="2s"/>
+            <line x1="100" y1="130" x2="180" y2="130" stroke="#ff6b6b" stroke-width="6" filter="url(#glow)"/><line x1="280" y1="130" x2="356" y2="130" stroke="#ff6b6b" stroke-width="6" filter="url(#glow)"/>
+            <g fill="#ffd28a"><circle r="4"><animateMotion dur="0.9s" repeatCount="indefinite" path="M100,130 H180"/></circle><circle r="4"><animateMotion dur="0.9s" begin="-.4s" repeatCount="indefinite" path="M280,130 H356"/></circle></g></g>
+          <text x="230" y="212" text-anchor="middle" class="svgcap w fin" style="--d:2.2s;font-size:12px">EV・電車・工場・データセンター電源の心臓部</text>
+          <text x="230" y="234" text-anchor="middle" class="svgcap sm fin" style="--d:2.4s" fill="#f4d97a">次世代材料：SiC（炭化ケイ素）/ GaN（窒化ガリウム）</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">情報でなく<b>電力そのもの</b>を効率よく制御する半導体。</p>
+        <p class="pt"><b>EV・電車・工場・データセンター電源</b>の心臓部。</p>
+        <p class="pt">次世代材料<span class="g">SiC・GaN</span>が高電圧・高温に強い。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（パワー半導体）</div>
+          <div class="chips"><span class="chip-s">Infineon</span><span class="chip-s jp">ローム 6963</span><span class="chip-s jp">三菱電機 6503</span><span class="chip-s jp">富士電機 6504</span><span class="chip-s jp">ルネサス 6723</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S123 受動部品 MLCC ========== -->
+  <section class="scene" data-vid="s123"
+    data-narration="主役のチップを支える、小さな名脇役も忘れてはいけません。その代表が、積層セラミックコンデンサ、MLCCです。電気を一時的にためて、電圧を安定させたり、ノイズを取り除いたりする部品で、髪の毛ほどの大きさしかないのに、最新のスマートフォンには千個以上、AIサーバーには一台で数万個も使われます。チップが高性能になるほど必要な数が増える、隠れた成長分野です。MLCCは日本の村田製作所が世界首位で、TDKや太陽誘電も上位を占めます。"
+    data-tts="主役のチップを支える、小さな名脇役も忘れてはいけません。その代表が、積層セラミックコンデンサ、エムエルシーシーです。電気を一時的にためて、電圧を安定させたり、ノイズを取り除いたりする部品で、髪の毛ほどの大きさしかないのに、最新のスマートフォンには千個以上、エーアイサーバーには一台で数万個も使われます。チップが高性能になるほど必要な数が増える、隠れた成長分野です。エムエルシーシーは日本の村田製作所が世界首位で、ティーディーケイや太陽誘電も上位を占めます。">
+    <div class="s-kicker fin">受動部品 ／ 隠れた成長分野</div>
+    <h2 class="s-title fin">⑱ 縁の下の力持ち ── <span class="hl">MLCC</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 260">
+          <text x="115" y="28" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:700">MLCC（積層コンデンサ）</text>
+          <g class="pop" style="--d:.5s">
+            <rect x="62" y="60" width="120" height="92" rx="4" fill="#2c3a57" stroke="#cfd6e6"/>
+            <rect x="72" y="68" width="100" height="7" fill="#d8b24a"/><rect x="72" y="80" width="100" height="7" fill="#7fd0ff"/><rect x="72" y="92" width="100" height="7" fill="#d8b24a"/><rect x="72" y="104" width="100" height="7" fill="#7fd0ff"/><rect x="72" y="116" width="100" height="7" fill="#d8b24a"/><rect x="72" y="128" width="100" height="7" fill="#7fd0ff"/><rect x="72" y="140" width="100" height="7" fill="#d8b24a"/>
+            <rect x="56" y="60" width="12" height="92" fill="#cfd6e6"/><rect x="176" y="60" width="12" height="92" fill="#cfd6e6"/>
+          </g>
+          <text x="122" y="172" text-anchor="middle" class="svgcap sm fin" style="--d:1s">電気をためる/電圧安定/ノイズ除去</text>
+          <text x="122" y="190" text-anchor="middle" class="svgcap sm fin" style="--d:1.2s" fill="#9fb0d0">大きさは髪の毛ほど</text>
+          <text x="345" y="28" text-anchor="middle" class="svgcap w fin" style="--d:.6s;font-weight:700">基板に大量実装</text>
+          <rect class="pop" style="--d:.8s" x="248" y="44" width="192" height="118" rx="6" fill="#14241a" stroke="#3a6a4a"/>
+          <g fill="#f4d97a">
+            <rect class="pop" style="--d:1.0s" x="262" y="58" width="14" height="7"/><rect class="pop" style="--d:1.06s" x="286" y="58" width="14" height="7"/><rect class="pop" style="--d:1.12s" x="310" y="58" width="14" height="7"/><rect class="pop" style="--d:1.18s" x="334" y="58" width="14" height="7"/><rect class="pop" style="--d:1.24s" x="358" y="58" width="14" height="7"/><rect class="pop" style="--d:1.3s" x="382" y="58" width="14" height="7"/><rect class="pop" style="--d:1.36s" x="406" y="58" width="14" height="7"/>
+            <rect class="pop" style="--d:1.1s" x="262" y="78" width="14" height="7"/><rect class="pop" style="--d:1.16s" x="286" y="78" width="14" height="7"/><rect class="pop" style="--d:1.22s" x="310" y="78" width="14" height="7"/><rect class="pop" style="--d:1.28s" x="334" y="78" width="14" height="7"/><rect class="pop" style="--d:1.34s" x="358" y="78" width="14" height="7"/><rect class="pop" style="--d:1.4s" x="382" y="78" width="14" height="7"/><rect class="pop" style="--d:1.46s" x="406" y="78" width="14" height="7"/>
+            <rect class="pop" style="--d:1.2s" x="262" y="98" width="14" height="7"/><rect class="pop" style="--d:1.26s" x="286" y="98" width="14" height="7"/><rect class="pop" style="--d:1.32s" x="310" y="98" width="14" height="7"/><rect class="pop" style="--d:1.38s" x="334" y="98" width="14" height="7"/><rect class="pop" style="--d:1.44s" x="358" y="98" width="14" height="7"/><rect class="pop" style="--d:1.5s" x="382" y="98" width="14" height="7"/><rect class="pop" style="--d:1.56s" x="406" y="98" width="14" height="7"/>
+            <rect class="pop" style="--d:1.3s" x="262" y="118" width="14" height="7"/><rect class="pop" style="--d:1.36s" x="286" y="118" width="14" height="7"/><rect class="pop" style="--d:1.42s" x="310" y="118" width="14" height="7"/><rect class="pop" style="--d:1.48s" x="334" y="118" width="14" height="7"/><rect class="pop" style="--d:1.54s" x="358" y="118" width="14" height="7"/><rect class="pop" style="--d:1.6s" x="382" y="118" width="14" height="7"/><rect class="pop" style="--d:1.66s" x="406" y="118" width="14" height="7"/>
+          </g>
+          <text x="344" y="152" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#f4d97a">スマホに1000個＋ / AIサーバに数万個</text>
+          <text x="230" y="232" text-anchor="middle" class="svgcap w fin" style="--d:2.4s;font-size:12px">高性能化ほど必要数↑＝隠れた成長分野（村田が世界首位）</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt"><span class="term">MLCC</span>＝電気をためて<b>電圧安定・ノイズ除去</b>。髪の毛ほどの極小部品。</p>
+        <p class="pt">スマホに1000個超、<b>AIサーバに数万個</b>。高性能化＝搭載数増。</p>
+        <p class="pt"><span class="g">村田製作所</span>が世界首位の<b>隠れ成長分野</b>。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（受動部品）</div>
+          <div class="chips"><span class="chip-s jp">村田製作所 6981</span><span class="chip-s jp">TDK 6762</span><span class="chip-s jp">太陽誘電 6976</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S115 製品→DC ========== -->
+  <section class="scene" data-vid="s115"
+    data-narration="こうして完成したチップは、電源や周辺部品とともに基板に載り、NVIDIAなどのGPUモジュールという製品になります。原子にわずかな不純物を混ぜるところから始まった長い旅が、ここでようやく形になります。そして、このチップを数千、数万個も集めて動かす巨大な施設が、データセンターです。その建設を支えているのが、巨額の投資を続けるマイクロソフトやグーグルといったハイパースケーラーです。"
+    data-tts="こうして完成したチップは、電源や周辺部品とともに基板に載り、エヌビディアなどのジーピーユーモジュールという製品になります。原子にわずかな不純物を混ぜるところから始まった長い旅が、ここでようやく形になります。そして、このチップを数千、数万個も集めて動かす巨大な施設が、データセンターです。その建設を支えているのが、巨額の投資を続けるマイクロソフトやグーグルといったハイパースケーラーです。">
+    <div class="s-kicker fin">SCALE ≈ 数 cm 〜</div>
+    <h2 class="s-title fin">⑲ 製品へ、そして<span class="hl">データセンター</span>へ</h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 440 250">
+          <rect class="gh" style="--d:.2s" x="20" y="150" width="400" height="50" rx="6" fill="#14331f" stroke="#3a6a4a"/><text x="220" y="192" text-anchor="middle" class="svgcap sm fin" style="--d:.5s" fill="#9fe6bf">GPUモジュール基板</text>
+          <rect class="pop" style="--d:.8s" x="130" y="86" width="180" height="64" rx="5" fill="#1a2236" stroke="#4ea1ff" stroke-width="2"><animate attributeName="stroke" values="#4ea1ff;#9fd0ff;#4ea1ff" dur="1.8s" begin="2s" repeatCount="indefinite"/></rect><text x="220" y="122" text-anchor="middle" class="svgcap w fin" style="--d:1.0s">AIアクセラレータ(完成)</text>
+          <rect class="pop" style="--d:1.0s" x="40" y="116" width="44" height="34" fill="#3a4a72"/><text x="62" y="136" text-anchor="middle" class="svgcap sm fin" style="--d:1.2s">電源</text>
+          <rect class="pop" style="--d:1.1s" x="356" y="116" width="44" height="34" fill="#3a4a72"/><text x="378" y="136" text-anchor="middle" class="svgcap sm fin" style="--d:1.3s">電源</text>
+          <line x1="310" y1="118" x2="420" y2="60" stroke="#9b6de8" stroke-width="2" class="fin" style="--d:1.6s"/>
+          <g fill="#c4a6ff" filter="url(#glow)"><circle r="3.5"><animateMotion dur="1.6s" begin="2s" repeatCount="indefinite" path="M150,118 H310 L420,60"/></circle><circle r="3.5"><animateMotion dur="1.6s" begin="-.5s" repeatCount="indefinite" path="M150,118 H310 L420,60"/></circle><circle r="3.5"><animateMotion dur="1.6s" begin="-1s" repeatCount="indefinite" path="M150,118 H310 L420,60"/></circle></g>
+          <text x="220" y="48" text-anchor="middle" class="svgcap w fin" style="--d:1.8s;font-size:13px">→ サーバ → データセンター → AIサービス</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">チップ＋電源＋部品 → <b>GPUモジュール</b>という製品へ。</p>
+        <p class="pt">ドーピングから始まった旅が<span class="g">社会実装</span>される瞬間。</p>
+        <p class="pt">数万個を集めて動かす施設＝<b>データセンター</b>。建設を支えるのはハイパースケーラ。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（製品・需要）</div>
+          <div class="chips"><span class="chip-s">NVIDIA</span><span class="chip-s">Super Micro</span><span class="chip-s">ハイパースケーラ4社</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S116 日本企業まとめ ========== -->
+  <section class="scene" data-vid="s116"
+    data-narration="ここで、旅を振り返ってみましょう。半導体の主役というと、TSMCやNVIDIAといった海外企業が目立ちます。しかし、その足元を支える材料や装置、部品に目を向けると、風景は一変します。シリコンウェハ、レジスト、露光の検査、成膜や洗浄の装置、後工程の切断や封止、検査テスト、AIパッケージの絶縁材。さらに、NANDメモリのキオクシア、電圧を支える部品MLCCの村田製作所、電力を操るパワー半導体まで。これら縁の下の関所の多くを、信越化学、東京エレクトロン、レーザーテック、ディスコ、アドバンテスト、味の素、村田製作所といった日本企業が、世界で高いシェアを握っています。半導体は、日本が今も強い、数少ない戦略産業なのです。"
+    data-tts="ここで、旅を振り返ってみましょう。半導体の主役というと、ティーエスエムシーやエヌビディアといった海外企業が目立ちます。しかし、その足元を支える材料や装置、部品に目を向けると、風景は一変します。シリコンウェハ、レジスト、露光の検査、成膜や洗浄の装置、後工程の切断や封止、検査テスト、エーアイパッケージの絶縁材。さらに、ナンドメモリのキオクシア、電圧を支える部品エムエルシーシーの村田製作所、電力を操るパワー半導体まで。これら縁の下の関所の多くを、信越化学、東京エレクトロン、レーザーテック、ディスコ、アドバンテスト、味の素、村田製作所といった日本企業が、世界で高いシェアを握っています。半導体は、日本が今も強い、数少ない戦略産業なのです。">
+    <div class="s-kicker fin">投資視点のまとめ</div>
+    <h2 class="s-title fin">⑳ 工程の<span class="hl">「関所」</span>を握る日本企業</h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 270">
+          <!-- vertical chain with highlight sweep (8 rows) -->
+          <g font-size="10.5">
+            <g class="gh" style="--d:.2s"><rect x="40" y="22" width="380" height="22" rx="4" fill="#1c2740" stroke="#f4c542"/><text x="52" y="37" class="svgcap w">材料・ウェハ</text><text x="408" y="37" text-anchor="end" class="svgcap" fill="#f4d97a">信越・SUMCO</text></g>
+            <g class="gh" style="--d:.45s"><rect x="40" y="49" width="380" height="22" rx="4" fill="#1c2740" stroke="#f4c542"/><text x="52" y="64" class="svgcap w">露光・レジスト・検査</text><text x="408" y="64" text-anchor="end" class="svgcap" fill="#f4d97a">東京応化・レーザーテック</text></g>
+            <g class="gh" style="--d:.7s"><rect x="40" y="76" width="380" height="22" rx="4" fill="#1c2740" stroke="#f4c542"/><text x="52" y="91" class="svgcap w">成膜・洗浄装置</text><text x="408" y="91" text-anchor="end" class="svgcap" fill="#f4d97a">東京エレクトロン・SCREEN</text></g>
+            <g class="gh" style="--d:.95s"><rect x="40" y="103" width="380" height="22" rx="4" fill="#1c2740" stroke="#f4c542"/><text x="52" y="118" class="svgcap w">後工程・切断・封止</text><text x="408" y="118" text-anchor="end" class="svgcap" fill="#f4d97a">DISCO・住友ベークライト</text></g>
+            <g class="gh" style="--d:1.2s"><rect x="40" y="130" width="380" height="22" rx="4" fill="#1c2740" stroke="#f4c542"/><text x="52" y="145" class="svgcap w">検査・テスト</text><text x="408" y="145" text-anchor="end" class="svgcap" fill="#f4d97a">アドバンテスト・東京精密</text></g>
+            <g class="gh" style="--d:1.45s"><rect x="40" y="157" width="380" height="22" rx="4" fill="#1c2740" stroke="#f4c542"/><text x="52" y="172" class="svgcap w">メモリ（NAND）</text><text x="408" y="172" text-anchor="end" class="svgcap" fill="#f4d97a">キオクシア</text></g>
+            <g class="gh" style="--d:1.7s"><rect x="40" y="184" width="380" height="22" rx="4" fill="#1c2740" stroke="#f4c542"/><text x="52" y="199" class="svgcap w">受動部品（MLCC）</text><text x="408" y="199" text-anchor="end" class="svgcap" fill="#f4d97a">村田・TDK・太陽誘電</text></g>
+            <g class="gh" style="--d:1.95s"><rect x="40" y="211" width="380" height="22" rx="4" fill="#1c2740" stroke="#f4c542"/><text x="52" y="226" class="svgcap w">AIパッケージ材料</text><text x="408" y="226" text-anchor="end" class="svgcap" fill="#f4d97a">味の素・イビデン</text></g>
+          </g>
+          <rect x="40" y="22" width="380" height="22" rx="4" fill="#f4c542" opacity="0.16"><animate attributeName="y" values="22;211;22" dur="7s" repeatCount="indefinite" begin="2s"/></rect>
+          <text x="230" y="252" text-anchor="middle" class="svgcap w fin" style="--d:2.2s;font-size:13px">「縁の下の関所」を日本企業が世界シェアで掌握</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">主役のTSMC・NVIDIAの<b>足元</b>を支える材料・装置。</p>
+        <p class="pt">ウェハ・レジスト・検査・装置・後工程・テスト・AI材料…</p>
+        <p class="pt">多くの<span class="g">関所</span>を日本企業が世界シェアで掌握。半導体は<b>日本が今も強い戦略産業</b>。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 日本の主要「関所」銘柄</div>
+          <div class="chips"><span class="chip-s jp">信越 4063</span><span class="chip-s jp">東エレ 8035</span><span class="chip-s jp">レーザーテック 6920</span><span class="chip-s jp">DISCO 6146</span><span class="chip-s jp">アドバンテスト 6857</span><span class="chip-s jp">キオクシア 285A</span><span class="chip-s jp">村田 6981</span><span class="chip-s jp">味の素 2802</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S117 章末 ========== -->
+  <section class="scene titlecard" data-vid="s117"
+    data-narration="第一章、半導体の構造は以上です。半導体という不思議な材料、ドーピング、トランジスタ、微細化、露光、論理、配線、ダイ、ウェハ、パッケージ。この長い積み重ねが、AIを動かす一枚のチップになります。次の章では、そのチップが集まってできる、データセンターの世界へご案内します。"
+    data-tts="第一章、半導体の構造は以上です。半導体という不思議な材料、ドーピング、トランジスタ、微細化、露光、論理、配線、ダイ、ウェハ、パッケージ。この長い積み重ねが、エーアイを動かす一枚のチップになります。次の章では、そのチップが集まってできる、データセンターの世界へご案内します。">
+    <svg id="titlebg2" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid slice">
+      <g fill="#4ea1ff" filter="url(#glow)"><circle r="3"><animateMotion dur="9s" repeatCount="indefinite" path="M-20 180 H1020"/></circle><circle r="3" fill="#9b6de8"><animateMotion dur="11s" begin="-4s" repeatCount="indefinite" path="M-20 380 H1020"/></circle><circle r="2.5" fill="#39d98a"><animateMotion dur="10s" begin="-2s" repeatCount="indefinite" path="M500 -20 V580"/></circle></g>
+    </svg>
+    <div class="big fin">第1章 <span class="hl">完</span></div>
+    <div class="lead fin" style="--d:.4s">半導体という材料 → ドーピング → トランジスタ → 微細化 → 露光 → 論理 → 配線 → ダイ → ウェハ → パッケージ。<br>この長い積み重ねが、AIを動かす一枚のチップになる。</div>
+    <div class="chip fin" style="--d:1.0s">▼ 第2章：データセンターへ続く</div>
+  </section>
+
+  <!-- ========== S200 CHAPTER 2 TITLE ========== -->
+  <section class="scene titlecard" data-vid="s200"
+    data-narration="第2章、データセンター。第1章で完成した一枚のチップを、数千、数万個も集めて、AIを動かし続ける巨大な施設が、データセンターです。この章では、サーバー一台から、電力や冷却をまかなう街のような施設の全体まで、その仕組みを見ていきます。"
+    data-tts="第二章、データセンター。第一章で完成した一枚のチップを、数千、数万個も集めて、エーアイを動かし続ける巨大な施設が、データセンターです。この章では、サーバー一台から、電力や冷却をまかなう街のような施設の全体まで、その仕組みを見ていきます。">
+    <svg id="titlebg" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid slice">
+      <g fill="#4ea1ff" filter="url(#glow)"><circle r="3"><animateMotion dur="9s" repeatCount="indefinite" path="M-20 160 H1020"/></circle><circle r="3" fill="#ff6b6b"><animateMotion dur="11s" begin="-3s" repeatCount="indefinite" path="M-20 300 H1020"/></circle><circle r="3" fill="#3fc7ff"><animateMotion dur="13s" begin="-6s" repeatCount="indefinite" path="M-20 420 H1020"/></circle></g>
+    </svg>
+    <div class="s-kicker fin">DATA CENTER · 教材ムービー 第2章</div>
+    <div class="big fin" style="--d:.2s">データセンターの<span class="hl">仕組み</span></div>
+    <div class="lead fin" style="--d:.7s">完成したチップを数万個集めてAIを動かす巨大施設。サーバー1台から、電力・冷却・ネットワーク、そして街のような施設全体までを旅する。</div>
+    <div class="chip fin" style="--d:1.2s">▶ 続けて再生します</div>
+  </section>
+
+  <!-- ========== S201 データセンターとは ========== -->
+  <section class="scene" data-vid="s201"
+    data-narration="データセンターとは、大量のコンピューターを一か所に集め、二十四時間休みなく動かし続けるための施設です。動かし続けるには、三つのものが欠かせません。安定した電力、発熱を逃がす冷却、そして大量のデータをやりとりするネットワークです。じつは今、AIブームの本当のボトルネックは、半導体そのものよりも、この電力と冷却に移りつつあります。"
+    data-tts="データセンターとは、大量のコンピューターを一か所に集め、二十四時間休みなく動かし続けるための施設です。動かし続けるには、三つのものが欠かせません。安定した電力、発熱を逃がす冷却、そして大量のデータをやりとりするネットワークです。じつは今、エーアイブームの本当のボトルネックは、半導体そのものよりも、この電力と冷却に移りつつあります。">
+    <div class="s-kicker fin">第2章 ／ 全体像</div>
+    <h2 class="s-title fin">① データセンターを支える<span class="hl">3要素</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 260">
+          <rect class="pop" style="--d:.3s" x="160" y="55" width="140" height="150" rx="8" fill="#0f1726" stroke="#3a4a72" stroke-width="2"/>
+          <text x="230" y="44" text-anchor="middle" class="svgcap w fin" style="--d:.5s;font-weight:700">データセンター</text>
+          <g class="fin" style="--d:.9s">
+            <rect x="172" y="68" width="116" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/><rect x="172" y="90" width="116" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/><rect x="172" y="112" width="116" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/><rect x="172" y="134" width="116" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/><rect x="172" y="156" width="116" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/><rect x="172" y="178" width="116" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/>
+            <g fill="#39d98a"><circle cx="182" cy="76" r="2"><animate attributeName="opacity" values="1;.2;1" dur="1.4s" repeatCount="indefinite"/></circle><circle cx="182" cy="120" r="2"><animate attributeName="opacity" values="1;.2;1" dur="1.4s" begin="-.6s" repeatCount="indefinite"/></circle><circle cx="182" cy="164" r="2"><animate attributeName="opacity" values="1;.2;1" dur="1.4s" begin="-.9s" repeatCount="indefinite"/></circle></g>
+          </g>
+          <line x1="20" y1="90" x2="160" y2="90" stroke="#ff6b6b" stroke-width="3" class="flow"/><text x="22" y="80" class="svgcap sm fin" style="--d:1.2s" fill="#ff9c9c">電力</text>
+          <line x1="20" y1="175" x2="160" y2="175" stroke="#3fc7ff" stroke-width="3" class="flow"/><text x="22" y="165" class="svgcap sm fin" style="--d:1.4s" fill="#9fe0ff">冷却</text>
+          <line x1="300" y1="130" x2="440" y2="130" stroke="#9b6de8" stroke-width="3" class="flow"/><text x="438" y="120" text-anchor="end" class="svgcap sm fin" style="--d:1.6s" fill="#c4a6ff">データ通信</text>
+          <text x="230" y="228" text-anchor="middle" class="svgcap w fin" style="--d:1.8s;font-size:12px">24時間稼働＝電力＋冷却＋ネットワーク</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">大量のコンピューターを集め<b>24時間動かす</b>施設。</p>
+        <p class="pt">必須の<span class="g">3要素</span>＝<b>電力・冷却・ネットワーク</b>。</p>
+        <p class="pt">AIの本当のボトルネックは、いまや<b>電力と冷却</b>へ。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（DC運営）</div>
+          <div class="chips"><span class="chip-s">Digital Realty</span><span class="chip-s">Equinix</span><span class="chip-s jp">NTT 9432</span><span class="chip-s jp">さくらネット 3778</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S202 AIサーバ ========== -->
+  <section class="scene" data-vid="s202"
+    data-narration="施設の最小単位が、サーバー、一台のノードです。第1章で作ったGPUを八個前後束ね、CPU、メモリ、データを送り出すネットワークカード、そして電源を一枚の基板に載せます。GPU同士はNVLinkという高速の橋で直結され、まるで一個の巨大なGPUのように協力します。一台で数キロワットと、従来のサーバーの数倍の電気を消費します。"
+    data-tts="施設の最小単位が、サーバー、一台のノードです。第一章で作ったジーピーユーを八個前後束ね、シーピーユー、メモリ、データを送り出すネットワークカード、そして電源を一枚の基板に載せます。ジーピーユー同士はエヌブイリンクという高速の橋で直結され、まるで一個の巨大なジーピーユーのように協力します。一台で数キロワットと、従来のサーバーの数倍の電気を消費します。">
+    <div class="s-kicker fin">SCALE ≈ 数十 cm ／ サーバー1台</div>
+    <h2 class="s-title fin">② AIサーバー＝<span class="hl">GPUの集合体</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 440 260">
+          <rect class="pop" style="--d:.2s" x="20" y="30" width="400" height="200" rx="8" fill="#0f1726" stroke="#3a4a72"/>
+          <g><rect class="pop" style="--d:.5s" x="40" y="55" width="70" height="58" rx="5" fill="#2a4a7a" stroke="#4ea1ff"/><rect class="pop" style="--d:.55s" x="118" y="55" width="70" height="58" rx="5" fill="#2a4a7a" stroke="#4ea1ff"/><rect class="pop" style="--d:.6s" x="40" y="121" width="70" height="58" rx="5" fill="#2a4a7a" stroke="#4ea1ff"/><rect class="pop" style="--d:.65s" x="118" y="121" width="70" height="58" rx="5" fill="#2a4a7a" stroke="#4ea1ff"/>
+            <text x="114" y="92" text-anchor="middle" class="svgcap w sm fin" style="--d:.9s">GPU ×8</text>
+            <g fill="#39d98a" class="pulse"><circle cx="48" cy="63" r="2.5"/><circle cx="102" cy="63" r="2.5"/><circle cx="126" cy="63" r="2.5"/><circle cx="180" cy="63" r="2.5"/></g></g>
+          <rect class="pop" style="--d:.9s" x="60" y="200" width="110" height="18" rx="4" fill="#5a3a7a"/><text x="115" y="213" text-anchor="middle" class="svgcap sm" fill="#d9b6ff">NVLink(GPU間直結)</text>
+          <rect class="pop" style="--d:1.0s" x="220" y="55" width="80" height="42" rx="5" fill="#3a6a4a"/><text x="260" y="80" text-anchor="middle" class="svgcap w sm fin" style="--d:1.2s">CPU</text>
+          <rect class="pop" style="--d:1.05s" x="220" y="105" width="80" height="28" rx="4" fill="#6a4a3a"/><text x="260" y="123" text-anchor="middle" class="svgcap sm">DRAM</text>
+          <rect class="pop" style="--d:1.1s" x="220" y="141" width="80" height="34" rx="4" fill="#7a3a5a"/><text x="260" y="162" text-anchor="middle" class="svgcap sm" fill="#fdd">NIC/光</text>
+          <rect class="pop" style="--d:1.15s" x="312" y="55" width="76" height="60" rx="5" fill="#5a2a2a" stroke="#ff6b6b"/><text x="350" y="90" text-anchor="middle" class="svgcap sm" fill="#ffb3b3">電源PSU</text>
+          <rect class="pop" style="--d:1.2s" x="312" y="125" width="76" height="90" rx="5" fill="#10303f" stroke="#3fc7ff"/><text x="350" y="172" text-anchor="middle" class="svgcap sm" fill="#9fe0ff">冷却プレート</text>
+          <line x1="350" y1="30" x2="350" y2="55" stroke="#ff6b6b" stroke-width="3" class="flow"/>
+          <line x1="300" y1="158" x2="420" y2="158" stroke="#9b6de8" stroke-width="3" class="flow"/>
+          <line x1="350" y1="215" x2="350" y2="240" stroke="#3fc7ff" stroke-width="3" class="flow"/>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt"><span class="term">ノード</span>＝GPU8個＋CPU・メモリ・<b>NIC</b>・電源を載せた1枚。</p>
+        <p class="pt">GPU同士は<span class="g">NVLink</span>で直結＝1個の巨大GPUのよう。</p>
+        <p class="pt">1台で<b>数kW</b>、従来サーバーの数倍を消費。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（サーバー・部材）</div>
+          <div class="chips"><span class="chip-s">NVIDIA</span><span class="chip-s">Super Micro</span><span class="chip-s">Broadcom</span><span class="chip-s">SK Hynix</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S203 ラック ========== -->
+  <section class="scene" data-vid="s203"
+    data-narration="サーバーを縦に積み重ねた棚が、ラックです。横を電気の通り道が、片側を冷却液の配管が走り、各サーバーに電力と冷却を配ります。従来のラックは一本あたり五キロから十五キロワットでした。ところがNVIDIAの最新のAIラックは、七十二個のGPUを詰め込み、一本でおよそ百二十キロワット。もはや空気では冷やせず、液体で冷やすのが前提になりました。"
+    data-tts="サーバーを縦に積み重ねた棚が、ラックです。横を電気の通り道が、片側を冷却液の配管が走り、各サーバーに電力と冷却を配ります。従来のラックは一本あたり五キロから十五キロワットでした。ところがエヌビディアの最新のエーアイラックは、七十二個のジーピーユーを詰め込み、一本でおよそ百二十キロワット。もはや空気では冷やせず、液体で冷やすのが前提になりました。">
+    <div class="s-kicker fin">SCALE ≈ 2 m ／ 1ラック120kW</div>
+    <h2 class="s-title fin">③ ラック＝<span class="hl">サーバーの柱</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 300 260">
+          <rect class="pop" style="--d:.2s" x="70" y="20" width="160" height="222" rx="6" fill="#0f1726" stroke="#3a4a72" stroke-width="2"/>
+          <rect class="pop" style="--d:.4s" x="80" y="28" width="140" height="16" rx="3" fill="#5a3a7a"/><text x="150" y="40" text-anchor="middle" class="svgcap sm" fill="#d9b6ff">ToRスイッチ</text>
+          <g class="fin" style="--d:.7s">
+            <rect x="80" y="50" width="140" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/><rect x="80" y="70" width="140" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/><rect x="80" y="90" width="140" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/><rect x="80" y="110" width="140" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/><rect x="80" y="130" width="140" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/><rect x="80" y="150" width="140" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/><rect x="80" y="170" width="140" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/><rect x="80" y="190" width="140" height="16" rx="2" fill="#1a2236" stroke="#2c3a57"/>
+            <g fill="#39d98a"><circle cx="90" cy="58" r="2"><animate attributeName="opacity" values="1;.2;1" dur="1.3s" repeatCount="indefinite"/></circle><circle cx="90" cy="98" r="2"><animate attributeName="opacity" values="1;.2;1" dur="1.3s" begin="-.4s" repeatCount="indefinite"/></circle><circle cx="90" cy="158" r="2"><animate attributeName="opacity" values="1;.2;1" dur="1.3s" begin="-.8s" repeatCount="indefinite"/></circle></g>
+          </g>
+          <rect x="232" y="20" width="10" height="222" fill="#3a1a1a" stroke="#ff6b6b"/><line x1="237" y1="242" x2="237" y2="20" stroke="#ff6b6b" stroke-width="4" class="flow"/>
+          <rect x="58" y="20" width="10" height="222" fill="#10303f" stroke="#3fc7ff"/><line x1="63" y1="20" x2="63" y2="242" stroke="#3fc7ff" stroke-width="4" class="flow"/>
+          <text x="150" y="256" text-anchor="middle" class="svgcap sm fin" style="--d:1.4s">左=冷却液 ／ 右=電源バスバー</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">サーバーを縦積みした筐体。横に<b>電源</b>、側面に<b>冷却液配管</b>。</p>
+        <p class="pt">従来5〜15kW → AIラック<span class="g">NVL72で約120kW</span>。</p>
+        <p class="pt">空冷では無理＝<b>液冷が前提</b>に。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（電源・配電）</div>
+          <div class="chips"><span class="chip-s">NVIDIA</span><span class="chip-s">Vertiv</span><span class="chip-s">Eaton</span><span class="chip-s">Schneider</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S204 ネットワーク ========== -->
+  <section class="scene" data-vid="s204"
+    data-narration="何万個ものGPUを、一つの巨大な計算機のように協調させるには、超高速で遅れの少ない通信網が必要です。主流は、各棚の上のスイッチを、上位のスイッチが束ねる、スパイン・リーフという構造。離れた装置の間は電気では送れず、光ファイバーと光トランシーバーで結びます。GPUが増えるほど光部品は爆発的に増え、AI投資の隠れた大受益分野です。光ファイバーはフジクラ、古河電工、住友電工など、日本勢が世界の大手です。"
+    data-tts="何万個ものジーピーユーを、一つの巨大な計算機のように協調させるには、超高速で遅れの少ない通信網が必要です。主流は、各棚の上のスイッチを、上位のスイッチが束ねる、スパイン・リーフという構造。離れた装置の間は電気では送れず、光ファイバーと光トランシーバーで結びます。ジーピーユーが増えるほど光部品は爆発的に増え、エーアイ投資の隠れた大受益分野です。光ファイバーはフジクラ、古河電工、住友電工など、日本勢が世界の大手です。">
+    <div class="s-kicker fin">建屋全域 ／ 光ネットワーク</div>
+    <h2 class="s-title fin">④ ネットワーク＝GPUを結ぶ<span class="hl">神経網</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 440 250">
+          <rect class="pop" style="--d:.3s" x="120" y="30" width="60" height="24" rx="4" fill="#5a3a7a"/><rect class="pop" style="--d:.4s" x="260" y="30" width="60" height="24" rx="4" fill="#5a3a7a"/>
+          <text x="220" y="22" text-anchor="middle" class="svgcap w sm fin" style="--d:.6s">スパイン(背骨)</text>
+          <g class="pop" style="--d:.7s"><rect x="40" y="128" width="54" height="22" rx="4" fill="#3a4a72"/><rect x="150" y="128" width="54" height="22" rx="4" fill="#3a4a72"/><rect x="260" y="128" width="54" height="22" rx="4" fill="#3a4a72"/><rect x="360" y="128" width="54" height="22" rx="4" fill="#3a4a72"/></g>
+          <text x="220" y="120" text-anchor="middle" class="svgcap sm fin" style="--d:.9s">リーフ(各ラック上)</text>
+          <g fill="#1a2236" stroke="#2c3a57" class="fin" style="--d:1.1s"><rect x="46" y="196" width="42" height="44"/><rect x="156" y="196" width="42" height="44"/><rect x="266" y="196" width="42" height="44"/><rect x="366" y="196" width="42" height="44"/></g>
+          <g stroke="#9b6de8" stroke-width="2" class="flow"><line x1="150" y1="54" x2="67" y2="128"/><line x1="150" y1="54" x2="177" y2="128"/><line x1="150" y1="54" x2="287" y2="128"/><line x1="150" y1="54" x2="387" y2="128"/><line x1="290" y1="54" x2="67" y2="128"/><line x1="290" y1="54" x2="177" y2="128"/><line x1="290" y1="54" x2="287" y2="128"/><line x1="290" y1="54" x2="387" y2="128"/></g>
+          <g stroke="#9b6de8" stroke-width="2" class="flow slow"><line x1="67" y1="150" x2="67" y2="196"/><line x1="177" y1="150" x2="177" y2="196"/><line x1="287" y1="150" x2="287" y2="196"/><line x1="387" y1="150" x2="387" y2="196"/></g>
+          <g fill="#f4c542" filter="url(#glow)"><circle cx="110" cy="91" r="3" class="pulse"/><circle cx="250" cy="91" r="3" class="pulse"/><circle cx="330" cy="91" r="3" class="pulse"/></g>
+          <text x="434" y="50" text-anchor="end" class="svgcap sm fin" style="--d:1.4s" fill="#f4c542">●=光トランシーバ</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">数万GPUを協調＝超高速・低遅延が必須。</p>
+        <p class="pt"><span class="term">スパイン・リーフ</span>構造＋<b>光ファイバ/光トランシーバ</b>で接続。</p>
+        <p class="pt">GPU増＝光部品が爆増＝<span class="g">AI投資の隠れ受益</span>。光ファイバは日本勢が大手。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（ネットワーク・光）</div>
+          <div class="chips"><span class="chip-s">Arista</span><span class="chip-s">Broadcom</span><span class="chip-s jp">フジクラ 5803</span><span class="chip-s jp">古河電工 5801</span><span class="chip-s jp">住友電工 5802</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S205 冷却 ========== -->
+  <section class="scene" data-vid="s205"
+    data-narration="電気は、使われた後すべて熱に変わります。百二十キロワットのラックを空気で冷やすのは不可能です。そこでAIデータセンターは、液体で冷やす方式へ移りました。冷却液をチップの真上の板に通して熱を吸い、CDUという熱交換器で受け渡し、屋外の冷却塔から外気へ捨てます。効率はPUEという指標で測り、1.0に近いほど優秀。液冷ではVertivが世界的な大手で、空調のダイキンや、流体継手の日本ピラー工業も関わります。"
+    data-tts="電気は、使われた後すべて熱に変わります。百二十キロワットのラックを空気で冷やすのは不可能です。そこでエーアイデータセンターは、液体で冷やす方式へ移りました。冷却液をチップの真上の板に通して熱を吸い、シーディーユーという熱交換器で受け渡し、屋外の冷却塔から外気へ捨てます。効率はピーユーイーという指標で測り、いってんゼロに近いほど優秀。液冷ではバーティブが世界的な大手で、空調のダイキンや、流体継手の日本ピラー工業も関わります。">
+    <div class="s-kicker fin">建屋設備 ／ 発熱との戦い</div>
+    <h2 class="s-title fin">⑤ 冷却＝<span class="hl">空冷から液冷へ</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 320 260">
+          <text x="160" y="20" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:700">直接液冷ループ</text>
+          <rect class="pop" style="--d:.4s" x="30" y="40" width="120" height="86" rx="6" fill="#0f1726" stroke="#3a4a72"/>
+          <rect x="44" y="58" width="92" height="24" rx="3" fill="#2a4a7a"/><text x="90" y="74" text-anchor="middle" class="svgcap sm" fill="#fff">GPU</text>
+          <rect x="44" y="58" width="92" height="10" fill="#10303f" stroke="#3fc7ff"/>
+          <rect x="44" y="98" width="92" height="6" fill="#5a2a2a"><animate attributeName="opacity" values=".2;.7;.2" dur="2s" repeatCount="indefinite"/></rect>
+          <rect class="pop" style="--d:.8s" x="210" y="48" width="90" height="78" rx="6" fill="#10262f" stroke="#3fc7ff"/><text x="255" y="84" text-anchor="middle" class="svgcap sm" fill="#9fe0ff">CDU</text><text x="255" y="100" text-anchor="middle" class="svgcap sm">熱交換器</text>
+          <path d="M150 66 H180 V86 H210" fill="none" stroke="#ff7a5a" stroke-width="4" class="flow"/><text x="180" y="60" text-anchor="middle" class="svgcap sm" fill="#ff9c7a">温</text>
+          <path d="M210 112 H180 V108 H150" fill="none" stroke="#3fc7ff" stroke-width="4" class="flow rev"/><text x="180" y="128" text-anchor="middle" class="svgcap sm" fill="#9fe0ff">冷</text>
+          <rect class="pop" style="--d:1.2s" x="120" y="195" width="90" height="55" rx="6" fill="#14331f" stroke="#3a6a4a"/><text x="165" y="220" text-anchor="middle" class="svgcap sm" fill="#9fe6bf">冷却塔/チラー</text><text x="165" y="236" text-anchor="middle" class="svgcap sm">屋外で排熱</text>
+          <path d="M255 126 V165 H165 V195" fill="none" stroke="#ff7a5a" stroke-width="3" class="flow"/><path d="M150 195 V170 H230 V126" fill="none" stroke="#3fc7ff" stroke-width="3" class="flow rev"/>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">電力は最後に全部<b>熱</b>に。120kWは空冷不可→<span class="g">液冷</span>へ。</p>
+        <p class="pt">冷却プレート→<span class="term">CDU</span>(熱交換)→冷却塔で外気へ。</p>
+        <p class="pt">効率指標<span class="term">PUE</span>＝1.0に近いほど優秀。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（冷却）</div>
+          <div class="chips"><span class="chip-s">Vertiv</span><span class="chip-s jp">ダイキン 6367</span><span class="chip-s jp">日本ピラー 6490</span><span class="chip-s jp">荏原 6361</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S206 電力 ========== -->
+  <section class="scene" data-vid="s206"
+    data-narration="いまAIの最大のボトルネックは、電力です。電気は、数十万ボルトの送電網から、変電所と変圧器、瞬断に備える無停電電源、配電盤を経て、各チップへ少しずつ電圧を下げて届きます。ところが、ギガワット級の需要に発電や送電が追いつかず、大型変圧器の納期は一年から二年にも延びています。この追い風を受けるのが、日立、三菱電機、富士電機、明電舎といった重電メーカーです。"
+    data-tts="いまエーアイの最大のボトルネックは、電力です。電気は、数十万ボルトの送電網から、変電所と変圧器、瞬断に備える無停電電源、配電盤を経て、各チップへ少しずつ電圧を下げて届きます。ところが、ギガワット級の需要に発電や送電が追いつかず、大型変圧器の納期は一年から二年にも延びています。この追い風を受けるのが、日立、三菱電機、富士電機、明電舎といった重電メーカーです。">
+    <div class="s-kicker fin">系統〜建屋 ／ 最大の律速</div>
+    <h2 class="s-title fin">⑥ 電力＝<span class="hl">AI最大のボトルネック</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 220">
+          <g class="pop" style="--d:.3s"><rect x="14" y="70" width="64" height="50" rx="6" fill="#3a1a1a" stroke="#ff6b6b"/><text x="46" y="92" text-anchor="middle" class="svgcap sm" fill="#ffb3b3">送電網</text><text x="46" y="106" text-anchor="middle" class="svgcap sm" fill="#ffb3b3">数十万V</text></g>
+          <g class="pop" style="--d:.6s"><rect x="108" y="70" width="64" height="50" rx="6" fill="#3a2a1a" stroke="#f4a04e"/><text x="140" y="90" text-anchor="middle" class="svgcap sm" fill="#ffd9a8">変電所</text><text x="140" y="104" text-anchor="middle" class="svgcap sm" fill="#ffd9a8">変圧器</text></g>
+          <g class="pop" style="--d:.9s"><rect x="202" y="70" width="64" height="50" rx="6" fill="#2a2a3a" stroke="#9b6de8"/><text x="234" y="90" text-anchor="middle" class="svgcap sm" fill="#d9b6ff">UPS</text><text x="234" y="104" text-anchor="middle" class="svgcap sm" fill="#d9b6ff">蓄電池</text></g>
+          <g class="pop" style="--d:1.2s"><rect x="296" y="70" width="64" height="50" rx="6" fill="#1a2a2a" stroke="#3fc7ff"/><text x="328" y="90" text-anchor="middle" class="svgcap sm" fill="#9fe0ff">配電盤</text></g>
+          <g class="pop" style="--d:1.5s"><rect x="390" y="70" width="60" height="50" rx="6" fill="#14331f" stroke="#3a6a4a"/><text x="420" y="90" text-anchor="middle" class="svgcap sm" fill="#9fe6bf">PSU</text><text x="420" y="104" text-anchor="middle" class="svgcap sm" fill="#9fe6bf">→GPU</text></g>
+          <g stroke="#ff6b6b" stroke-width="4" class="flow"><line x1="78" y1="95" x2="108" y2="95"/><line x1="172" y1="95" x2="202" y2="95"/><line x1="266" y1="95" x2="296" y2="95"/><line x1="360" y1="95" x2="390" y2="95"/></g>
+          <g class="pop" style="--d:1.8s"><rect x="202" y="155" width="64" height="40" rx="6" fill="#2a1a1a" stroke="#ff6b6b"/><text x="234" y="172" text-anchor="middle" class="svgcap sm" fill="#ffb3b3">非常用</text><text x="234" y="186" text-anchor="middle" class="svgcap sm" fill="#ffb3b3">発電機</text></g>
+          <text x="46" y="150" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#ff9c9c">高圧</text><text x="420" y="150" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#9fe6bf">低圧</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">送電網→変電所/変圧器→<span class="term">UPS</span>→配電→PSUへ段階的に降圧。</p>
+        <p class="pt">GW級需要に発電・送電が追いつかず<b>変圧器の納期1〜2年</b>。</p>
+        <p class="pt"><span class="g">電力がAI最大の律速</span>。重電に構造的追い風。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（電力・重電）</div>
+          <div class="chips"><span class="chip-s">Vertiv</span><span class="chip-s jp">日立 6501</span><span class="chip-s jp">三菱電機 6503</span><span class="chip-s jp">富士電機 6504</span><span class="chip-s jp">明電舎 6508</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S207 データホール ========== -->
+  <section class="scene" data-vid="s207"
+    data-narration="ラックを何百本も並べた広間が、データホールです。冷たい空気と熱い空気が混ざると効率が落ちるため、ラックの前面どうし、背面どうしを向かい合わせ、冷気の通路と熱気の通路をきっちり分けます。これがコールドアイルとホットアイルです。床下や天井で電力・冷却・通信を通し、無人で二十四時間運用します。施設の建設は、大林組や鹿島など、日本のゼネコンも数多く手がけています。"
+    data-tts="ラックを何百本も並べた広間が、データホールです。冷たい空気と熱い空気が混ざると効率が落ちるため、ラックの前面どうし、背面どうしを向かい合わせ、冷気の通路と熱気の通路をきっちり分けます。これがコールドアイルとホットアイルです。床下や天井で電力・冷却・通信を通し、無人で二十四時間運用します。施設の建設は、大林組や鹿島など、日本のゼネコンも数多く手がけています。">
+    <div class="s-kicker fin">建屋内部 ／ 気流設計</div>
+    <h2 class="s-title fin">⑦ データホール＝<span class="hl">熱気と冷気の分離</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 320 260">
+          <rect class="pop" style="--d:.2s" x="20" y="30" width="280" height="200" rx="8" fill="#0f1726" stroke="#3a4a72"/>
+          <text x="160" y="22" text-anchor="middle" class="svgcap w fin" style="--d:.4s;font-weight:700">ホット/コールドアイル（上から）</text>
+          <g fill="#1a2236" stroke="#2c3a57" class="fin" style="--d:.7s"><rect x="50" y="55" width="40" height="22"/><rect x="90" y="55" width="40" height="22"/><rect x="50" y="110" width="40" height="22"/><rect x="90" y="110" width="40" height="22"/><rect x="50" y="165" width="40" height="22"/><rect x="90" y="165" width="40" height="22"/><rect x="190" y="55" width="40" height="22"/><rect x="230" y="55" width="40" height="22"/><rect x="190" y="110" width="40" height="22"/><rect x="230" y="110" width="40" height="22"/><rect x="190" y="165" width="40" height="22"/><rect x="230" y="165" width="40" height="22"/></g>
+          <rect class="fin" style="--d:1.0s" x="135" y="48" width="50" height="170" fill="#10303f" opacity=".5"/>
+          <text x="160" y="140" text-anchor="middle" class="svgcap sm" fill="#9fe0ff" transform="rotate(-90 160 140)">コールドアイル</text>
+          <rect x="44" y="82" width="86" height="24" fill="#5a2a2a" opacity=".4"><animate attributeName="opacity" values=".2;.55;.2" dur="2s" repeatCount="indefinite"/></rect>
+          <rect x="190" y="82" width="86" height="24" fill="#5a2a2a" opacity=".4"><animate attributeName="opacity" values=".2;.55;.2" dur="2s" begin="-1s" repeatCount="indefinite"/></rect>
+          <g stroke="#3fc7ff" stroke-width="2" class="flow"><line x1="160" y1="66" x2="132" y2="78"/><line x1="160" y1="121" x2="132" y2="133"/><line x1="160" y1="66" x2="188" y2="78"/></g>
+          <text x="160" y="246" text-anchor="middle" class="svgcap sm fin" style="--d:1.4s">前面=冷気吸入 / 背面=熱気排出</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">ラックを数百本並べた広間＝<span class="term">データホール</span>。</p>
+        <p class="pt">前面・背面を揃え<span class="g">コールド/ホットアイル</span>に分離＝効率UP。</p>
+        <p class="pt">無人で24時間運用。建設は日本のゼネコンも多数。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（運営・建設）</div>
+          <div class="chips"><span class="chip-s">Digital Realty</span><span class="chip-s jp">大林組 1802</span><span class="chip-s jp">鹿島 1812</span><span class="chip-s jp">NTT 9432</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S208 キャンパス・立地 ========== -->
+  <section class="scene" data-vid="s208"
+    data-narration="複数の建物をまとめたキャンパスが、今の主戦場です。AI向けは一拠点で数百メガワットから、原発一基に匹敵するギガワット級。立地を決めるのは、もはやチップではなく、大容量の電力を引けるか、広い土地と冷却用の水があるか、そして光ファイバーの幹線につながるか、です。学習用は安い電力地に巨大集約し、応答速度が要る推論用は、利用者の近くに分散して置かれます。"
+    data-tts="複数の建物をまとめたキャンパスが、今の主戦場です。エーアイ向けは一拠点で数百メガワットから、原発一基に匹敵するギガワット級。立地を決めるのは、もはやチップではなく、大容量の電力を引けるか、広い土地と冷却用の水があるか、そして光ファイバーの幹線につながるか、です。学習用は安い電力地に巨大集約し、応答速度が要る推論用は、利用者の近くに分散して置かれます。">
+    <div class="s-kicker fin">数百MW〜GW級 ／ 立地</div>
+    <h2 class="s-title fin">⑧ キャンパス＝<span class="hl">電力・土地・水・回線</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 440 250">
+          <rect class="pop" style="--d:.3s" x="20" y="100" width="60" height="50" rx="5" fill="#3a2a1a" stroke="#f4a04e"/><text x="50" y="122" text-anchor="middle" class="svgcap sm" fill="#ffd9a8">受電</text><text x="50" y="136" text-anchor="middle" class="svgcap sm" fill="#ffd9a8">変電所</text>
+          <line x1="0" y1="125" x2="20" y2="125" stroke="#ff6b6b" stroke-width="4" class="flow"/><text x="2" y="115" class="svgcap sm fin" style="--d:.6s" fill="#ff9c9c">送電線</text>
+          <g fill="#0f1726" stroke="#3a4a72"><rect class="pop" style="--d:.6s" x="120" y="60" width="80" height="60" rx="5"/><rect class="pop" style="--d:.7s" x="120" y="135" width="80" height="60" rx="5"/><rect class="pop" style="--d:.8s" x="220" y="60" width="80" height="60" rx="5"/><rect class="pop" style="--d:.9s" x="220" y="135" width="80" height="60" rx="5"/></g>
+          <text x="160" y="94" text-anchor="middle" class="svgcap sm">棟1</text><text x="160" y="169" text-anchor="middle" class="svgcap sm">棟2</text><text x="260" y="94" text-anchor="middle" class="svgcap sm">棟3</text><text x="260" y="169" text-anchor="middle" class="svgcap sm">棟4</text>
+          <g stroke="#ff6b6b" stroke-width="3" class="flow"><line x1="80" y1="125" x2="120" y2="90"/><line x1="80" y1="125" x2="120" y2="165"/><line x1="80" y1="125" x2="220" y2="90"/><line x1="80" y1="125" x2="220" y2="165"/></g>
+          <g fill="#14331f" stroke="#3a6a4a"><rect class="pop" style="--d:1.1s" x="330" y="70" width="34" height="40" rx="4"/><rect class="pop" style="--d:1.15s" x="372" y="70" width="34" height="40" rx="4"/></g>
+          <circle cx="347" cy="65" r="8" fill="none" stroke="#9fe6bf" class="spin" style="transform-origin:347px 65px"/><circle cx="389" cy="65" r="8" fill="none" stroke="#9fe6bf" class="spin" style="transform-origin:389px 65px"/>
+          <text x="368" y="124" text-anchor="middle" class="svgcap sm fin" style="--d:1.3s" fill="#9fe6bf">冷却塔</text>
+          <line x1="300" y1="165" x2="430" y2="165" stroke="#9b6de8" stroke-width="3" class="flow"/><text x="430" y="155" text-anchor="end" class="svgcap sm fin" style="--d:1.5s" fill="#c4a6ff">光ファイバ→ネット</text>
+          <text x="220" y="232" text-anchor="middle" class="svgcap w fin" style="--d:1.8s;font-size:12px">1拠点で数百MW〜GW（原発1基級）</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">複数棟のキャンパス＝1拠点<b>数百MW〜GW級</b>。</p>
+        <p class="pt">立地の決め手は<span class="g">電力・土地・水・回線</span>（チップではない）。</p>
+        <p class="pt"><b>学習</b>＝安い電力地に集約／<b>推論</b>＝利用者近くに分散。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 関連銘柄（立地・運営）</div>
+          <div class="chips"><span class="chip-s">ハイパースケーラ4社</span><span class="chip-s">Equinix</span><span class="chip-s jp">NTT 9432</span><span class="chip-s jp">さくらネット 3778</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S209 投資まとめ ========== -->
+  <section class="scene" data-vid="s209"
+    data-narration="AI投資の本体は、マイクロソフトやグーグルなどが投じる、年間数十兆円規模の設備投資です。その資金が、チップだけでなく、電力、冷却、光通信へと流れ込みます。GPUやHBMは注目が進んだぶん、相対的に出遅れているのが、電力の変圧器、液冷、そして光ファイバー。日本株では、重電の日立や三菱電機、明電舎、光ファイバーのフジクラや古河電工、部品の村田製作所などが、この第二の波の中心にいます。"
+    data-tts="エーアイ投資の本体は、マイクロソフトやグーグルなどが投じる、年間数十兆円規模の設備投資です。その資金が、チップだけでなく、電力、冷却、光通信へと流れ込みます。ジーピーユーやエイチビーエムは注目が進んだぶん、相対的に出遅れているのが、電力の変圧器、液冷、そして光ファイバー。日本株では、重電の日立や三菱電機、明電舎、光ファイバーのフジクラや古河電工、部品の村田製作所などが、この第二の波の中心にいます。">
+    <div class="s-kicker fin">投資視点 ／ 第二の波</div>
+    <h2 class="s-title fin">⑨ どこが儲かるか ── <span class="hl">第二の波</span></h2>
+    <div class="s-body">
+      <div class="s-viz">
+        <svg viewBox="0 0 460 250">
+          <rect class="pop" style="--d:.2s" x="160" y="24" width="140" height="42" rx="8" fill="#15233c" stroke="#4ea1ff"/><text x="230" y="42" text-anchor="middle" class="svgcap w" style="font-weight:700">ハイパースケーラ</text><text x="230" y="57" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">年数十兆円のCapEx</text>
+          <g stroke="#4ea1ff" stroke-width="2" class="flow"><line x1="200" y1="66" x2="90" y2="120"/><line x1="220" y1="66" x2="200" y2="120"/><line x1="245" y1="66" x2="300" y2="120"/><line x1="265" y1="66" x2="400" y2="120"/></g>
+          <g class="pop" style="--d:.7s"><rect x="40" y="122" width="100" height="44" rx="6" fill="#23304a" stroke="#4ea1ff"/><text x="90" y="140" text-anchor="middle" class="svgcap w sm">GPU/HBM</text><text x="90" y="156" text-anchor="middle" class="svgcap sm" fill="#9fb0d0">織り込み進む</text></g>
+          <g class="pop" style="--d:.9s"><rect x="155" y="122" width="100" height="44" rx="6" fill="#1c2740" stroke="#9b6de8"/><text x="205" y="140" text-anchor="middle" class="svgcap w sm">光通信</text><text x="205" y="156" text-anchor="middle" class="svgcap sm" fill="#c4a6ff">フジクラ/古河</text></g>
+          <g class="pop" style="--d:1.1s"><rect x="270" y="122" width="100" height="44" rx="6" fill="#10262f" stroke="#3fc7ff"/><text x="320" y="140" text-anchor="middle" class="svgcap w sm">液冷</text><text x="320" y="156" text-anchor="middle" class="svgcap sm" fill="#9fe0ff">Vertiv/ダイキン</text></g>
+          <g class="pop" style="--d:1.3s"><rect x="370" y="122" width="80" height="44" rx="6" fill="#2a1818" stroke="#ff6b6b"/><text x="410" y="140" text-anchor="middle" class="svgcap w sm">電力</text><text x="410" y="156" text-anchor="middle" class="svgcap sm" fill="#ff9c9c">日立/明電舎</text></g>
+          <text x="230" y="210" text-anchor="middle" class="svgcap w fin" style="--d:1.8s;font-size:13px">GPU/HBMは織り込み進む → <tspan fill="#f4c542">電力・冷却・光が「第二の波」</tspan></text>
+          <text x="230" y="232" text-anchor="middle" class="svgcap sm fin" style="--d:2s">⚠ CapExは一部が部材の価格上昇分。下方修正がテールリスク</text>
+        </svg>
+      </div>
+      <div class="s-side">
+        <p class="pt">AI投資の本体＝ハイパースケーラの<b>年数十兆円CapEx</b>。</p>
+        <p class="pt">GPU/HBMは織り込み進む → <span class="g">電力・冷却・光が第二の波</span>。</p>
+        <p class="pt">日本株：重電・光ファイバ・部品が中心。</p>
+        <div class="s-stocks">
+          <div class="lab">💹 第二の波の日本株</div>
+          <div class="chips"><span class="chip-s jp">日立 6501</span><span class="chip-s jp">三菱電機 6503</span><span class="chip-s jp">明電舎 6508</span><span class="chip-s jp">フジクラ 5803</span><span class="chip-s jp">村田 6981</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S210 END ========== -->
+  <section class="scene titlecard" data-vid="s210"
+    data-narration="ここまで、二つの章を旅してきました。砂から生まれたシリコンが、トランジスタになり、チップになり、サーバーに載り、データセンターに集まって、AIを動かす。この長い長いつながりの、ほとんどの工程で、日本企業が世界の鍵を握っています。半導体とデータセンターは、これからの十年、最も重要な投資テーマであり続けるでしょう。ご視聴ありがとうございました。"
+    data-tts="ここまで、二つの章を旅してきました。砂から生まれたシリコンが、トランジスタになり、チップになり、サーバーに載り、データセンターに集まって、エーアイを動かす。この長い長いつながりの、ほとんどの工程で、日本企業が世界の鍵を握っています。半導体とデータセンターは、これからの十年、最も重要な投資テーマであり続けるでしょう。ご視聴ありがとうございました。">
+    <svg id="titlebg2" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid slice">
+      <g fill="#4ea1ff" filter="url(#glow)"><circle r="3"><animateMotion dur="9s" repeatCount="indefinite" path="M-20 200 H1020"/></circle><circle r="3" fill="#f4c542"><animateMotion dur="11s" begin="-4s" repeatCount="indefinite" path="M-20 360 H1020"/></circle><circle r="2.5" fill="#39d98a"><animateMotion dur="10s" begin="-2s" repeatCount="indefinite" path="M500 -20 V580"/></circle></g>
+    </svg>
+    <div class="big fin">半導体 → データセンター → <span class="hl">AI</span></div>
+    <div class="lead fin" style="--d:.4s">砂 → シリコン → トランジスタ → チップ → サーバー → データセンター → AI。<br>この長いつながりの多くの工程で、日本企業が世界の鍵を握る。</div>
+    <div class="chip fin" style="--d:1.0s">ご視聴ありがとうございました</div>
+  </section>
+
+  <div id="subtitle"></div>
+</div></div>
+
+<div class="badge-audio" id="audioBadge">🔊 音声を準備中…</div>
+<div class="hint">Space:再生/一時停止 ／ ← →:シーン移動<br>F:全画面 ／ M:ミュート ／ [ ]:再生速度</div>
+<div id="bar"><div id="barfill"></div></div>
+<div id="ctl">
+  <button id="prev" title="前へ (←)">⏮</button>
+  <button class="play" id="play" title="再生/一時停止 (Space)">▶</button>
+  <button id="next" title="次へ (→)">⏭</button>
+  <span class="lbl" id="lbl">1 / 1</span>
+  <select id="speed" title="再生速度 ( [ / ] )">
+    <option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option><option value="1.75">1.75×</option><option value="2">2×</option>
+  </select>
+  <select id="jump" title="シーンへ移動"></select>
+  <button id="mute" title="ミュート (M)">🔊</button>
+  <button id="full" title="全画面 (F)">⛶</button>
+</div>
+
+<script>
+(function(){
+  var scenes = Array.prototype.slice.call(document.querySelectorAll('.scene'));
+  var sub = document.getElementById('subtitle'), barfill = document.getElementById('barfill');
+  var lbl = document.getElementById('lbl'), playBtn = document.getElementById('play');
+  var jump = document.getElementById('jump'), audioBadge = document.getElementById('audioBadge');
+  var i = 0, playing = false, muted = false, rate = 1;
+  var fallbackTimer = null, hideTimer = null, audios = {};
+
+  function applyRate(){
+    for(var k in audios){ try{ audios[k].playbackRate = rate; audios[k].preservesPitch = true; }catch(e){} }
+    try{ document.getAnimations().forEach(function(a){ a.playbackRate = rate; }); }catch(e){}
+  }
+
+  scenes.forEach(function(s, idx){
+    var t = s.querySelector('.s-title, .big');
+    var name = t ? t.textContent.replace(/\s+/g,' ').trim() : ('シーン '+(idx+1));
+    var o = document.createElement('option'); o.value = idx; o.textContent = (idx+1)+'. '+name.slice(0,20);
+    jump.appendChild(o);
+    var vid = s.getAttribute('data-vid');
+    var src = (window.EMBEDDED_AUDIO && window.EMBEDDED_AUDIO[vid]) ? window.EMBEDDED_AUDIO[vid] : 'audio/'+vid+'.mp3';
+    var a = new Audio(src); a.preload = 'auto';
+    a.addEventListener('canplaythrough', function(){ audioBadge.textContent='🔊 音声あり'; audioBadge.style.color='#7df0b0'; }, {once:true});
+    audios[vid] = a;
+  });
+
+  function estDuration(s){ var n=(s.getAttribute('data-narration')||'').length; return Math.max(4500, n*135+1200); }
+  function clearTimers(){ if(fallbackTimer){clearTimeout(fallbackTimer);fallbackTimer=null;} }
+  function stopAllAudio(){ for(var k in audios){ try{audios[k].pause(); audios[k].currentTime=0;}catch(e){} } }
+
+  function show(idx){
+    clearTimers(); stopAllAudio();
+    i = Math.max(0, Math.min(scenes.length-1, idx));
+    scenes.forEach(function(s,k){ s.classList.toggle('active', k===i); });
+    var s = scenes[i];
+    sub.innerHTML = s.getAttribute('data-narration')||'';
+    lbl.textContent = (i+1)+' / '+scenes.length;
+    jump.value = i; barfill.style.width = (i/(scenes.length-1)*100)+'%';
+    applyRate();
+    if(playing){ playScene(s); }
+  }
+
+  function playScene(s){
+    var vid = s.getAttribute('data-vid'), a = audios[vid], advanced = false;
+    function go(){ if(advanced) return; advanced=true; if(i<scenes.length-1 && playing) show(i+1); else { playing=false; updatePlayBtn(); } }
+    a.muted = muted; a.currentTime = 0; a.onended = go;
+    try{ a.playbackRate = rate; a.preservesPitch = true; }catch(e){}
+    var p = a.play();
+    if(p && p.catch){ p.catch(function(){ fallbackTimer = setTimeout(go, estDuration(s)/rate); }); }
+    setTimeout(function(){ if(!advanced && a.paused){ clearTimers(); fallbackTimer = setTimeout(go, estDuration(s)/rate); } }, 450);
+  }
+
+  function updatePlayBtn(){ playBtn.textContent = playing ? '❚❚' : '▶'; }
+  function play(){ playing = true; updatePlayBtn(); playScene(scenes[i]); }
+  function pause(){ playing = false; updatePlayBtn(); clearTimers(); stopAllAudio(); }
+  function toggle(){ if(playing) pause(); else { if(i>=scenes.length-1){ show(0); } play(); } }
+
+  playBtn.onclick = toggle;
+  document.getElementById('next').onclick = function(){ show(i+1); };
+  document.getElementById('prev').onclick = function(){ show(i-1); };
+  jump.onchange = function(){ show(parseInt(jump.value,10)); };
+  document.getElementById('mute').onclick = function(){ muted=!muted; this.textContent = muted?'🔇':'🔊'; for(var k in audios) audios[k].muted=muted; };
+  document.getElementById('full').onclick = function(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); };
+  var speedSel = document.getElementById('speed');
+  speedSel.onchange = function(){ rate = parseFloat(speedSel.value)||1; applyRate(); };
+  var RATES = [0.75,1,1.25,1.5,1.75,2];
+  function setRate(r){ rate=r; speedSel.value=String(r); applyRate(); }
+  function bumpRate(d){ var k=RATES.indexOf(rate); if(k<0)k=1; k=Math.max(0,Math.min(RATES.length-1,k+d)); setRate(RATES[k]); }
+
+  document.addEventListener('keydown', function(e){
+    if(e.code==='Space'){ e.preventDefault(); toggle(); }
+    else if(e.code==='ArrowRight'){ show(i+1); }
+    else if(e.code==='ArrowLeft'){ show(i-1); }
+    else if(e.key==='f'||e.key==='F'){ document.getElementById('full').click(); }
+    else if(e.key==='m'||e.key==='M'){ document.getElementById('mute').click(); }
+    else if(e.key===']'){ bumpRate(1); }
+    else if(e.key==='['){ bumpRate(-1); }
+  });
+
+  var ctl = document.getElementById('ctl');
+  function poke(){ ctl.classList.remove('hide'); clearTimeout(hideTimer); hideTimer=setTimeout(function(){ if(playing) ctl.classList.add('hide'); }, 2600); }
+  document.addEventListener('mousemove', poke); poke();
+
+  (function(){
+    var g=document.getElementById('waferdies'); if(!g) return;
+    var cx=160,cy=150,r=126,s=17,gap=1.4,h='',n=0;
+    for(var y=cy-r;y<cy+r;y+=s){ for(var x=cx-r;x<cx+r;x+=s){
+      var dx=x+s/2-cx, dy=y+s/2-cy;
+      if(Math.hypot(Math.abs(dx)+s/2,Math.abs(dy)+s/2) < r-2){
+        var bad=(n%17===5||n%23===11), fill=bad?'#7a2630':'#243a5e', stroke=bad?'#ff5d6c':'#3a6a8a', dly=(0.3+(n%9)*0.1).toFixed(2);
+        h+='<rect class="pop" style="--d:'+dly+'s" x="'+(x+gap)+'" y="'+(y+gap)+'" width="'+(s-gap*2)+'" height="'+(s-gap*2)+'" rx="1.5" fill="'+fill+'" stroke="'+stroke+'" stroke-width="0.7"/>';
+        n++;
+      }
+    }}
+    g.innerHTML=h;
+  })();
+
+  show(0);
+})();
+</script>
+</body>
+</html>
