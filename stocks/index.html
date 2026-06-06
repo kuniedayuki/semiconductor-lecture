@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>半導体サプライチェーン 個別銘柄編 ── 解説ムービー（第3章）</title>
+<style>
+  :root{
+    --bg:#070b12; --panel:#121a2b; --line:#27314c; --txt:#eaf0fb; --sub:#9fb0d0; --dim:#5f6f8f;
+    --accent:#4ea1ff; --gold:#f4c542; --green:#39d98a; --red:#ff6b6b; --gate:#9b6de8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:#000;overflow:hidden;
+    font-family:"Segoe UI","Hiragino Kaku Gothic ProN","Meiryo",system-ui,sans-serif;color:var(--txt)}
+  #stage{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(120% 120% at 50% 0%,#0c1322,#05080f)}
+  #frame{position:relative;width:min(100vw,177.78vh);height:min(56.25vw,100vh);
+    background:linear-gradient(180deg,#0a0f1a,#070b12);overflow:hidden}
+  .scene{position:absolute;inset:0;display:none;padding:4.0% 5%;flex-direction:column}
+  .scene.active{display:flex}
+  .s-kicker{font-size:1.5vh;font-weight:800;letter-spacing:.2em;color:var(--accent);text-transform:uppercase}
+  .s-title{font-size:3.3vh;font-weight:800;margin:.4vh 0 0;line-height:1.2}
+  .s-title .hl{color:var(--gold)}
+  .s-title .tk{font-size:2vh;color:var(--dim);font-weight:700;font-variant-numeric:tabular-nums;margin-left:.6em}
+  .s-body{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;margin-top:1vh;overflow:visible}
+  .s-viz{flex:1;height:100%;display:grid;place-items:center;overflow:visible}
+  .s-viz svg{width:100%;height:100%;max-height:64vh;overflow:visible}
+  .scene.active .s-viz svg{animation:kb 26s ease-in-out infinite alternate}
+  @keyframes kb{from{transform:scale(1)}to{transform:scale(1.025)}}
+
+  #subtitle{position:absolute;left:0;right:0;bottom:0;padding:2.0vh 7% 2.6vh;
+    background:linear-gradient(0deg,rgba(0,0,0,.82),rgba(0,0,0,.4) 60%,transparent);text-align:center;
+    font-size:2.05vh;line-height:1.55;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.9);pointer-events:none}
+  #subtitle b{color:var(--gold)}
+  .titlecard{align-items:center;justify-content:center;text-align:center}
+  .titlecard .big{font-size:5vh;font-weight:900;line-height:1.18;position:relative;z-index:2}
+  .titlecard .big .hl{color:var(--gold)}
+  .titlecard .lead{font-size:2.1vh;color:var(--sub);margin-top:2vh;max-width:78%;position:relative;z-index:2}
+  .titlecard .chip{margin-top:2.4vh;font-size:1.6vh;color:var(--accent);border:1px solid var(--line);padding:.8vh 2vh;border-radius:999px;position:relative;z-index:2}
+  #titlebg{position:absolute;inset:0;z-index:1;opacity:.5}
+  .disc{position:absolute;left:0;right:0;bottom:1vh;text-align:center;font-size:1.25vh;color:var(--dim);z-index:2}
+
+  #bar{position:fixed;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.08);z-index:20}
+  #barfill{height:100%;width:0;background:linear-gradient(90deg,#4ea1ff,#9b6de8);transition:width .25s linear}
+  #ctl{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:flex;align-items:center;gap:9px;
+    background:rgba(12,18,30,.86);border:1px solid var(--line);border-radius:999px;padding:8px 14px;z-index:30;backdrop-filter:blur(8px);transition:opacity .4s;font-size:13px}
+  #ctl.hide{opacity:0;pointer-events:none}
+  #ctl button{background:#1a2336;border:1px solid var(--line);color:var(--txt);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:15px;display:grid;place-items:center}
+  #ctl button:hover{border-color:var(--accent);color:var(--accent)}
+  #ctl .play{width:42px;height:42px;font-size:18px;background:var(--accent);color:#071018;border:0}
+  #ctl .lbl{color:var(--sub);font-variant-numeric:tabular-nums;min-width:120px;text-align:center}
+  #ctl select{background:#1a2336;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:6px;font-size:12px;max-width:220px}
+  .hint{position:fixed;top:12px;right:16px;z-index:30;color:var(--dim);font-size:11.5px;text-align:right;line-height:1.6}
+  .badge-audio{position:fixed;top:12px;left:16px;z-index:30;font-size:11.5px;color:var(--dim);background:rgba(12,18,30,.7);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+  @keyframes pop{0%{opacity:0;transform:scale(.4)}70%{transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}
+  @keyframes grow-h{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @keyframes grow-v{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  @keyframes flow{to{stroke-dashoffset:-28}}
+  @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important}}
+  .scene .pop,.scene .gh,.scene .gv,.scene .fin{opacity:0}
+  .scene.active .pop{animation:pop .55s cubic-bezier(.2,.8,.3,1.4) forwards}
+  .scene.active .fin{animation:fadein .7s ease forwards}
+  .scene.active .gh{transform-origin:left center;animation:grow-h .8s ease forwards,fadein .3s ease forwards}
+  .scene.active .gv{transform-origin:bottom center;animation:grow-v .7s ease forwards,fadein .3s ease forwards}
+  .scene.active [style*="--d"]{animation-delay:var(--d)}
+  .flow{stroke-dasharray:6 8;animation:flow 1.1s linear infinite}
+  .pulse{animation:pulse 1.5s ease-in-out infinite}
+  .svgcap{fill:var(--sub);font-size:11px;font-family:inherit}
+  .svgcap.sm{font-size:9px}.svgcap.w{fill:#dbe5f7}.svgcap.big{font-size:34px;font-weight:800}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <linearGradient id="gBlue" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#3a7bd5"/><stop offset="100%" stop-color="#4ea1ff"/></linearGradient>
+  <linearGradient id="gGold" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f4c542"/><stop offset="100%" stop-color="#ffe9a0"/></linearGradient>
+  <linearGradient id="gGreen" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2fae6e"/><stop offset="100%" stop-color="#39d98a"/></linearGradient>
+</defs></svg>
+
+<div id="stage"><div id="frame">
+
+  <!-- ===== S300 TITLE ===== -->
+  <section class="scene titlecard" data-vid="s300"
+    data-narration="第3章、個別銘柄編。第1章と第2章で、半導体とデータセンターの全体像を見てきました。この章では、その流れの中で鍵を握る企業を、一社ずつ掘り下げます。日本株を主役に、外せない海外企業も交えながら、何の会社で、サプライチェーンのどこにいて、なぜ強いのか、そして今どんな評価なのかを見ていきます。なお株価などの数値は、2026年6月初め時点の参考情報です。投資判断はご自身で。"
+    data-tts="第三章、個別銘柄編。第一章と第二章で、半導体とデータセンターの全体像を見てきました。この章では、その流れの中で鍵を握る企業を、一社ずつ掘り下げます。日本株を主役に、外せない海外企業も交えながら、何の会社で、サプライチェーンのどこにいて、なぜ強いのか、そして今どんな評価なのかを見ていきます。なお株価などの数値は、二千二十六年六月初め時点の参考情報です。投資判断はご自身で。">
+    <svg id="titlebg" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid slice">
+      <g fill="#4ea1ff" filter="url(#glow)"><circle r="3"><animateMotion dur="9s" repeatCount="indefinite" path="M-20 150 H1020"/></circle><circle r="3" fill="#f4c542"><animateMotion dur="11s" begin="-3s" repeatCount="indefinite" path="M-20 300 H1020"/></circle><circle r="2.5" fill="#39d98a"><animateMotion dur="13s" begin="-6s" repeatCount="indefinite" path="M-20 430 H1020"/></circle></g>
+    </svg>
+    <div class="s-kicker fin">STOCKS · 教材ムービー 第3章</div>
+    <div class="big fin" style="--d:.2s">サプライチェーンの<span class="hl">主役たち</span><br>個別銘柄を一社ずつ</div>
+    <div class="lead fin" style="--d:.7s">日本株を主役に、外せない海外企業（NVIDIA・TSMC・ASML・韓国メモリ等）も。何の会社で・どこにいて・なぜ強く・今いくらか。まずパイロット3社。</div>
+    <div class="chip fin" style="--d:1.2s">▶ 自動再生します</div>
+    <div class="disc fin" style="--d:1.6s">※株価・時価総額等は2026年6月初め時点の参考情報。最新値は要確認。投資判断はご自身で。</div>
+  </section>
+
+  <!-- ===== S301 復習：全体図 ===== -->
+  <section class="scene" data-vid="s301"
+    data-narration="まず軽く復習です。半導体は、設計、露光、成膜やエッチング、検査、ウェハ、後工程、検査テストと、多くの工程を通って完成します。そのほとんどの工程に、世界シェアの高い関所企業が存在します。この章では、設計・装置・検査・材料と、それぞれの位置で鍵を握る代表企業を、一社ずつ順番に取り上げていきます。まずは設計のNVIDIA、装置の東京エレクトロン、検査のレーザーテックから始めましょう。"
+    data-tts="まず軽く復習です。半導体は、設計、露光、成膜やエッチング、検査、ウェハ、後工程、検査テストと、多くの工程を通って完成します。そのほとんどの工程に、世界シェアの高い関所企業が存在します。この章では、設計・装置・検査・材料と、それぞれの位置で鍵を握る代表企業を、一社ずつ順番に取り上げていきます。まずは設計のエヌビディア、装置の東京エレクトロン、検査のレーザーテックから始めましょう。">
+    <div class="s-kicker fin">復習 ／ サプライチェーン地図</div>
+    <h2 class="s-title fin">この章で見る<span class="hl">3社の位置</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <g font-size="11">
+          <g class="gh" style="--d:.2s"><rect x="30" y="30" width="400" height="26" rx="5" fill="#1c2740" stroke="#9b6de8"/><text x="44" y="47" class="svgcap w">設計 / EDA</text><text x="416" y="47" text-anchor="end" class="svgcap" fill="#c4a6ff">NVIDIA ←</text></g>
+          <g class="gh" style="--d:.5s"><rect x="30" y="62" width="400" height="26" rx="5" fill="#1c2740" stroke="#27314c"/><text x="44" y="79" class="svgcap w">露光（EUV）</text><text x="416" y="79" text-anchor="end" class="svgcap" fill="#5f6f8f">ASML</text></g>
+          <g class="gh" style="--d:.8s"><rect x="30" y="94" width="400" height="26" rx="5" fill="#1c2740" stroke="#f4c542"/><text x="44" y="111" class="svgcap w">前工程 装置</text><text x="416" y="111" text-anchor="end" class="svgcap" fill="#f4d97a">東京エレクトロン ←</text></g>
+          <g class="gh" style="--d:1.1s"><rect x="30" y="126" width="400" height="26" rx="5" fill="#1c2740" stroke="#f4c542"/><text x="44" y="143" class="svgcap w">検査（EUVマスク）</text><text x="416" y="143" text-anchor="end" class="svgcap" fill="#f4d97a">レーザーテック ←</text></g>
+          <g class="gh" style="--d:1.4s"><rect x="30" y="158" width="400" height="26" rx="5" fill="#1c2740" stroke="#27314c"/><text x="44" y="175" class="svgcap w">製造 / 後工程 / テスト</text><text x="416" y="175" text-anchor="end" class="svgcap" fill="#5f6f8f">TSMC・SK Hynix・アドバンテスト…</text></g>
+        </g>
+        <text x="230" y="212" text-anchor="middle" class="svgcap w fin" style="--d:1.8s;font-size:13px">設計（NVIDIA）・装置（東エレ）・検査（レーザーテック）の3社を解説</text>
+      </svg>
+    </div></div>
+  </section>
+
+  <!-- ===================== 東京エレクトロン 8035 ===================== -->
+  <!-- S310 intro -->
+  <section class="scene" data-vid="s310"
+    data-narration="一社目は、東京エレクトロン、証券コード8035。1963年創業、日本を代表する半導体製造装置メーカーです。半導体は、ウェハの上に、塗って、光を当て、削って、積んで、洗う、という工程を何百回も繰り返して作られます。東京エレクトロンは、このうち塗布・現像、エッチング、成膜、洗浄と、前工程の主要な装置を幅広く手がける総合メーカーです。"
+    data-tts="一社目は、東京エレクトロン、証券コード はちまるさんご。千九百六十三年創業、日本を代表する半導体製造装置メーカーです。半導体は、ウェハの上に、塗って、光を当て、削って、積んで、洗う、という工程を何百回も繰り返して作られます。東京エレクトロンは、このうち塗布・現像、エッチング、成膜、洗浄と、前工程の主要な装置を幅広く手がける総合メーカーです。">
+    <div class="s-kicker fin">① 製造装置 ／ 日本</div>
+    <h2 class="s-title fin">東京エレクトロン<span class="tk">8035</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <rect class="pop" style="--d:.2s" x="120" y="26" width="220" height="60" rx="10" fill="#15233c" stroke="#4ea1ff" stroke-width="2"/>
+        <text x="230" y="52" text-anchor="middle" class="svgcap w" style="font-size:17px;font-weight:800">東京エレクトロン 🇯🇵</text>
+        <text x="230" y="74" text-anchor="middle" class="svgcap" fill="#9fd0ff">前工程装置の総合メーカー（1963〜）</text>
+        <text x="230" y="112" text-anchor="middle" class="svgcap w fin" style="--d:1.0s">担当する前工程：</text>
+        <g>
+          <g class="pop" style="--d:1.2s"><rect x="40" y="128" width="74" height="40" rx="6" fill="#1c2740" stroke="#f4c542"/><text x="77" y="146" text-anchor="middle" class="svgcap sm w">塗布・現像</text><text x="77" y="160" text-anchor="middle" class="svgcap sm" fill="#f4d97a">主力</text></g>
+          <g class="pop" style="--d:1.4s"><rect x="124" y="128" width="74" height="40" rx="6" fill="#1c2740" stroke="#27314c"/><text x="161" y="151" text-anchor="middle" class="svgcap sm w">エッチング</text></g>
+          <g class="pop" style="--d:1.6s"><rect x="208" y="128" width="74" height="40" rx="6" fill="#1c2740" stroke="#27314c"/><text x="245" y="151" text-anchor="middle" class="svgcap sm w">成膜</text></g>
+          <g class="pop" style="--d:1.8s"><rect x="292" y="128" width="74" height="40" rx="6" fill="#1c2740" stroke="#27314c"/><text x="329" y="151" text-anchor="middle" class="svgcap sm w">洗浄</text></g>
+          <g class="pop" style="--d:2.0s"><rect x="376" y="128" width="44" height="40" rx="6" fill="#101722" stroke="#27314c" stroke-dasharray="3 2"/><text x="398" y="151" text-anchor="middle" class="svgcap sm">FPD等</text></g>
+        </g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap fin" style="--d:2.3s" fill="#9fb0d0">「塗って・光当て・削って・積んで・洗う」を支える</text>
+      </svg>
+    </div></div>
+  </section>
+  <!-- S311 share -->
+  <section class="scene" data-vid="s311"
+    data-narration="中でも圧倒的なのが、フォトレジストを塗って現像する、コータ・デベロッパという装置。世界シェアはおよそ92パーセント、最先端のEUV向けにいたっては、事実上100パーセントの独占です。EUV露光機を作るのはオランダのASMLですが、その前後で必ず東京エレクトロンの装置を通る。だからこそ、最先端チップを作るなら避けて通れない関所なのです。"
+    data-tts="中でも圧倒的なのが、フォトレジストを塗って現像する、コータ・デベロッパという装置。世界シェアはおよそ きゅうじゅうにパーセント、最先端のイーユーブイ向けにいたっては、事実上 ひゃくパーセントの独占です。イーユーブイ露光機を作るのはオランダのエーエスエムエルですが、その前後で必ず東京エレクトロンの装置を通る。だからこそ、最先端チップを作るなら避けて通れない関所なのです。">
+    <div class="s-kicker fin">① 強み ／ なぜ関所か</div>
+    <h2 class="s-title fin">コータ/現像で<span class="hl">世界シェア92%</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="60" y="60" class="svgcap w fin" style="--d:.3s">コータ・デベロッパ（塗布・現像）世界シェア</text>
+        <rect x="60" y="74" width="340" height="34" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:.6s" x="60" y="74" width="313" height="34" rx="8" fill="url(#gGold)"/>
+        <text class="svgcap big fin" style="--d:1.2s" x="230" y="100" text-anchor="middle" fill="#0a0f1a">92%</text>
+        <text x="60" y="150" class="svgcap w fin" style="--d:1.6s">EUV向け コータ・デベロッパ</text>
+        <rect x="60" y="164" width="340" height="30" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:1.8s" x="60" y="164" width="340" height="30" rx="8" fill="url(#gGreen)"/>
+        <text class="svgcap fin" style="--d:2.2s;font-size:18px;font-weight:800" x="230" y="186" text-anchor="middle" fill="#06241a">実質 100%（独占）</text>
+        <text x="230" y="222" text-anchor="middle" class="svgcap fin" style="--d:2.5s" fill="#9fb0d0">ASMLのEUVと一体で必ず通る＝代替不能の関所</text>
+      </svg>
+    </div></div>
+  </section>
+  <!-- S312 valuation -->
+  <section class="scene" data-vid="s312"
+    data-narration="評価を見てみましょう。2026年6月5日時点で、株価はおよそ5万9千円、時価総額はおよそ27兆円と、日本でも有数の規模です。予想ベースのPERはおよそ38倍、PBRは10倍を超え、歴史的に高い水準。直近の決算では、売上は過去最高のおよそ2兆4千億円、一方で研究開発費の増加などから、営業利益は前年比およそ1割の減益でした。数値は時点で変わるので、最新値は必ずご確認ください。"
+    data-tts="評価を見てみましょう。二千二十六年六月五日時点で、株価はおよそ ごまんきゅうせんえん、時価総額はおよそ にじゅうななちょうえん と、日本でも有数の規模です。予想ベースのピーイーアールはおよそ さんじゅうはちばい、ピービーアールは じゅうばい を超え、歴史的に高い水準。直近の決算では、売上は過去最高のおよそ にちょうよんせんおくえん、一方で研究開発費の増加などから、営業利益は前年比およそ いちわり の減益でした。数値は時点で変わるので、最新値は必ずご確認ください。">
+    <div class="s-kicker fin">① バリュエーション</div>
+    <h2 class="s-title fin">いくらの会社？<span class="tk">2026/6/5時点</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <g class="pop" style="--d:.3s"><rect x="34" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="129" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">株価</text><text x="129" y="92" text-anchor="middle" class="svgcap w" style="font-size:24px;font-weight:800">約5.9万円</text></g>
+        <g class="pop" style="--d:.6s"><rect x="236" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="331" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">時価総額</text><text x="331" y="92" text-anchor="middle" class="svgcap w" style="font-size:24px;font-weight:800">約27兆円</text></g>
+        <g class="pop" style="--d:.9s"><rect x="34" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="96" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">予想PER</text><text x="96" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約38倍</text></g>
+        <g class="pop" style="--d:1.1s"><rect x="168" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="230" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">PBR</text><text x="230" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">10倍超</text></g>
+        <g class="pop" style="--d:1.3s"><rect x="302" y="120" width="124" height="64" rx="10" fill="#16241a" stroke="#39d98a"/><text x="364" y="144" text-anchor="middle" class="svgcap sm" fill="#7df0b0">FY26売上</text><text x="364" y="170" text-anchor="middle" class="svgcap w" style="font-size:18px;font-weight:800">約2.4兆円</text></g>
+        <text x="230" y="212" text-anchor="middle" class="svgcap fin" style="--d:1.7s" fill="#9fb0d0">売上 過去最高 / 営業益は前年比 約-10%（先行投資）</text>
+        <text x="230" y="230" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#5f6f8f">※2026/6/5時点・出典：会社IR/各種金融サイト。最新値は要確認</text>
+      </svg>
+    </div></div>
+  </section>
+  <!-- S313 thesis & risk -->
+  <section class="scene" data-vid="s313"
+    data-narration="投資のポイントは、AIやHBM向けの先端投資ブームの、直接の恩恵を受けること。そしてEUV普及の、構造的な勝ち組であること。一方リスクは、中国向け売上がおよそ4割と高く、輸出規制の影響を受けやすいこと、装置投資サイクルの波、そして高いバリュエーションです。期待が大きいぶん、株価の振れも大きい銘柄だと、覚えておきましょう。"
+    data-tts="投資のポイントは、エーアイやエイチビーエム向けの先端投資ブームの、直接の恩恵を受けること。そしてイーユーブイ普及の、構造的な勝ち組であること。一方リスクは、中国向け売上がおよそ よんわり と高く、輸出規制の影響を受けやすいこと、装置投資サイクルの波、そして高いバリュエーションです。期待が大きいぶん、株価の振れも大きい銘柄だと、覚えておきましょう。">
+    <div class="s-kicker fin">① 投資ポイント ＆ リスク</div>
+    <h2 class="s-title fin">強みと<span class="hl">弱み</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="125" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:800" fill="#7df0b0">✅ 投資ポイント</text>
+        <g class="gh" style="--d:.5s"><rect x="20" y="42" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="63" class="svgcap w sm">AI/HBM先端投資の直接恩恵</text></g>
+        <g class="gh" style="--d:.8s"><rect x="20" y="82" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="103" class="svgcap w sm">EUV普及の構造的勝ち組</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="20" y="122" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="143" class="svgcap w sm">非メモリ売上6割・高ROE</text></g>
+        <text x="345" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.4s;font-weight:800" fill="#ff9c9c">⚠ リスク</text>
+        <g class="gh" style="--d:.7s"><rect x="240" y="42" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="63" class="svgcap w sm">中国売上 約4割／輸出規制</text></g>
+        <g class="gh" style="--d:1.0s"><rect x="240" y="82" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="103" class="svgcap w sm">装置投資サイクルの波</text></g>
+        <g class="gh" style="--d:1.3s"><rect x="240" y="122" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="143" class="svgcap w sm">高バリュエーション（PER高）</text></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap w fin" style="--d:1.7s;font-size:13px">期待が大きいぶん、株価の振れも大きい</text>
+      </svg>
+    </div></div>
+  </section>
+  <!-- S314 recap -->
+  <section class="scene" data-vid="s314"
+    data-narration="ここまでのまとめ。東京エレクトロンは、前工程装置の総合メーカー。コータ・デベロッパで世界シェア92パーセントの関所。AI投資の追い風と、中国規制・高バリュエーションのリスクを併せ持つ。この三点を、押さえておきましょう。"
+    data-tts="ここまでのまとめ。東京エレクトロンは、前工程装置の総合メーカー。コータ・デベロッパで世界シェア きゅうじゅうにパーセント の関所。エーアイ投資の追い風と、中国規制・高バリュエーションのリスクを併せ持つ。この三点を、押さえておきましょう。">
+    <div class="s-kicker fin">① ミニ復習</div>
+    <h2 class="s-title fin">東京エレクトロン <span class="hl">3行まとめ</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 230">
+        <g class="gh" style="--d:.3s"><rect x="40" y="40" width="380" height="42" rx="8" fill="#15233c" stroke="#4ea1ff"/><circle cx="66" cy="61" r="13" fill="#4ea1ff"/><text x="66" y="66" text-anchor="middle" fill="#071018" style="font-weight:800">1</text><text x="92" y="66" class="svgcap w" style="font-size:13px">前工程装置の総合メーカー</text></g>
+        <g class="gh" style="--d:.7s"><rect x="40" y="92" width="380" height="42" rx="8" fill="#1c2740" stroke="#f4c542"/><circle cx="66" cy="113" r="13" fill="#f4c542"/><text x="66" y="118" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">2</text><text x="92" y="118" class="svgcap w" style="font-size:13px">コータ/現像 世界シェア92%の関所</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="40" y="144" width="380" height="42" rx="8" fill="#241010" stroke="#ff6b6b"/><circle cx="66" cy="165" r="13" fill="#ff6b6b"/><text x="66" y="170" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">3</text><text x="92" y="170" class="svgcap w" style="font-size:13px">AI追い風 ／ 中国規制・高評価のリスク</text></g>
+      </svg>
+    </div></div>
+  </section>
+
+  <!-- ===================== レーザーテック 6920 ===================== -->
+  <!-- S320 intro -->
+  <section class="scene" data-vid="s320"
+    data-narration="二社目は、レーザーテック、証券コード6920。横浜に本社を置く、半導体検査装置の専業メーカーです。EUVで使う回路の原版、フォトマスクに、ナノレベルの欠陥があると、それがそのままチップに転写され、不良になります。レーザーテックは、このEUVマスクの欠陥を、実際の露光と同じ波長の光で検査する装置を、世界で唯一商用化した会社です。"
+    data-tts="二社目は、レーザーテック、証券コード ろくきゅうにまる。横浜に本社を置く、半導体検査装置の専業メーカーです。イーユーブイで使う回路の原版、フォトマスクに、ナノレベルの欠陥があると、それがそのままチップに転写され、不良になります。レーザーテックは、このイーユーブイマスクの欠陥を、実際の露光と同じ波長の光で検査する装置を、世界で唯一商用化した会社です。">
+    <div class="s-kicker fin">② 検査装置 ／ 日本</div>
+    <h2 class="s-title fin">レーザーテック<span class="tk">6920</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <rect class="pop" style="--d:.2s" x="120" y="24" width="220" height="58" rx="10" fill="#15233c" stroke="#4ea1ff" stroke-width="2"/>
+        <text x="230" y="50" text-anchor="middle" class="svgcap w" style="font-size:17px;font-weight:800">レーザーテック 🇯🇵</text>
+        <text x="230" y="70" text-anchor="middle" class="svgcap" fill="#9fd0ff">EUVマスク欠陥検査の専業</text>
+        <!-- flow: ASML -> mask -> Lasertec -> fab -->
+        <g class="fin" style="--d:1.0s">
+          <rect x="24" y="120" width="86" height="44" rx="6" fill="#1c2740" stroke="#27314c"/><text x="67" y="146" text-anchor="middle" class="svgcap sm w">ASML 露光</text>
+          <rect x="130" y="120" width="86" height="44" rx="6" fill="#1c2740" stroke="#27314c"/><text x="173" y="140" text-anchor="middle" class="svgcap sm w">マスク</text><text x="173" y="154" text-anchor="middle" class="svgcap sm">(回路原版)</text>
+          <rect x="236" y="120" width="98" height="44" rx="6" fill="#1c2740" stroke="#f4c542"/><text x="285" y="140" text-anchor="middle" class="svgcap sm w" fill="#f4d97a">レーザーテック</text><text x="285" y="154" text-anchor="middle" class="svgcap sm" fill="#f4d97a">欠陥検査</text>
+          <rect x="354" y="120" width="82" height="44" rx="6" fill="#1c2740" stroke="#27314c"/><text x="395" y="146" text-anchor="middle" class="svgcap sm w">ファウンドリ</text>
+        </g>
+        <g stroke="#9b6de8" stroke-width="2" class="flow"><line x1="110" y1="142" x2="130" y2="142"/><line x1="216" y1="142" x2="236" y2="142"/><line x1="334" y1="142" x2="354" y2="142"/></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap fin" style="--d:1.6s" fill="#9fb0d0">実露光と同じ13.5nm波長で「欠陥が写るか」を直接検査</text>
+      </svg>
+    </div></div>
+  </section>
+  <!-- S321 share -->
+  <section class="scene" data-vid="s321"
+    data-narration="この、実波長で検べる、アクチニック検査という分野で、レーザーテックは事実上の独占。EUVマスク検査全体でも、9割を超えるシェアとされます。競合のKLAは電子線方式で別の領域を担いますが、実際の露光波長で欠陥を直接見られる点で、現時点では代替が利きません。EUVが普及するほど、検査の需要も増える構造です。"
+    data-tts="この、実波長で検べる、アクチニック検査という分野で、レーザーテックは事実上の独占。イーユーブイマスク検査全体でも、きゅうわり を超えるシェアとされます。競合のケイエルエーは電子線方式で別の領域を担いますが、実際の露光波長で欠陥を直接見られる点で、現時点では代替が利きません。イーユーブイが普及するほど、検査の需要も増える構造です。">
+    <div class="s-kicker fin">② 強み ／ なぜ関所か</div>
+    <h2 class="s-title fin">EUVマスク検査を<span class="hl">ほぼ独占</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="60" y="56" class="svgcap w fin" style="--d:.3s">アクチニック検査（実波長13.5nm）</text>
+        <rect x="60" y="70" width="340" height="34" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:.6s" x="60" y="70" width="340" height="34" rx="8" fill="url(#gGreen)"/>
+        <text class="svgcap fin" style="--d:1.2s;font-size:18px;font-weight:800" x="230" y="93" text-anchor="middle" fill="#06241a">実質 独占（唯一の商用化）</text>
+        <text x="60" y="146" class="svgcap w fin" style="--d:1.5s">EUVマスク検査 全体シェア</text>
+        <rect x="60" y="160" width="340" height="34" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:1.7s" x="60" y="160" width="310" height="34" rx="8" fill="url(#gGold)"/>
+        <text class="svgcap big fin" style="--d:2.2s" x="230" y="186" text-anchor="middle" fill="#0a0f1a">90%+</text>
+        <text x="230" y="222" text-anchor="middle" class="svgcap fin" style="--d:2.5s" fill="#9fb0d0">競合KLAは別方式（電子線）。実波長は今のところ代替不能</text>
+      </svg>
+    </div></div>
+  </section>
+  <!-- S322 valuation -->
+  <section class="scene" data-vid="s322"
+    data-narration="評価です。2026年6月初め時点で、株価はおよそ4万3千円、時価総額はおよそ4兆円。予想PERは、年初の38倍から、株価上昇で50倍前後まで切り上がり、PBRは16倍を超える、極めて高い評価です。直近では、装置販売が一服する一方、保守サービスの売上が前年比3割超で伸び、受注の見通しは上方修正されました。"
+    data-tts="評価です。二千二十六年六月初め時点で、株価はおよそ よんまんさんぜんえん、時価総額はおよそ よんちょうえん。予想ピーイーアールは、年初の さんじゅうはちばい から、株価上昇で ごじゅうばい 前後まで切り上がり、ピービーアールは じゅうろくばい を超える、極めて高い評価です。直近では、装置販売が一服する一方、保守サービスの売上が前年比 さんわり 超で伸び、受注の見通しは上方修正されました。">
+    <div class="s-kicker fin">② バリュエーション</div>
+    <h2 class="s-title fin">いくらの会社？<span class="tk">2026/6初時点</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <g class="pop" style="--d:.3s"><rect x="34" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="129" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">株価</text><text x="129" y="92" text-anchor="middle" class="svgcap w" style="font-size:24px;font-weight:800">約4.3万円</text></g>
+        <g class="pop" style="--d:.6s"><rect x="236" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="331" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">時価総額</text><text x="331" y="92" text-anchor="middle" class="svgcap w" style="font-size:24px;font-weight:800">約4兆円</text></g>
+        <g class="pop" style="--d:.9s"><rect x="34" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="96" y="142" text-anchor="middle" class="svgcap sm" fill="#f4d97a">予想PER</text><text x="96" y="166" text-anchor="middle" class="svgcap w" style="font-size:17px;font-weight:800">約50倍前後</text></g>
+        <g class="pop" style="--d:1.1s"><rect x="168" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="230" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">PBR</text><text x="230" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">16倍超</text></g>
+        <g class="pop" style="--d:1.3s"><rect x="302" y="120" width="124" height="64" rx="10" fill="#16241a" stroke="#39d98a"/><text x="364" y="142" text-anchor="middle" class="svgcap sm" fill="#7df0b0">サービス売上</text><text x="364" y="166" text-anchor="middle" class="svgcap w" style="font-size:17px;font-weight:800">+3割超</text></g>
+        <text x="230" y="210" text-anchor="middle" class="svgcap fin" style="--d:1.7s" fill="#9fb0d0">受注見通しを上方修正（High-NA対応の新装置が牽引）</text>
+        <text x="230" y="230" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#5f6f8f">※PERは取得日の株価で大きく変動。最新値は要確認</text>
+      </svg>
+    </div></div>
+  </section>
+  <!-- S323 thesis & risk -->
+  <section class="scene" data-vid="s323"
+    data-narration="ポイントは、EUVとHigh-NAの普及による、検査需要の構造的な成長。そして独占による、高い利益率です。リスクは、KLAの電子線・マルチビーム検査による侵食、新世代への移行期の技術競争、受注の振れの大きさ、そして高いバリュエーション。独占は強力ですが、その前提が崩れないか、技術動向の監視が欠かせません。"
+    data-tts="ポイントは、イーユーブイとハイエヌエーの普及による、検査需要の構造的な成長。そして独占による、高い利益率です。リスクは、ケイエルエーの電子線・マルチビーム検査による侵食、新世代への移行期の技術競争、受注の振れの大きさ、そして高いバリュエーション。独占は強力ですが、その前提が崩れないか、技術動向の監視が欠かせません。">
+    <div class="s-kicker fin">② 投資ポイント ＆ リスク</div>
+    <h2 class="s-title fin">強みと<span class="hl">弱み</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="125" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:800" fill="#7df0b0">✅ 投資ポイント</text>
+        <g class="gh" style="--d:.5s"><rect x="20" y="42" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="63" class="svgcap w sm">EUV/High-NA普及で需要増</text></g>
+        <g class="gh" style="--d:.8s"><rect x="20" y="82" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="103" class="svgcap w sm">独占による高い利益率</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="20" y="122" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="143" class="svgcap w sm">保守サービスのリカーリング化</text></g>
+        <text x="345" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.4s;font-weight:800" fill="#ff9c9c">⚠ リスク</text>
+        <g class="gh" style="--d:.7s"><rect x="240" y="42" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="63" class="svgcap w sm">KLAの電子線検査の侵食</text></g>
+        <g class="gh" style="--d:1.0s"><rect x="240" y="82" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="103" class="svgcap w sm">受注の振れ／技術移行リスク</text></g>
+        <g class="gh" style="--d:1.3s"><rect x="240" y="122" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="143" class="svgcap w sm">PER約50倍の高バリュエーション</text></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap w fin" style="--d:1.7s;font-size:13px">独占の前提が崩れないか、技術動向の監視が要</text>
+      </svg>
+    </div></div>
+  </section>
+  <!-- S324 recap -->
+  <section class="scene" data-vid="s324"
+    data-narration="まとめ。レーザーテックは、EUVマスク検査をほぼ独占する日本企業。EUV普及の受益者で、高収益。ただし高い評価と、競合の技術侵食のリスクを抱える。ASMLでもTSMCでもない、もう一つのEUVの関所、と覚えてください。"
+    data-tts="まとめ。レーザーテックは、イーユーブイマスク検査をほぼ独占する日本企業。イーユーブイ普及の受益者で、高収益。ただし高い評価と、競合の技術侵食のリスクを抱える。エーエスエムエルでもティーエスエムシーでもない、もう一つのイーユーブイの関所、と覚えてください。">
+    <div class="s-kicker fin">② ミニ復習</div>
+    <h2 class="s-title fin">レーザーテック <span class="hl">3行まとめ</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 230">
+        <g class="gh" style="--d:.3s"><rect x="40" y="40" width="380" height="42" rx="8" fill="#15233c" stroke="#4ea1ff"/><circle cx="66" cy="61" r="13" fill="#4ea1ff"/><text x="66" y="66" text-anchor="middle" fill="#071018" style="font-weight:800">1</text><text x="92" y="66" class="svgcap w" style="font-size:13px">EUVマスク検査をほぼ独占</text></g>
+        <g class="gh" style="--d:.7s"><rect x="40" y="92" width="380" height="42" rx="8" fill="#1c2740" stroke="#f4c542"/><circle cx="66" cy="113" r="13" fill="#f4c542"/><text x="66" y="118" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">2</text><text x="92" y="118" class="svgcap w" style="font-size:13px">EUV普及の受益者・高収益</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="40" y="144" width="380" height="42" rx="8" fill="#241010" stroke="#ff6b6b"/><circle cx="66" cy="165" r="13" fill="#ff6b6b"/><text x="66" y="170" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">3</text><text x="92" y="170" class="svgcap w" style="font-size:13px">高評価＋競合の技術侵食リスク</text></g>
+      </svg>
+    </div></div>
+  </section>
+
+  <!-- ===================== NVIDIA ===================== -->
+  <!-- S330 intro -->
+  <section class="scene" data-vid="s330"
+    data-narration="三社目は、世界の主役、NVIDIA。GPUと呼ばれる半導体を起点に、今やAIの計算を担うアクセラレータの設計で、世界を席巻しています。NVIDIAは設計専門の、ファブレス企業。製造は台湾のTSMC、メモリのHBMは韓国のSK Hynix、後工程はTSMCのCoWoS。じつは、その周りを、日本のアドバンテストやDISCO、味の素が支えています。"
+    data-tts="三社目は、世界の主役、エヌビディア。ジーピーユーと呼ばれる半導体を起点に、今やエーアイの計算を担うアクセラレータの設計で、世界を席巻しています。エヌビディアは設計専門の、ファブレス企業。製造は台湾のティーエスエムシー、メモリのエイチビーエムは韓国のエスケイハイニックス、後工程はティーエスエムシーのコワス。じつは、その周りを、日本のアドバンテストやディスコ、味の素が支えています。">
+    <div class="s-kicker fin">③ 設計（ファブレス） ／ 米国</div>
+    <h2 class="s-title fin">NVIDIA<span class="tk">NVDA</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <rect class="pop" style="--d:.2s" x="170" y="22" width="120" height="50" rx="10" fill="#16331f" stroke="#39d98a" stroke-width="2"/>
+        <text x="230" y="44" text-anchor="middle" class="svgcap w" style="font-size:16px;font-weight:800">NVIDIA 🇺🇸</text>
+        <text x="230" y="62" text-anchor="middle" class="svgcap sm" fill="#7df0b0">設計（ファブレス）</text>
+        <text x="230" y="98" text-anchor="middle" class="svgcap w fin" style="--d:1.0s">製造・後工程は外部が担う：</text>
+        <g class="pop" style="--d:1.2s"><rect x="30" y="116" width="92" height="40" rx="6" fill="#1c2740" stroke="#27314c"/><text x="76" y="134" text-anchor="middle" class="svgcap sm w">TSMC 🇹🇼</text><text x="76" y="148" text-anchor="middle" class="svgcap sm">製造</text></g>
+        <g class="pop" style="--d:1.4s"><rect x="130" y="116" width="92" height="40" rx="6" fill="#1c2740" stroke="#27314c"/><text x="176" y="134" text-anchor="middle" class="svgcap sm w">SK Hynix 🇰🇷</text><text x="176" y="148" text-anchor="middle" class="svgcap sm">HBM</text></g>
+        <g class="pop" style="--d:1.6s"><rect x="230" y="116" width="92" height="40" rx="6" fill="#1c2740" stroke="#27314c"/><text x="276" y="134" text-anchor="middle" class="svgcap sm w">TSMC CoWoS</text><text x="276" y="148" text-anchor="middle" class="svgcap sm">後工程</text></g>
+        <g class="pop" style="--d:1.8s"><rect x="330" y="116" width="100" height="40" rx="6" fill="#1c2740" stroke="#f4c542"/><text x="380" y="134" text-anchor="middle" class="svgcap sm w" fill="#f4d97a">日本 🇯🇵</text><text x="380" y="148" text-anchor="middle" class="svgcap sm" fill="#f4d97a">装置・材料</text></g>
+        <text x="230" y="192" text-anchor="middle" class="svgcap fin" style="--d:2.1s" fill="#9fb0d0">アドバンテスト・DISCO・味の素 などが足元を支える</text>
+      </svg>
+    </div></div>
+  </section>
+  <!-- S331 share / CUDA -->
+  <section class="scene" data-vid="s331"
+    data-narration="AIアクセラレータでのシェアは、およそ8割から8割半ば。圧倒的な首位です。その強さの源泉は、性能だけではありません。CUDAという、15年以上かけて育てた独自のソフト基盤。世界中の開発者が、この上でAIを作っているため、他社が性能で追いついても、簡単には乗り換えられない。これが、見えない堀と呼ばれる、参入障壁です。"
+    data-tts="エーアイアクセラレータでのシェアは、およそ はちわり から はちわりはんば。圧倒的な首位です。その強さの源泉は、性能だけではありません。クーダという、じゅうごねん 以上かけて育てた独自のソフト基盤。世界中の開発者が、この上でエーアイを作っているため、他社が性能で追いついても、簡単には乗り換えられない。これが、見えない堀と呼ばれる、参入障壁です。">
+    <div class="s-kicker fin">③ 強み ／ なぜ最強か</div>
+    <h2 class="s-title fin">AI GPUで<span class="hl">シェア約8割</span>＋CUDAの堀</h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="60" y="52" class="svgcap w fin" style="--d:.3s">AIアクセラレータ 世界シェア</text>
+        <rect x="60" y="66" width="340" height="36" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:.6s" x="60" y="66" width="282" height="36" rx="8" fill="url(#gGreen)"/>
+        <text class="svgcap big fin" style="--d:1.2s" x="200" y="92" text-anchor="middle" fill="#06241a">約80〜86%</text>
+        <text x="60" y="138" class="svgcap w fin" style="--d:1.6s">最大の強み＝CUDA（独自ソフト基盤）</text>
+        <g class="pop" style="--d:1.9s"><rect x="60" y="150" width="340" height="50" rx="8" fill="#1c2740" stroke="#9b6de8"/>
+          <text x="230" y="172" text-anchor="middle" class="svgcap w" style="font-size:13px">15年以上かけた開発者エコシステム</text>
+          <text x="230" y="190" text-anchor="middle" class="svgcap" fill="#c4a6ff">＝性能で追いつかれても乗り換えにくい「見えない堀」</text></g>
+        <text x="230" y="226" text-anchor="middle" class="svgcap sm fin" style="--d:2.3s" fill="#5f6f8f">競合：AMD・Broadcom(カスタムASIC)</text>
+      </svg>
+    </div></div>
+  </section>
+  <!-- S332 valuation -->
+  <section class="scene" data-vid="s332"
+    data-narration="評価です。2026年6月5日時点で、株価はおよそ200ドル、時価総額はおよそ5兆ドルと、世界最大級の企業です。直近の四半期決算では、売上が前年比およそ8割5分の増加、その中心であるデータセンター部門は、9割以上の増収と、驚異的な成長が続いています。予想PERはおよそ20倍台で、利益の成長を考えると、必ずしも割高すぎないという見方もあります。"
+    data-tts="評価です。二千二十六年六月五日時点で、株価はおよそ にひゃくドル、時価総額はおよそ ごちょうドル と、世界最大級の企業です。直近の四半期決算では、売上が前年比およそ はちわりごぶ の増加、その中心であるデータセンター部門は、きゅうわり 以上の増収と、驚異的な成長が続いています。予想ピーイーアールはおよそ にじゅうばいだい で、利益の成長を考えると、必ずしも割高すぎないという見方もあります。">
+    <div class="s-kicker fin">③ バリュエーション</div>
+    <h2 class="s-title fin">いくらの会社？<span class="tk">2026/6/5時点</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <g class="pop" style="--d:.3s"><rect x="34" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="129" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">株価</text><text x="129" y="92" text-anchor="middle" class="svgcap w" style="font-size:24px;font-weight:800">約$207</text></g>
+        <g class="pop" style="--d:.6s"><rect x="236" y="34" width="190" height="76" rx="10" fill="#16331f" stroke="#39d98a"/><text x="331" y="60" text-anchor="middle" class="svgcap sm" fill="#7df0b0">時価総額</text><text x="331" y="92" text-anchor="middle" class="svgcap w" style="font-size:22px;font-weight:800">約$5兆</text></g>
+        <g class="pop" style="--d:.9s"><rect x="34" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="96" y="142" text-anchor="middle" class="svgcap sm" fill="#f4d97a">予想PER</text><text x="96" y="168" text-anchor="middle" class="svgcap w" style="font-size:18px;font-weight:800">約22〜25倍</text></g>
+        <g class="pop" style="--d:1.1s"><rect x="168" y="120" width="124" height="64" rx="10" fill="#16241a" stroke="#39d98a"/><text x="230" y="142" text-anchor="middle" class="svgcap sm" fill="#7df0b0">直近売上</text><text x="230" y="168" text-anchor="middle" class="svgcap w" style="font-size:17px;font-weight:800">前年比+85%</text></g>
+        <g class="pop" style="--d:1.3s"><rect x="302" y="120" width="124" height="64" rx="10" fill="#16241a" stroke="#39d98a"/><text x="364" y="142" text-anchor="middle" class="svgcap sm" fill="#7df0b0">DC部門</text><text x="364" y="168" text-anchor="middle" class="svgcap w" style="font-size:18px;font-weight:800">+92%</text></g>
+        <text x="230" y="212" text-anchor="middle" class="svgcap fin" style="--d:1.7s" fill="#9fb0d0">世界最大級。データセンター需要で驚異的成長が継続</text>
+        <text x="230" y="230" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#5f6f8f">※2026/6/5時点・株価/時価総額は変動が速い。最新値は要確認</text>
+      </svg>
+    </div></div>
+  </section>
+  <!-- S333 thesis & risk -->
+  <section class="scene" data-vid="s333"
+    data-narration="ポイントは、AI設備投資の波の、ど真ん中にいること。次世代のRubinやHBM4で、単価が上がること。リスクは、高い時価総額ゆえの調整余地、ハイパースケーラーの投資が一巡したときの需要減、対中規制、そして、グーグルやアマゾンが自社開発する、カスタムチップの台頭です。供給を縛るCoWoSやHBMの逼迫は、裏を返せば、日本の装置・材料の追い風でもあります。"
+    data-tts="ポイントは、エーアイ設備投資の波の、ど真ん中にいること。次世代のルービンやエイチビーエムフォーで、単価が上がること。リスクは、高い時価総額ゆえの調整余地、ハイパースケーラーの投資が一巡したときの需要減、対中規制、そして、グーグルやアマゾンが自社開発する、カスタムチップの台頭です。供給を縛るコワスやエイチビーエムの逼迫は、裏を返せば、日本の装置・材料の追い風でもあります。">
+    <div class="s-kicker fin">③ 投資ポイント ＆ リスク</div>
+    <h2 class="s-title fin">強みと<span class="hl">弱み</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="125" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:800" fill="#7df0b0">✅ 投資ポイント</text>
+        <g class="gh" style="--d:.5s"><rect x="20" y="42" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="63" class="svgcap w sm">AI設備投資の波の中心</text></g>
+        <g class="gh" style="--d:.8s"><rect x="20" y="82" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="103" class="svgcap w sm">Rubin/HBM4で単価上昇</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="20" y="122" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="143" class="svgcap w sm">CUDAの圧倒的な堀</text></g>
+        <text x="345" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.4s;font-weight:800" fill="#ff9c9c">⚠ リスク</text>
+        <g class="gh" style="--d:.7s"><rect x="240" y="42" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="63" class="svgcap w sm">高時価総額ゆえの調整余地</text></g>
+        <g class="gh" style="--d:1.0s"><rect x="240" y="82" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="103" class="svgcap w sm">AI投資の一巡／対中規制</text></g>
+        <g class="gh" style="--d:1.3s"><rect x="240" y="122" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="143" class="svgcap w sm">自社ASIC（Google/AWS）の台頭</text></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap w fin" style="--d:1.7s;font-size:12px">CoWoS/HBM逼迫は、日本の装置・材料には追い風</text>
+      </svg>
+    </div></div>
+  </section>
+  <!-- S334 recap -->
+  <section class="scene" data-vid="s334"
+    data-narration="まとめ。NVIDIAは、AIの心臓部を作る、世界最大級の企業。CUDAという堀で守られた、圧倒的シェア。そして製造や後工程で、日本企業がその足元を支えている。この三社だけでも、設計・装置・検査という、サプライチェーンの異なる関所が、見えてきましたね。"
+    data-tts="まとめ。エヌビディアは、エーアイの心臓部を作る、世界最大級の企業。クーダという堀で守られた、圧倒的シェア。そして製造や後工程で、日本企業がその足元を支えている。この三社だけでも、設計・装置・検査という、サプライチェーンの異なる関所が、見えてきましたね。">
+    <div class="s-kicker fin">③ ミニ復習</div>
+    <h2 class="s-title fin">NVIDIA <span class="hl">3行まとめ</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 230">
+        <g class="gh" style="--d:.3s"><rect x="40" y="40" width="380" height="42" rx="8" fill="#16331f" stroke="#39d98a"/><circle cx="66" cy="61" r="13" fill="#39d98a"/><text x="66" y="66" text-anchor="middle" fill="#06241a" style="font-weight:800">1</text><text x="92" y="66" class="svgcap w" style="font-size:13px">AIの心臓部・世界最大級</text></g>
+        <g class="gh" style="--d:.7s"><rect x="40" y="92" width="380" height="42" rx="8" fill="#1c2740" stroke="#9b6de8"/><circle cx="66" cy="113" r="13" fill="#9b6de8"/><text x="66" y="118" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">2</text><text x="92" y="118" class="svgcap w" style="font-size:13px">CUDAの堀で守られた約8割シェア</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="40" y="144" width="380" height="42" rx="8" fill="#1c2740" stroke="#f4c542"/><circle cx="66" cy="165" r="13" fill="#f4c542"/><text x="66" y="170" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">3</text><text x="92" y="170" class="svgcap w" style="font-size:13px">足元を日本の装置・材料が支える</text></g>
+      </svg>
+    </div></div>
+  </section>
+
+  <!-- ===================== アドバンテスト 6857 ===================== -->
+  <section class="scene" data-vid="s350"
+    data-narration="四社目は、アドバンテスト、証券コード6857。半導体が、設計図どおりに正しく動くかを、出荷前に検査する装置、テスタの世界最大手です。チップは作って終わりではなく、一つひとつ性能を試験して、合格品だけが出荷されます。アドバンテストは、その最終関門を担う会社。特に、AIチップやHBMといった、複雑なチップのテストを得意としています。"
+    data-tts="四社目は、アドバンテスト、証券コード ろくはちごなな。半導体が、設計図どおりに正しく動くかを、出荷前に検査する装置、テスタの世界最大手です。チップは作って終わりではなく、一つひとつ性能を試験して、合格品だけが出荷されます。アドバンテストは、その最終関門を担う会社。特に、エーアイチップやエイチビーエムといった、複雑なチップのテストを得意としています。">
+    <div class="s-kicker fin">④ 検査・テスト ／ 日本</div>
+    <h2 class="s-title fin">アドバンテスト<span class="tk">6857</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <rect class="pop" style="--d:.2s" x="120" y="26" width="220" height="58" rx="10" fill="#15233c" stroke="#4ea1ff" stroke-width="2"/>
+        <text x="230" y="52" text-anchor="middle" class="svgcap w" style="font-size:17px;font-weight:800">アドバンテスト 🇯🇵</text>
+        <text x="230" y="72" text-anchor="middle" class="svgcap" fill="#9fd0ff">半導体テスタ（検査）世界最大手</text>
+        <text x="230" y="110" text-anchor="middle" class="svgcap w fin" style="--d:1.0s">「作って終わり」ではない ── 最終関門</text>
+        <g class="fin" style="--d:1.3s">
+          <rect x="60" y="124" width="100" height="44" rx="6" fill="#1c2740" stroke="#27314c"/><text x="110" y="142" text-anchor="middle" class="svgcap sm w">チップ製造</text><text x="110" y="156" text-anchor="middle" class="svgcap sm">前工程・後工程</text>
+          <rect x="200" y="124" width="100" height="44" rx="6" fill="#1c2740" stroke="#4ea1ff"/><text x="250" y="142" text-anchor="middle" class="svgcap sm w" fill="#9fd0ff">テスト</text><text x="250" y="156" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">アドバンテスト</text>
+          <rect x="340" y="124" width="80" height="44" rx="6" fill="#16241a" stroke="#39d98a"/><text x="380" y="150" text-anchor="middle" class="svgcap sm" fill="#7df0b0">合格→出荷</text>
+        </g>
+        <g stroke="#9b6de8" stroke-width="2" class="flow"><line x1="160" y1="146" x2="200" y2="146"/><line x1="300" y1="146" x2="340" y2="146"/></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap fin" style="--d:1.8s" fill="#9fb0d0">AI/HBMなど複雑なチップのテストが得意</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s351"
+    data-narration="テスタ市場は、アドバンテストと、アメリカのテラダインの二社で、世界のおよそ8割を占める寡占です。とくにロジック向けのSoCテスタで、首位を競います。AIチップは高性能になるほど、検査する項目が増え、テスト時間も延びる。すると、同じ数を作っても、必要なテスタが増えていく。だから、テスト業界のASMLとも呼ばれる、構造的な成長企業なのです。"
+    data-tts="テスタ市場は、アドバンテストと、アメリカのテラダインの二社で、世界のおよそ はちわり を占める寡占です。とくにロジック向けのエスオーシーテスタで、首位を競います。エーアイチップは高性能になるほど、検査する項目が増え、テスト時間も延びる。すると、同じ数を作っても、必要なテスタが増えていく。だから、テスト業界のエーエスエムエルとも呼ばれる、構造的な成長企業なのです。">
+    <div class="s-kicker fin">④ 強み ／ なぜ重要か</div>
+    <h2 class="s-title fin">テスタ市場を<span class="hl">2社で約8割</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="60" y="54" class="svgcap w fin" style="--d:.3s">テスタ（ATE）世界市場シェア</text>
+        <rect x="60" y="68" width="340" height="36" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:.6s" x="60" y="68" width="170" height="36" rx="8" fill="url(#gBlue)"/>
+        <rect class="gh" style="--d:.9s" x="230" y="68" width="102" height="36" fill="#3a4a72"/>
+        <text class="svgcap fin" style="--d:1.2s;font-size:14px;font-weight:800" x="145" y="91" text-anchor="middle" fill="#fff">アドバンテスト 約5割</text>
+        <text class="svgcap fin" style="--d:1.4s;font-size:11px" x="281" y="91" text-anchor="middle" fill="#cdd6ea">テラダイン</text>
+        <text x="230" y="138" text-anchor="middle" class="svgcap fin" style="--d:1.7s" fill="#9fb0d0">2社で世界の約8割＝寡占（デュオポリー）</text>
+        <g class="pop" style="--d:2.0s"><rect x="90" y="156" width="280" height="50" rx="8" fill="#1c2740" stroke="#f4c542"/>
+          <text x="230" y="178" text-anchor="middle" class="svgcap w" style="font-size:13px">AIチップ高性能化 → 検査項目↑・テスト時間↑</text>
+          <text x="230" y="196" text-anchor="middle" class="svgcap" fill="#f4d97a">＝同じ生産量でもテスタ需要が増える「テスト業界のASML」</text></g>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s352"
+    data-narration="評価です。2026年6月5日時点で、株価はおよそ2万7千円、時価総額はおよそ20兆円。予想PERはおよそ39倍、PBRはおよそ24倍と、非常に高い水準です。直近の通期決算は、売上がおよそ1兆1千億円で前年比4割超の増加、営業利益はおよそ5千億円で、なんと前年の2倍以上。AIテスト需要で、過去最高益を更新しました。"
+    data-tts="評価です。二千二十六年六月五日時点で、株価はおよそ にまんななせんえん、時価総額はおよそ にじゅっちょうえん。予想ピーイーアールはおよそ さんじゅうきゅうばい、ピービーアールはおよそ にじゅうよんばい と、非常に高い水準です。直近の通期決算は、売上がおよそ いっちょういっせんおくえん で前年比 よわり 超の増加、営業利益はおよそ ごせんおくえん で、なんと前年の二倍以上。エーアイテスト需要で、過去最高益を更新しました。">
+    <div class="s-kicker fin">④ バリュエーション</div>
+    <h2 class="s-title fin">いくらの会社？<span class="tk">2026/6/5時点</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <g class="pop" style="--d:.3s"><rect x="34" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="129" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">株価</text><text x="129" y="92" text-anchor="middle" class="svgcap w" style="font-size:23px;font-weight:800">約2.7万円</text></g>
+        <g class="pop" style="--d:.6s"><rect x="236" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="331" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">時価総額</text><text x="331" y="92" text-anchor="middle" class="svgcap w" style="font-size:23px;font-weight:800">約20兆円</text></g>
+        <g class="pop" style="--d:.9s"><rect x="34" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="96" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">予想PER</text><text x="96" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約39倍</text></g>
+        <g class="pop" style="--d:1.1s"><rect x="168" y="120" width="124" height="64" rx="10" fill="#241010" stroke="#ff6b6b"/><text x="230" y="144" text-anchor="middle" class="svgcap sm" fill="#ff9c9c">PBR</text><text x="230" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約24倍</text></g>
+        <g class="pop" style="--d:1.3s"><rect x="302" y="120" width="124" height="64" rx="10" fill="#16241a" stroke="#39d98a"/><text x="364" y="144" text-anchor="middle" class="svgcap sm" fill="#7df0b0">営業利益</text><text x="364" y="170" text-anchor="middle" class="svgcap w" style="font-size:16px;font-weight:800">前年比2倍+</text></g>
+        <text x="230" y="212" text-anchor="middle" class="svgcap fin" style="--d:1.7s" fill="#9fb0d0">売上 約1.1兆円(+4割超)・営業益 約5千億円 過去最高</text>
+        <text x="230" y="230" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#5f6f8f">※2026/6/5時点・出典：会社IR/各種金融サイト。最新値は要確認</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s353"
+    data-narration="投資ポイントは、AIとHBMによる、テスト需要の構造的な成長。寡占による価格決定力。そして装置と保守の組み合わせによる、高い収益性です。リスクは、PBR24倍という非常に高い評価、AI設備投資サイクルへの強い感応度、そして対中リスク。利益が二倍になるほどの勢いですが、その勢いが鈍れば、株価の調整も大きくなりやすい銘柄です。"
+    data-tts="投資ポイントは、エーアイとエイチビーエムによる、テスト需要の構造的な成長。寡占による価格決定力。そして装置と保守の組み合わせによる、高い収益性です。リスクは、ピービーアール にじゅうよんばい という非常に高い評価、エーアイ設備投資サイクルへの強い感応度、そして対中リスク。利益が二倍になるほどの勢いですが、その勢いが鈍れば、株価の調整も大きくなりやすい銘柄です。">
+    <div class="s-kicker fin">④ 投資ポイント ＆ リスク</div>
+    <h2 class="s-title fin">強みと<span class="hl">弱み</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="125" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:800" fill="#7df0b0">✅ 投資ポイント</text>
+        <g class="gh" style="--d:.5s"><rect x="20" y="42" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="63" class="svgcap w sm">AI/HBMでテスト需要が構造成長</text></g>
+        <g class="gh" style="--d:.8s"><rect x="20" y="82" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="103" class="svgcap w sm">寡占による価格決定力</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="20" y="122" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="143" class="svgcap w sm">装置＋保守で高収益・高ROE</text></g>
+        <text x="345" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.4s;font-weight:800" fill="#ff9c9c">⚠ リスク</text>
+        <g class="gh" style="--d:.7s"><rect x="240" y="42" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="63" class="svgcap w sm">PBR約24倍の高評価</text></g>
+        <g class="gh" style="--d:1.0s"><rect x="240" y="82" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="103" class="svgcap w sm">AI設備投資サイクル感応度大</text></g>
+        <g class="gh" style="--d:1.3s"><rect x="240" y="122" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="143" class="svgcap w sm">対中リスク</text></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap w fin" style="--d:1.7s;font-size:13px">勢いが鈍れば株価の調整も大きくなりやすい</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s354"
+    data-narration="まとめ。アドバンテストは、半導体テスタの世界最大手で、テスト業界のASML。AIとHBMで、テスト需要が構造的に伸びる。寡占で高収益だが、PBR24倍という高い評価と、AI投資サイクルへの感応度がリスク。この三点です。"
+    data-tts="まとめ。アドバンテストは、半導体テスタの世界最大手で、テスト業界のエーエスエムエル。エーアイとエイチビーエムで、テスト需要が構造的に伸びる。寡占で高収益だが、ピービーアール にじゅうよんばい という高い評価と、エーアイ投資サイクルへの感応度がリスク。この三点です。">
+    <div class="s-kicker fin">④ ミニ復習</div>
+    <h2 class="s-title fin">アドバンテスト <span class="hl">3行まとめ</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 230">
+        <g class="gh" style="--d:.3s"><rect x="40" y="40" width="380" height="42" rx="8" fill="#15233c" stroke="#4ea1ff"/><circle cx="66" cy="61" r="13" fill="#4ea1ff"/><text x="66" y="66" text-anchor="middle" fill="#071018" style="font-weight:800">1</text><text x="92" y="66" class="svgcap w" style="font-size:13px">テスタ世界最大手＝テスト業界のASML</text></g>
+        <g class="gh" style="--d:.7s"><rect x="40" y="92" width="380" height="42" rx="8" fill="#16331f" stroke="#39d98a"/><circle cx="66" cy="113" r="13" fill="#39d98a"/><text x="66" y="118" text-anchor="middle" fill="#06241a" style="font-weight:800">2</text><text x="92" y="118" class="svgcap w" style="font-size:13px">AI/HBMでテスト需要が構造成長</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="40" y="144" width="380" height="42" rx="8" fill="#241010" stroke="#ff6b6b"/><circle cx="66" cy="165" r="13" fill="#ff6b6b"/><text x="66" y="170" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">3</text><text x="92" y="170" class="svgcap w" style="font-size:13px">PBR24倍の高評価＋AI投資感応度</text></g>
+      </svg>
+    </div></div>
+  </section>
+
+  <!-- ===================== DISCO 6146 ===================== -->
+  <section class="scene" data-vid="s360"
+    data-narration="五社目は、ディスコ、証券コード6146。「切る、削る、磨く」を究めた、精密加工装置のメーカーです。完成したウェハを、紙のように薄く削り、一つひとつのチップへ正確に切り分ける。この、後工程の地味だけれど欠かせない作業を担います。とくにHBMのように、チップを薄く削って高く積み上げる用途で、なくてはならない存在です。"
+    data-tts="五社目は、ディスコ、証券コード ろくいちよんろく。きる、けずる、みがく、を究めた、精密加工装置のメーカーです。完成したウェハを、紙のように薄く削り、一つひとつのチップへ正確に切り分ける。この、後工程の地味だけれど欠かせない作業を担います。とくにエイチビーエムのように、チップを薄く削って高く積み上げる用途で、なくてはならない存在です。">
+    <div class="s-kicker fin">⑤ 後工程・加工 ／ 日本</div>
+    <h2 class="s-title fin">ディスコ<span class="tk">6146</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <rect class="pop" style="--d:.2s" x="120" y="24" width="220" height="56" rx="10" fill="#15233c" stroke="#4ea1ff" stroke-width="2"/>
+        <text x="230" y="48" text-anchor="middle" class="svgcap w" style="font-size:17px;font-weight:800">ディスコ 🇯🇵</text>
+        <text x="230" y="68" text-anchor="middle" class="svgcap" fill="#9fd0ff">精密加工装置（切る・削る・磨く）</text>
+        <g class="pop" style="--d:1.0s"><rect x="40" y="110" width="116" height="58" rx="8" fill="#1c2740" stroke="#f4c542"/><text x="98" y="134" text-anchor="middle" class="svgcap w sm">切る</text><text x="98" y="150" text-anchor="middle" class="svgcap sm" fill="#f4d97a">ダイシング</text></g>
+        <g class="pop" style="--d:1.3s"><rect x="172" y="110" width="116" height="58" rx="8" fill="#1c2740" stroke="#f4c542"/><text x="230" y="134" text-anchor="middle" class="svgcap w sm">削る</text><text x="230" y="150" text-anchor="middle" class="svgcap sm" fill="#f4d97a">グラインダ</text></g>
+        <g class="pop" style="--d:1.6s"><rect x="304" y="110" width="116" height="58" rx="8" fill="#1c2740" stroke="#27314c"/><text x="362" y="134" text-anchor="middle" class="svgcap w sm">磨く</text><text x="362" y="150" text-anchor="middle" class="svgcap sm">ポリッシャ</text></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap fin" style="--d:2.0s" fill="#9fb0d0">HBM＝薄く削って高く積む。だから不可欠</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s361"
+    data-narration="ディスコのシェアは驚異的です。チップを切るダイシングソーで、世界のおよそ7割から8割。削るグラインダでも、6割以上を握ります。HBMは、積み重ねる枚数が増えるほど、薄く削り、切る工程が増えていく。つまりAIでHBMが伸びるほど、ディスコの装置と消耗品の出番が増える構造です。営業利益率は40パーセント超と、装置メーカーとしては驚異的な高さです。"
+    data-tts="ディスコのシェアは驚異的です。チップを切るダイシングソーで、世界のおよそ ななわり から はちわり。削るグラインダでも、ろくわり 以上を握ります。エイチビーエムは、積み重ねる枚数が増えるほど、薄く削り、切る工程が増えていく。つまりエーアイでエイチビーエムが伸びるほど、ディスコの装置と消耗品の出番が増える構造です。営業利益率は よんじゅっパーセント 超と、装置メーカーとしては驚異的な高さです。">
+    <div class="s-kicker fin">⑤ 強み ／ なぜ関所か</div>
+    <h2 class="s-title fin">ダイシングで<span class="hl">世界シェア7〜8割</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="60" y="48" class="svgcap w fin" style="--d:.3s">ダイシングソー（切断）世界シェア</text>
+        <rect x="60" y="60" width="340" height="32" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:.6s" x="60" y="60" width="255" height="32" rx="8" fill="url(#gGold)"/>
+        <text class="svgcap fin" style="--d:1.2s;font-size:20px;font-weight:800" x="187" y="84" text-anchor="middle" fill="#0a0f1a">70〜80%</text>
+        <text x="60" y="120" class="svgcap w fin" style="--d:1.5s">グラインダ（研削）世界シェア</text>
+        <rect x="60" y="132" width="340" height="28" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:1.7s" x="60" y="132" width="221" height="28" rx="8" fill="#d8b24a"/>
+        <text class="svgcap fin" style="--d:2.1s;font-size:16px;font-weight:800" x="170" y="153" text-anchor="middle" fill="#0a0f1a">60%+</text>
+        <text x="230" y="190" text-anchor="middle" class="svgcap fin" style="--d:2.3s" fill="#9fb0d0">HBM積層↑＝薄化・切断工程↑｜営業利益率40%超</text>
+        <text x="230" y="212" text-anchor="middle" class="svgcap sm fin" style="--d:2.5s" fill="#5f6f8f">※シェアは各社推計でレンジ差あり</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s362"
+    data-narration="評価です。2026年6月5日時点で、株価はおよそ7万円、時価総額はおよそ8兆円。予想PERはおよそ60倍、PBRはおよそ13倍と、かなり高い評価です。直近の通期決算は、売上がおよそ4千4百億円で前年比1割増、営業利益はおよそ1千8百億円、利益率は42パーセント。6期連続で、過去最高益を更新しました。"
+    data-tts="評価です。二千二十六年六月五日時点で、株価はおよそ ななまんえん、時価総額はおよそ はっちょうえん。予想ピーイーアールはおよそ ろくじゅうばい、ピービーアールはおよそ じゅうさんばい と、かなり高い評価です。直近の通期決算は、売上がおよそ よんせんよんひゃくおくえん で前年比 いちわり 増、営業利益はおよそ せんはっぴゃくおくえん、利益率は よんじゅうにパーセント。ろっき 連続で、過去最高益を更新しました。">
+    <div class="s-kicker fin">⑤ バリュエーション</div>
+    <h2 class="s-title fin">いくらの会社？<span class="tk">2026/6/5時点</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <g class="pop" style="--d:.3s"><rect x="34" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="129" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">株価</text><text x="129" y="92" text-anchor="middle" class="svgcap w" style="font-size:24px;font-weight:800">約7万円</text></g>
+        <g class="pop" style="--d:.6s"><rect x="236" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="331" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">時価総額</text><text x="331" y="92" text-anchor="middle" class="svgcap w" style="font-size:24px;font-weight:800">約8兆円</text></g>
+        <g class="pop" style="--d:.9s"><rect x="34" y="120" width="124" height="64" rx="10" fill="#241010" stroke="#ff6b6b"/><text x="96" y="144" text-anchor="middle" class="svgcap sm" fill="#ff9c9c">予想PER</text><text x="96" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約60倍</text></g>
+        <g class="pop" style="--d:1.1s"><rect x="168" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="230" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">PBR</text><text x="230" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約13倍</text></g>
+        <g class="pop" style="--d:1.3s"><rect x="302" y="120" width="124" height="64" rx="10" fill="#16241a" stroke="#39d98a"/><text x="364" y="144" text-anchor="middle" class="svgcap sm" fill="#7df0b0">営業利益率</text><text x="364" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">42%</text></g>
+        <text x="230" y="212" text-anchor="middle" class="svgcap fin" style="--d:1.7s" fill="#9fb0d0">売上 約4,400億円(+1割)・6期連続 過去最高益</text>
+        <text x="230" y="230" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#5f6f8f">※通期予想は非開示・四半期のみ／最新値は要確認</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s363"
+    data-narration="ポイントは、AIとHBMに直結する需要、4割を超える高い利益率、そして消耗品のブレードによる、継続的な収益です。リスクは、PER60倍という高い評価、装置需要のサイクル、そして対中リスク。ディスコは、業績の振れが大きいため、あえて通期予想を出さず、四半期ごとにしか見通しを示しません。それだけ需要の波が大きい、ということでもあります。"
+    data-tts="ポイントは、エーアイとエイチビーエムに直結する需要、よわり を超える高い利益率、そして消耗品のブレードによる、継続的な収益です。リスクは、ピーイーアール ろくじゅうばい という高い評価、装置需要のサイクル、そして対中リスク。ディスコは、業績の振れが大きいため、あえて通期予想を出さず、四半期ごとにしか見通しを示しません。それだけ需要の波が大きい、ということでもあります。">
+    <div class="s-kicker fin">⑤ 投資ポイント ＆ リスク</div>
+    <h2 class="s-title fin">強みと<span class="hl">弱み</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="125" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:800" fill="#7df0b0">✅ 投資ポイント</text>
+        <g class="gh" style="--d:.5s"><rect x="20" y="42" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="63" class="svgcap w sm">AI/HBM需要に直結</text></g>
+        <g class="gh" style="--d:.8s"><rect x="20" y="82" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="103" class="svgcap w sm">営業利益率40%超の高収益</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="20" y="122" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="143" class="svgcap w sm">ブレード(消耗品)の継続収益</text></g>
+        <text x="345" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.4s;font-weight:800" fill="#ff9c9c">⚠ リスク</text>
+        <g class="gh" style="--d:.7s"><rect x="240" y="42" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="63" class="svgcap w sm">PER約60倍の高評価</text></g>
+        <g class="gh" style="--d:1.0s"><rect x="240" y="82" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="103" class="svgcap w sm">装置需要のサイクル(振れ大)</text></g>
+        <g class="gh" style="--d:1.3s"><rect x="240" y="122" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="143" class="svgcap w sm">対中リスク</text></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap w fin" style="--d:1.7s;font-size:13px">通期予想を出さないほど需要の波が大きい</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s364"
+    data-narration="まとめ。ディスコは、「切る・削る・磨く」で後工程を支える関所。ダイシングで世界シェア7割から8割、営業利益率は42パーセント。AIとHBMに直結する一方、PER60倍の高評価と、需要サイクルの波がリスク。この三点を押さえましょう。"
+    data-tts="まとめ。ディスコは、きる・けずる・みがく、で後工程を支える関所。ダイシングで世界シェア ななわり から はちわり、営業利益率は よんじゅうにパーセント。エーアイとエイチビーエムに直結する一方、ピーイーアール ろくじゅうばい の高評価と、需要サイクルの波がリスク。この三点を押さえましょう。">
+    <div class="s-kicker fin">⑤ ミニ復習</div>
+    <h2 class="s-title fin">ディスコ <span class="hl">3行まとめ</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 230">
+        <g class="gh" style="--d:.3s"><rect x="40" y="40" width="380" height="42" rx="8" fill="#15233c" stroke="#4ea1ff"/><circle cx="66" cy="61" r="13" fill="#4ea1ff"/><text x="66" y="66" text-anchor="middle" fill="#071018" style="font-weight:800">1</text><text x="92" y="66" class="svgcap w" style="font-size:13px">「切る・削る・磨く」後工程の関所</text></g>
+        <g class="gh" style="--d:.7s"><rect x="40" y="92" width="380" height="42" rx="8" fill="#1c2740" stroke="#f4c542"/><circle cx="66" cy="113" r="13" fill="#f4c542"/><text x="66" y="118" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">2</text><text x="92" y="118" class="svgcap w" style="font-size:13px">ダイシング7〜8割・利益率42%</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="40" y="144" width="380" height="42" rx="8" fill="#241010" stroke="#ff6b6b"/><circle cx="66" cy="165" r="13" fill="#ff6b6b"/><text x="66" y="170" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">3</text><text x="92" y="170" class="svgcap w" style="font-size:13px">AI/HBM直結・高評価とサイクルのリスク</text></g>
+      </svg>
+    </div></div>
+  </section>
+
+  <!-- ===================== SCREEN 7735 ===================== -->
+  <section class="scene" data-vid="s370"
+    data-narration="六社目は、スクリーンホールディングス、証券コード7735。京都発祥の、半導体製造装置メーカーです。得意とするのは、ウェハの表面を洗う、洗浄装置。チップ作りは、塗って、削って、積んで、を何百回も繰り返しますが、その合間に、ゴミや残りカスを徹底的に洗い流さないと、不良になります。スクリーンは、その洗い場の、世界的リーダーです。"
+    data-tts="六社目は、スクリーンホールディングス、証券コード ななななさんご。京都発祥の、半導体製造装置メーカーです。得意とするのは、ウェハの表面を洗う、洗浄装置。チップ作りは、塗って、削って、積んで、を何百回も繰り返しますが、その合間に、ゴミや残りカスを徹底的に洗い流さないと、不良になります。スクリーンは、その洗い場の、世界的リーダーです。">
+    <div class="s-kicker fin">⑥ 前工程・洗浄 ／ 日本</div>
+    <h2 class="s-title fin">スクリーンHD<span class="tk">7735</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <rect class="pop" style="--d:.2s" x="120" y="26" width="220" height="58" rx="10" fill="#15233c" stroke="#4ea1ff" stroke-width="2"/>
+        <text x="230" y="52" text-anchor="middle" class="svgcap w" style="font-size:16px;font-weight:800">スクリーンHD 🇯🇵</text>
+        <text x="230" y="72" text-anchor="middle" class="svgcap" fill="#9fd0ff">枚葉洗浄装置のリーダー（京都・1868〜）</text>
+        <text x="230" y="110" text-anchor="middle" class="svgcap w fin" style="--d:1.0s">工程の合間に「洗う」── 歩留まりを左右</text>
+        <g class="fin" style="--d:1.3s">
+          <rect x="60" y="124" width="70" height="40" rx="6" fill="#1c2740" stroke="#27314c"/><text x="95" y="148" text-anchor="middle" class="svgcap sm w">成膜</text>
+          <rect x="138" y="124" width="84" height="40" rx="6" fill="#10303f" stroke="#3fc7ff"/><text x="180" y="148" text-anchor="middle" class="svgcap sm" fill="#9fe0ff">洗浄(SCREEN)</text>
+          <rect x="230" y="124" width="70" height="40" rx="6" fill="#1c2740" stroke="#27314c"/><text x="265" y="148" text-anchor="middle" class="svgcap sm w">露光</text>
+          <rect x="308" y="124" width="84" height="40" rx="6" fill="#10303f" stroke="#3fc7ff"/><text x="350" y="148" text-anchor="middle" class="svgcap sm" fill="#9fe0ff">洗浄(SCREEN)</text>
+        </g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap fin" style="--d:1.8s" fill="#9fb0d0">工程ごとに洗浄が挟まる → 微細化で回数が激増</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s371"
+    data-narration="スクリーンは、ウェハを一枚ずつ洗う、枚葉式洗浄装置で、世界シェアおよそ45パーセントの首位。微細化が進むほど、洗う回数そのものが増えるため、工程の数が増えるほど装置が売れる、という成長構造を持っています。2026年には、装置の最大手、アプライド・マテリアルズとも、先端の洗浄技術で提携しました。"
+    data-tts="スクリーンは、ウェハを一枚ずつ洗う、枚葉式洗浄装置で、世界シェアおよそ よんじゅうごパーセント の首位。微細化が進むほど、洗う回数そのものが増えるため、工程の数が増えるほど装置が売れる、という成長構造を持っています。二千二十六年には、装置の最大手、アプライド・マテリアルズとも、先端の洗浄技術で提携しました。">
+    <div class="s-kicker fin">⑥ 強み ／ なぜ関所か</div>
+    <h2 class="s-title fin">枚葉洗浄で<span class="hl">世界シェア約45%</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="60" y="56" class="svgcap w fin" style="--d:.3s">枚葉式洗浄装置 世界シェア（首位）</text>
+        <rect x="60" y="70" width="340" height="36" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:.6s" x="60" y="70" width="153" height="36" rx="8" fill="url(#gBlue)"/>
+        <text class="svgcap big fin" style="--d:1.2s" x="136" y="96" text-anchor="middle" fill="#fff">45%</text>
+        <text x="225" y="93" class="svgcap fin" style="--d:1.4s" fill="#9fb0d0">＝世界トップ（3カテゴリで首位）</text>
+        <g class="pop" style="--d:1.8s"><rect x="90" y="124" width="280" height="48" rx="8" fill="#1c2740" stroke="#39d98a"/>
+          <text x="230" y="146" text-anchor="middle" class="svgcap w" style="font-size:13px">微細化 → 洗浄回数が増える＝数量成長</text>
+          <text x="230" y="164" text-anchor="middle" class="svgcap" fill="#7df0b0">2026年 アプライド・マテリアルズと先端洗浄で提携</text></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap sm fin" style="--d:2.2s" fill="#5f6f8f">※シェアは調査会社推計（出所によりレンジ）</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s372"
+    data-narration="評価です。2026年6月5日時点で、株価はおよそ1万3千円、時価総額はおよそ2兆4千億円。予想PERはおよそ26倍、PBRはおよそ4倍と、ここまでの装置3社の中では、比較的おとなしい評価です。直近の通期は、売上がおよそ6千億円で微減、利益も一服しましたが、来期は売上およそ7千2百億円と、2割増の過去最高を見込んでいます。"
+    data-tts="評価です。二千二十六年六月五日時点で、株価はおよそ いちまんさんぜんえん、時価総額はおよそ にちょうよんせんおくえん。予想ピーイーアールはおよそ にじゅうろくばい、ピービーアールはおよそ よんばい と、ここまでの装置三社の中では、比較的おとなしい評価です。直近の通期は、売上がおよそ ろくせんおくえん で微減、利益も一服しましたが、来期は売上およそ ななせんにひゃくおくえん と、にわり 増の過去最高を見込んでいます。">
+    <div class="s-kicker fin">⑥ バリュエーション</div>
+    <h2 class="s-title fin">いくらの会社？<span class="tk">2026/6/5時点</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <g class="pop" style="--d:.3s"><rect x="34" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="129" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">株価</text><text x="129" y="92" text-anchor="middle" class="svgcap w" style="font-size:23px;font-weight:800">約1.3万円</text></g>
+        <g class="pop" style="--d:.6s"><rect x="236" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="331" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">時価総額</text><text x="331" y="92" text-anchor="middle" class="svgcap w" style="font-size:22px;font-weight:800">約2.4兆円</text></g>
+        <g class="pop" style="--d:.9s"><rect x="34" y="120" width="124" height="64" rx="10" fill="#16241a" stroke="#39d98a"/><text x="96" y="144" text-anchor="middle" class="svgcap sm" fill="#7df0b0">予想PER</text><text x="96" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約26倍</text></g>
+        <g class="pop" style="--d:1.1s"><rect x="168" y="120" width="124" height="64" rx="10" fill="#16241a" stroke="#39d98a"/><text x="230" y="144" text-anchor="middle" class="svgcap sm" fill="#7df0b0">PBR</text><text x="230" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約4倍</text></g>
+        <g class="pop" style="--d:1.3s"><rect x="302" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="364" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">来期売上</text><text x="364" y="170" text-anchor="middle" class="svgcap w" style="font-size:16px;font-weight:800">+2割・最高</text></g>
+        <text x="230" y="212" text-anchor="middle" class="svgcap fin" style="--d:1.7s" fill="#9fb0d0">今期は微減も、来期は過去最高ガイダンス（装置3社では穏当な評価）</text>
+        <text x="230" y="230" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#5f6f8f">※2026/6/5時点・PER/配当はソース差あり。最新値は要確認</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s373"
+    data-narration="ポイントは、洗浄というニッチ分野での独占的な地位、微細化による構造的な数量成長、そして来期の強気なガイダンスです。リスクは、中国向け売上がおよそ4割と高く、輸出規制の影響を受けやすいこと、装置サイクルの波、そして今期は減益だったように、業績が循環的に振れることです。"
+    data-tts="ポイントは、洗浄というニッチ分野での独占的な地位、微細化による構造的な数量成長、そして来期の強気なガイダンスです。リスクは、中国向け売上がおよそ よんわり と高く、輸出規制の影響を受けやすいこと、装置サイクルの波、そして今期は減益だったように、業績が循環的に振れることです。">
+    <div class="s-kicker fin">⑥ 投資ポイント ＆ リスク</div>
+    <h2 class="s-title fin">強みと<span class="hl">弱み</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="125" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:800" fill="#7df0b0">✅ 投資ポイント</text>
+        <g class="gh" style="--d:.5s"><rect x="20" y="42" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="63" class="svgcap w sm">枚葉洗浄シェア45%首位</text></g>
+        <g class="gh" style="--d:.8s"><rect x="20" y="82" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="103" class="svgcap w sm">微細化で洗浄工程↑の数量成長</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="20" y="122" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="143" class="svgcap w sm">来期は過去最高の強気ガイダンス</text></g>
+        <text x="345" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.4s;font-weight:800" fill="#ff9c9c">⚠ リスク</text>
+        <g class="gh" style="--d:.7s"><rect x="240" y="42" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="63" class="svgcap w sm">中国売上 約4割／輸出規制</text></g>
+        <g class="gh" style="--d:1.0s"><rect x="240" y="82" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="103" class="svgcap w sm">装置サイクルの波（今期減益）</text></g>
+        <g class="gh" style="--d:1.3s"><rect x="240" y="122" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="143" class="svgcap w sm">受注のずれ込みリスク</text></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap w fin" style="--d:1.7s;font-size:13px">評価は装置3社では穏当だが、循環性に注意</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s374"
+    data-narration="まとめ。スクリーンは、半導体の洗い場を握る、枚葉洗浄の世界首位。微細化で洗浄工程が増える、構造的な数量成長が魅力。ただし、中国向け4割の規制リスクと、業績の循環性には注意。評価は装置勢の中では、比較的おとなしめ、と覚えてください。"
+    data-tts="まとめ。スクリーンは、半導体の洗い場を握る、枚葉洗浄の世界首位。微細化で洗浄工程が増える、構造的な数量成長が魅力。ただし、中国向け よんわり の規制リスクと、業績の循環性には注意。評価は装置勢の中では、比較的おとなしめ、と覚えてください。">
+    <div class="s-kicker fin">⑥ ミニ復習</div>
+    <h2 class="s-title fin">スクリーンHD <span class="hl">3行まとめ</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 230">
+        <g class="gh" style="--d:.3s"><rect x="40" y="40" width="380" height="42" rx="8" fill="#15233c" stroke="#4ea1ff"/><circle cx="66" cy="61" r="13" fill="#4ea1ff"/><text x="66" y="66" text-anchor="middle" fill="#071018" style="font-weight:800">1</text><text x="92" y="66" class="svgcap w" style="font-size:13px">枚葉洗浄で世界シェア45%首位</text></g>
+        <g class="gh" style="--d:.7s"><rect x="40" y="92" width="380" height="42" rx="8" fill="#16331f" stroke="#39d98a"/><circle cx="66" cy="113" r="13" fill="#39d98a"/><text x="66" y="118" text-anchor="middle" fill="#06241a" style="font-weight:800">2</text><text x="92" y="118" class="svgcap w" style="font-size:13px">微細化で洗浄工程↑の数量成長</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="40" y="144" width="380" height="42" rx="8" fill="#241010" stroke="#ff6b6b"/><circle cx="66" cy="165" r="13" fill="#ff6b6b"/><text x="66" y="170" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">3</text><text x="92" y="170" class="svgcap w" style="font-size:13px">対中4割・循環性のリスク／評価は穏当</text></g>
+      </svg>
+    </div></div>
+  </section>
+
+  <!-- ===================== 国際電気 6525 ===================== -->
+  <section class="scene" data-vid="s380"
+    data-narration="七社目は、コクサイエレクトリック、証券コード6525。前工程のうち、ウェハの上に、薄い膜を一層ずつ積み上げる、成膜という工程を担う会社です。とくに、何十枚ものウェハを一度に処理する、バッチ式のALDという方式に、圧倒的な強みを持ちます。元は日立グループの装置部門で、投資ファンドを経て、2023年に上場しました。"
+    data-tts="七社目は、コクサイエレクトリック、証券コード ろくごにご。前工程のうち、ウェハの上に、薄い膜を一層ずつ積み上げる、成膜という工程を担う会社です。とくに、何十枚ものウェハを一度に処理する、バッチ式のエーエルディーという方式に、圧倒的な強みを持ちます。元は日立グループの装置部門で、投資ファンドを経て、二千二十三年に上場しました。">
+    <div class="s-kicker fin">⑦ 前工程・成膜 ／ 日本</div>
+    <h2 class="s-title fin">コクサイエレクトリック<span class="tk">6525</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <rect class="pop" style="--d:.2s" x="110" y="24" width="240" height="56" rx="10" fill="#15233c" stroke="#4ea1ff" stroke-width="2"/>
+        <text x="230" y="48" text-anchor="middle" class="svgcap w" style="font-size:16px;font-weight:800">コクサイエレクトリック 🇯🇵</text>
+        <text x="230" y="68" text-anchor="middle" class="svgcap" fill="#9fd0ff">成膜（バッチALD・熱処理）が得意</text>
+        <text x="230" y="106" text-anchor="middle" class="svgcap w fin" style="--d:1.0s">薄い膜を一層ずつ積み上げる ＝ 成膜</text>
+        <g class="gv" style="--d:1.3s"><rect x="170" y="150" width="120" height="12" fill="#3a6a4a"/><rect x="174" y="138" width="112" height="10" fill="#27406a"/><rect x="174" y="126" width="112" height="10" fill="#27406a"/><rect x="174" y="114" width="112" height="10" fill="#27406a"/><rect x="174" y="102" width="112" height="10" fill="#27406a"/></g>
+        <text x="320" y="130" class="svgcap sm fin" style="--d:1.8s" fill="#9fb0d0">↑何十枚も一括処理（バッチ）</text>
+        <text x="230" y="196" text-anchor="middle" class="svgcap fin" style="--d:2.0s" fill="#9fb0d0">元・日立国際電気 → ファンド経由 → 2023年上場</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s381"
+    data-narration="このバッチ式ALDで、コクサイは世界シェアおよそ7割の首位。残りを東京エレクトロンが占める、実質二社の寡占です。メモリ、とくにNANDフラッシュは、記憶素子を高く積み上げるほど、膜を積む工程が増える。つまり、立体化が進むほど、コクサイの装置の出番が増えます。じつは過去に、アプライド・マテリアルズが買収しようとして、中国の独占禁止当局の承認が下りず、破談になった、という逸話もあります。"
+    data-tts="このバッチ式エーエルディーで、コクサイは世界シェアおよそ ななわり の首位。残りを東京エレクトロンが占める、実質二社の寡占です。メモリ、とくにナンドフラッシュは、記憶素子を高く積み上げるほど、膜を積む工程が増える。つまり、立体化が進むほど、コクサイの装置の出番が増えます。じつは過去に、アプライド・マテリアルズが買収しようとして、中国の独占禁止当局の承認が下りず、破談になった、という逸話もあります。">
+    <div class="s-kicker fin">⑦ 強み ／ なぜ関所か</div>
+    <h2 class="s-title fin">バッチALDで<span class="hl">世界シェア約7割</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="60" y="54" class="svgcap w fin" style="--d:.3s">バッチ式ALD（成膜）世界シェア</text>
+        <rect x="60" y="68" width="340" height="36" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:.6s" x="60" y="68" width="238" height="36" rx="8" fill="url(#gBlue)"/>
+        <rect class="gh" style="--d:.9s" x="298" y="68" width="102" height="36" fill="#3a4a72"/>
+        <text class="svgcap fin" style="--d:1.2s;font-size:18px;font-weight:800" x="179" y="93" text-anchor="middle" fill="#fff">約70%</text>
+        <text class="svgcap fin" style="--d:1.4s;font-size:10px" x="349" y="92" text-anchor="middle" fill="#cdd6ea">東エレ</text>
+        <text x="230" y="134" text-anchor="middle" class="svgcap fin" style="--d:1.7s" fill="#9fb0d0">実質2社の寡占｜NAND高層化で工程↑＝出番↑</text>
+        <g class="pop" style="--d:2.0s"><rect x="70" y="150" width="320" height="46" rx="8" fill="#1c2740" stroke="#f4c542"/>
+          <text x="230" y="172" text-anchor="middle" class="svgcap w" style="font-size:12px">逸話：アプライド・マテリアルズが買収を試みるも</text>
+          <text x="230" y="190" text-anchor="middle" class="svgcap" fill="#f4d97a">中国の独禁当局が承認せず破談 → 独立上場へ</text></g>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s382"
+    data-narration="評価です。2026年6月5日時点で、株価はおよそ8千円、時価総額はおよそ1兆9千億円。予想PERはおよそ48倍、PBRはおよそ8倍台と、高めの評価です。直近の通期は、メモリ投資の一服で、減収減益でしたが、来期は売上およそ2千8百億円と2割の増収、営業利益は3割増を、会社は見込んでいます。"
+    data-tts="評価です。二千二十六年六月五日時点で、株価はおよそ はっせんえん、時価総額はおよそ いっちょうきゅうせんおくえん。予想ピーイーアールはおよそ よんじゅうはちばい、ピービーアールはおよそ はちばいだい と、高めの評価です。直近の通期は、メモリ投資の一服で、減収減益でしたが、来期は売上およそ にせんはっぴゃくおくえん と にわり の増収、営業利益は さんわり 増を、会社は見込んでいます。">
+    <div class="s-kicker fin">⑦ バリュエーション</div>
+    <h2 class="s-title fin">いくらの会社？<span class="tk">2026/6/5時点</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <g class="pop" style="--d:.3s"><rect x="34" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="129" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">株価</text><text x="129" y="92" text-anchor="middle" class="svgcap w" style="font-size:24px;font-weight:800">約8千円</text></g>
+        <g class="pop" style="--d:.6s"><rect x="236" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="331" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">時価総額</text><text x="331" y="92" text-anchor="middle" class="svgcap w" style="font-size:21px;font-weight:800">約1.9兆円</text></g>
+        <g class="pop" style="--d:.9s"><rect x="34" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="96" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">予想PER</text><text x="96" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約48倍</text></g>
+        <g class="pop" style="--d:1.1s"><rect x="168" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="230" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">PBR</text><text x="230" y="170" text-anchor="middle" class="svgcap w" style="font-size:18px;font-weight:800">約8倍台</text></g>
+        <g class="pop" style="--d:1.3s"><rect x="302" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#9b6de8"/><text x="364" y="144" text-anchor="middle" class="svgcap sm" fill="#c4a6ff">来期</text><text x="364" y="170" text-anchor="middle" class="svgcap w" style="font-size:15px;font-weight:800">増収+2割計画</text></g>
+        <text x="230" y="212" text-anchor="middle" class="svgcap fin" style="--d:1.7s" fill="#9fb0d0">今期は減収減益も、来期は売上+2割・営業益+3割の会社計画</text>
+        <text x="230" y="230" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#5f6f8f">※来期計画は市場予想を下回り決算翌日に株価下落。最新値は要確認</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s383"
+    data-narration="ポイントは、AIとHBMの追い風、NANDの高層化による数量の伸び、そして得意の成膜技術を、次世代ロジックやパワー半導体へ広げる展開力です。リスクは、メモリ市況への強い依存、対中リスク、そして高いバリュエーション。会社の来期計画が、市場の予想を下回ったことで、決算の翌日に株価が下落した点も、期待の高さの裏返しです。"
+    data-tts="ポイントは、エーアイとエイチビーエムの追い風、ナンドの高層化による数量の伸び、そして得意の成膜技術を、次世代ロジックやパワー半導体へ広げる展開力です。リスクは、メモリ市況への強い依存、対中リスク、そして高いバリュエーション。会社の来期計画が、市場の予想を下回ったことで、決算の翌日に株価が下落した点も、期待の高さの裏返しです。">
+    <div class="s-kicker fin">⑦ 投資ポイント ＆ リスク</div>
+    <h2 class="s-title fin">強みと<span class="hl">弱み</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="125" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:800" fill="#7df0b0">✅ 投資ポイント</text>
+        <g class="gh" style="--d:.5s"><rect x="20" y="42" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="63" class="svgcap w sm">AI/HBMの追い風</text></g>
+        <g class="gh" style="--d:.8s"><rect x="20" y="82" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="103" class="svgcap w sm">NAND高層化で数量レバレッジ</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="20" y="122" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="143" class="svgcap w sm">ロジック/パワーへの横展開</text></g>
+        <text x="345" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.4s;font-weight:800" fill="#ff9c9c">⚠ リスク</text>
+        <g class="gh" style="--d:.7s"><rect x="240" y="42" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="63" class="svgcap w sm">メモリ市況への強い依存</text></g>
+        <g class="gh" style="--d:1.0s"><rect x="240" y="82" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="103" class="svgcap w sm">対中リスク</text></g>
+        <g class="gh" style="--d:1.3s"><rect x="240" y="122" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="143" class="svgcap w sm">高評価・来期計画が予想未達</text></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap w fin" style="--d:1.7s;font-size:13px">メモリ市況の波に業績が連動しやすい</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s384"
+    data-narration="まとめ。コクサイエレクトリックは、バッチ式ALDで世界シェア7割の、成膜の関所。NANDの高層化と、AIで数量が伸びる。ただし、メモリ市況への依存、対中、そして高いバリュエーションがリスク。アプライドが欲しがり、中国が止めた会社、という逸話も覚えておくと面白いですね。"
+    data-tts="まとめ。コクサイエレクトリックは、バッチ式エーエルディーで世界シェア ななわり の、成膜の関所。ナンドの高層化と、エーアイで数量が伸びる。ただし、メモリ市況への依存、対中、そして高いバリュエーションがリスク。アプライドが欲しがり、中国が止めた会社、という逸話も覚えておくと面白いですね。">
+    <div class="s-kicker fin">⑦ ミニ復習</div>
+    <h2 class="s-title fin">コクサイ <span class="hl">3行まとめ</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 230">
+        <g class="gh" style="--d:.3s"><rect x="40" y="40" width="380" height="42" rx="8" fill="#15233c" stroke="#4ea1ff"/><circle cx="66" cy="61" r="13" fill="#4ea1ff"/><text x="66" y="66" text-anchor="middle" fill="#071018" style="font-weight:800">1</text><text x="92" y="66" class="svgcap w" style="font-size:13px">バッチALDで世界シェア7割の成膜関所</text></g>
+        <g class="gh" style="--d:.7s"><rect x="40" y="92" width="380" height="42" rx="8" fill="#16331f" stroke="#39d98a"/><circle cx="66" cy="113" r="13" fill="#39d98a"/><text x="66" y="118" text-anchor="middle" fill="#06241a" style="font-weight:800">2</text><text x="92" y="118" class="svgcap w" style="font-size:13px">NAND高層化・AIで数量成長</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="40" y="144" width="380" height="42" rx="8" fill="#241010" stroke="#ff6b6b"/><circle cx="66" cy="165" r="13" fill="#ff6b6b"/><text x="66" y="170" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">3</text><text x="92" y="170" class="svgcap w" style="font-size:13px">メモリ市況依存・対中・高評価のリスク</text></g>
+      </svg>
+    </div></div>
+  </section>
+
+  <!-- ===================== 信越化学 4063 ===================== -->
+  <section class="scene" data-vid="s390"
+    data-narration="八社目は、信越化学工業、証券コード4063。半導体のいちばん土台、シリコンウェハの世界最大手です。チップは、この円盤の上に作られるので、信越はまさに製造の入口を握る存在。さらに、塩化ビニルやシリコーンといった化学事業も大きく、半導体一本足ではない、分散の効いた総合化学メーカーでもあります。実質無借金という、鉄壁の財務でも知られます。"
+    data-tts="八社目は、信越化学工業、証券コード よんまるろくさん。半導体のいちばん土台、シリコンウェハの世界最大手です。チップは、この円盤の上に作られるので、信越はまさに製造の入口を握る存在。さらに、塩化ビニルやシリコーンといった化学事業も大きく、半導体一本足ではない、分散の効いた総合化学メーカーでもあります。実質無借金という、鉄壁の財務でも知られます。">
+    <div class="s-kicker fin">⑧ 材料・ウェハ ／ 日本</div>
+    <h2 class="s-title fin">信越化学工業<span class="tk">4063</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <rect class="pop" style="--d:.2s" x="120" y="22" width="220" height="56" rx="10" fill="#15233c" stroke="#4ea1ff" stroke-width="2"/>
+        <text x="230" y="46" text-anchor="middle" class="svgcap w" style="font-size:16px;font-weight:800">信越化学 🇯🇵</text>
+        <text x="230" y="66" text-anchor="middle" class="svgcap" fill="#9fd0ff">シリコンウェハ世界最大手＋総合化学</text>
+        <circle class="pop" style="--d:1.0s" cx="110" cy="150" r="44" fill="url(#gBlue)" opacity=".85"/>
+        <text x="110" y="154" text-anchor="middle" class="svgcap w sm">ウェハ</text>
+        <text x="110" y="206" text-anchor="middle" class="svgcap sm fin" style="--d:1.3s">製造の入口（最上流）</text>
+        <g class="fin" style="--d:1.6s">
+          <rect x="200" y="110" width="100" height="34" rx="6" fill="#1c2740" stroke="#27314c"/><text x="250" y="132" text-anchor="middle" class="svgcap sm w">塩ビ・シリコーン</text>
+          <rect x="200" y="150" width="100" height="34" rx="6" fill="#1c2740" stroke="#27314c"/><text x="250" y="172" text-anchor="middle" class="svgcap sm w">EUVレジスト等</text>
+          <rect x="312" y="130" width="108" height="34" rx="6" fill="#16241a" stroke="#39d98a"/><text x="366" y="148" text-anchor="middle" class="svgcap sm" fill="#7df0b0">実質無借金</text><text x="366" y="162" text-anchor="middle" class="svgcap sm" fill="#7df0b0">鉄壁の財務</text>
+        </g>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s391"
+    data-narration="シリコンウェハ、とくに最先端の300ミリウェハで、信越は世界シェアおよそ3割の首位。二位のSUMCOと合わせると、ウェハ全体で世界のおよそ9割を、日本の二社が握ります。2ナノ、3ナノといった最先端ほど、平らで欠陥のないウェハが求められ、その品質で他社を引き離す。だからこそ、どんなチップも通る、入口の関所なのです。"
+    data-tts="シリコンウェハ、とくに最先端の さんびゃくミリウェハで、信越は世界シェアおよそ さんわり の首位。二位のサムコと合わせると、ウェハ全体で世界のおよそ きゅうわり を、日本の二社が握ります。にナノ、さんナノ といった最先端ほど、平らで欠陥のないウェハが求められ、その品質で他社を引き離す。だからこそ、どんなチップも通る、入口の関所なのです。">
+    <div class="s-kicker fin">⑧ 強み ／ なぜ関所か</div>
+    <h2 class="s-title fin">300mmウェハで<span class="hl">世界シェア首位</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="60" y="54" class="svgcap w fin" style="--d:.3s">300mmシリコンウェハ 世界シェア</text>
+        <rect x="60" y="68" width="340" height="36" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:.6s" x="60" y="68" width="119" height="36" rx="8" fill="url(#gBlue)"/>
+        <rect class="gh" style="--d:.9s" x="179" y="68" width="92" height="36" fill="#3a4a72"/>
+        <text class="svgcap fin" style="--d:1.2s;font-size:13px;font-weight:800" x="119" y="91" text-anchor="middle" fill="#fff">信越 約3割</text>
+        <text class="svgcap fin" style="--d:1.4s;font-size:11px" x="225" y="91" text-anchor="middle" fill="#cdd6ea">SUMCO</text>
+        <text x="60" y="138" class="svgcap w fin" style="--d:1.6s">ウェハ全体（信越＋SUMCO）</text>
+        <rect x="60" y="150" width="340" height="28" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:1.8s" x="60" y="150" width="306" height="28" rx="8" fill="url(#gGold)"/>
+        <text class="svgcap fin" style="--d:2.2s;font-size:15px;font-weight:800" x="200" y="170" text-anchor="middle" fill="#0a0f1a">日本2社で 約9割</text>
+        <text x="230" y="206" text-anchor="middle" class="svgcap fin" style="--d:2.4s" fill="#9fb0d0">先端ほど超平坦・低欠陥が必須＝品質で独走</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s392"
+    data-narration="評価です。2026年6月5日時点で、株価はおよそ7千4百円、時価総額はおよそ15兆円。実績ベースのPERはおよそ29倍、PBRはおよそ3倍と、ここまでの会社と比べると、比較的おとなしい評価です。直近の通期決算は、売上がおよそ2兆6千億円でほぼ横ばい、営業利益はおよそ6千4百億円で、塩ビ市況の悪化などから前年比1割超の減益でした。大型の自社株買いも実施しています。"
+    data-tts="評価です。二千二十六年六月五日時点で、株価はおよそ ななせんよんひゃくえん、時価総額はおよそ じゅうごちょうえん。実績ベースのピーイーアールはおよそ にじゅうきゅうばい、ピービーアールはおよそ さんばい と、ここまでの会社と比べると、比較的おとなしい評価です。直近の通期決算は、売上がおよそ にちょうろくせんおくえん でほぼ横ばい、営業利益はおよそ ろくせんよんひゃくおくえん で、塩ビ市況の悪化などから前年比 いちわり 超の減益でした。大型の自社株買いも実施しています。">
+    <div class="s-kicker fin">⑧ バリュエーション</div>
+    <h2 class="s-title fin">いくらの会社？<span class="tk">2026/6/5時点</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <g class="pop" style="--d:.3s"><rect x="34" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="129" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">株価</text><text x="129" y="92" text-anchor="middle" class="svgcap w" style="font-size:23px;font-weight:800">約7,400円</text></g>
+        <g class="pop" style="--d:.6s"><rect x="236" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="331" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">時価総額</text><text x="331" y="92" text-anchor="middle" class="svgcap w" style="font-size:23px;font-weight:800">約15兆円</text></g>
+        <g class="pop" style="--d:.9s"><rect x="34" y="120" width="124" height="64" rx="10" fill="#16241a" stroke="#39d98a"/><text x="96" y="144" text-anchor="middle" class="svgcap sm" fill="#7df0b0">実績PER</text><text x="96" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約29倍</text></g>
+        <g class="pop" style="--d:1.1s"><rect x="168" y="120" width="124" height="64" rx="10" fill="#16241a" stroke="#39d98a"/><text x="230" y="144" text-anchor="middle" class="svgcap sm" fill="#7df0b0">PBR</text><text x="230" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約3倍</text></g>
+        <g class="pop" style="--d:1.3s"><rect x="302" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="364" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">配当利回り</text><text x="364" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約1.4%</text></g>
+        <text x="230" y="212" text-anchor="middle" class="svgcap fin" style="--d:1.7s" fill="#9fb0d0">売上 約2.6兆円(横ばい)・営業益は塩ビ市況で前年比-1割超／大型自社株買い</text>
+        <text x="230" y="230" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#5f6f8f">※2026/6/5時点・予想PERは非開示が多く実績ベース。最新値は要確認</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s393"
+    data-narration="ポイントは、AIやHBM、2ナノ世代に向けた、先端ウェハ需要の構造的な拡大。塩ビやシリコーンなど、事業分散による安定感。そして、実質無借金という、業界随一の財務基盤です。リスクは、塩ビなど化学市況の変動、半導体の在庫調整によるウェハ価格や稼働の低下、そして円高。質と財務で守りが固い一方、化学と半導体、二つの市況の波を受ける点には注意です。"
+    data-tts="ポイントは、エーアイやエイチビーエム、にナノ世代に向けた、先端ウェハ需要の構造的な拡大。塩ビやシリコーンなど、事業分散による安定感。そして、実質無借金という、業界随一の財務基盤です。リスクは、塩ビなど化学市況の変動、半導体の在庫調整によるウェハ価格や稼働の低下、そして円高。質と財務で守りが固い一方、化学と半導体、二つの市況の波を受ける点には注意です。">
+    <div class="s-kicker fin">⑧ 投資ポイント ＆ リスク</div>
+    <h2 class="s-title fin">強みと<span class="hl">弱み</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="125" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:800" fill="#7df0b0">✅ 投資ポイント</text>
+        <g class="gh" style="--d:.5s"><rect x="20" y="42" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="63" class="svgcap w sm">AI/2nm向け先端ウェハ需要</text></g>
+        <g class="gh" style="--d:.8s"><rect x="20" y="82" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="103" class="svgcap w sm">塩ビ等で事業分散・安定</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="20" y="122" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="143" class="svgcap w sm">実質無借金の鉄壁財務・還元</text></g>
+        <text x="345" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.4s;font-weight:800" fill="#ff9c9c">⚠ リスク</text>
+        <g class="gh" style="--d:.7s"><rect x="240" y="42" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="63" class="svgcap w sm">化学・塩ビ市況の変動</text></g>
+        <g class="gh" style="--d:1.0s"><rect x="240" y="82" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="103" class="svgcap w sm">ウェハ価格・稼働の低下</text></g>
+        <g class="gh" style="--d:1.3s"><rect x="240" y="122" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="143" class="svgcap w sm">円高・景気循環</text></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap w fin" style="--d:1.7s;font-size:13px">化学と半導体、二つの市況の波を受ける</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s394"
+    data-narration="まとめ。信越化学は、シリコンウェハ世界首位で、半導体製造の入口の関所。塩ビなどの分散と、実質無借金の鉄壁財務が強み。評価は比較的おとなしいが、化学と半導体、二つの市況に左右される。守りの堅い、上流の王者と覚えましょう。"
+    data-tts="まとめ。信越化学は、シリコンウェハ世界首位で、半導体製造の入口の関所。塩ビなどの分散と、実質無借金の鉄壁財務が強み。評価は比較的おとなしいが、化学と半導体、二つの市況に左右される。守りの堅い、上流の王者と覚えましょう。">
+    <div class="s-kicker fin">⑧ ミニ復習</div>
+    <h2 class="s-title fin">信越化学 <span class="hl">3行まとめ</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 230">
+        <g class="gh" style="--d:.3s"><rect x="40" y="40" width="380" height="42" rx="8" fill="#15233c" stroke="#4ea1ff"/><circle cx="66" cy="61" r="13" fill="#4ea1ff"/><text x="66" y="66" text-anchor="middle" fill="#071018" style="font-weight:800">1</text><text x="92" y="66" class="svgcap w" style="font-size:13px">シリコンウェハ世界首位＝入口の関所</text></g>
+        <g class="gh" style="--d:.7s"><rect x="40" y="92" width="380" height="42" rx="8" fill="#16331f" stroke="#39d98a"/><circle cx="66" cy="113" r="13" fill="#39d98a"/><text x="66" y="118" text-anchor="middle" fill="#06241a" style="font-weight:800">2</text><text x="92" y="118" class="svgcap w" style="font-size:13px">事業分散＋実質無借金の鉄壁財務</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="40" y="144" width="380" height="42" rx="8" fill="#241010" stroke="#ff6b6b"/><circle cx="66" cy="165" r="13" fill="#ff6b6b"/><text x="66" y="170" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">3</text><text x="92" y="170" class="svgcap w" style="font-size:13px">化学と半導体、二つの市況に左右</text></g>
+      </svg>
+    </div></div>
+  </section>
+
+  <!-- ===================== SUMCO 3436 ===================== -->
+  <section class="scene" data-vid="s400"
+    data-narration="九社目は、サムコ、証券コード3436。こちらも、シリコンウェハのメーカーですが、信越とちがって、売上のほとんどがウェハという、純粋なウェハ専業です。住友金属と三菱マテリアルの、シリコン事業が統合してできた会社で、社名のサムコは、その英語名の頭文字に由来します。信越に次ぐ、世界第二位のウェハメーカーです。"
+    data-tts="九社目は、サムコ、証券コード さんよんさんろく。こちらも、シリコンウェハのメーカーですが、信越とちがって、売上のほとんどがウェハという、純粋なウェハ専業です。住友金属と三菱マテリアルの、シリコン事業が統合してできた会社で、社名のサムコは、その英語名の頭文字に由来します。信越に次ぐ、世界第二位のウェハメーカーです。">
+    <div class="s-kicker fin">⑨ 材料・ウェハ ／ 日本</div>
+    <h2 class="s-title fin">SUMCO<span class="tk">3436</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <rect class="pop" style="--d:.2s" x="120" y="24" width="220" height="56" rx="10" fill="#15233c" stroke="#4ea1ff" stroke-width="2"/>
+        <text x="230" y="48" text-anchor="middle" class="svgcap w" style="font-size:17px;font-weight:800">SUMCO 🇯🇵</text>
+        <text x="230" y="68" text-anchor="middle" class="svgcap" fill="#9fd0ff">シリコンウェハ専業（世界2位）</text>
+        <circle class="pop" style="--d:1.0s" cx="150" cy="155" r="42" fill="url(#gBlue)" opacity=".5"/><text x="150" y="159" text-anchor="middle" class="svgcap w sm">ウェハ</text>
+        <text x="150" y="210" text-anchor="middle" class="svgcap sm fin" style="--d:1.3s">売上の約97%がウェハ＝純粋専業</text>
+        <g class="fin" style="--d:1.6s"><rect x="250" y="120" width="170" height="34" rx="6" fill="#1c2740" stroke="#27314c"/><text x="335" y="142" text-anchor="middle" class="svgcap sm w">住友金属＋三菱マテリアル統合</text>
+          <rect x="250" y="160" width="170" height="34" rx="6" fill="#1c2740" stroke="#27314c"/><text x="335" y="182" text-anchor="middle" class="svgcap sm w">信越に次ぐ世界2位</text></g>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s401"
+    data-narration="シェアは、信越と合わせて世界のおよそ9割を握る、二強の一角。とくにAIサーバー向けの、最先端300ミリウェハで存在感があります。サムコのいちばんの特徴は、専業ゆえに、ウェハ市況がそのまま業績に出ること。市況が悪いと赤字にもなりますが、回復すると利益が一気に戻る。市況回復への、純粋なレバレッジ、と言える銘柄です。"
+    data-tts="シェアは、信越と合わせて世界のおよそ きゅうわり を握る、二強の一角。とくにエーアイサーバー向けの、最先端 さんびゃくミリウェハで存在感があります。サムコのいちばんの特徴は、専業ゆえに、ウェハ市況がそのまま業績に出ること。市況が悪いと赤字にもなりますが、回復すると利益が一気に戻る。市況回復への、純粋なレバレッジ、と言える銘柄です。">
+    <div class="s-kicker fin">⑨ 強み ／ 性格</div>
+    <h2 class="s-title fin">市況回復への<span class="hl">純粋レバレッジ</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="60" y="48" class="svgcap w fin" style="--d:.3s">ウェハ世界シェア（信越＋SUMCOで2強）</text>
+        <rect x="60" y="62" width="340" height="30" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:.6s" x="60" y="62" width="306" height="30" rx="8" fill="url(#gGold)"/>
+        <text class="svgcap fin" style="--d:1.1s;font-size:14px;font-weight:800" x="200" y="83" text-anchor="middle" fill="#0a0f1a">日本2社で約9割（SUMCOは2位）</text>
+        <text x="230" y="118" text-anchor="middle" class="svgcap w fin" style="--d:1.4s">専業＝市況がそのまま業績に出る</text>
+        <g class="fin" style="--d:1.8s">
+          <polyline points="60,190 130,196 200,200 270,178 340,150 400,128" fill="none" stroke="#39d98a" stroke-width="3"/>
+          <circle r="4" fill="#9bffce" filter="url(#glow)"><animateMotion dur="3s" repeatCount="indefinite" path="M60,190 L130,196 L200,200 L270,178 L340,150 L400,128"/></circle>
+          <text x="200" y="216" text-anchor="middle" class="svgcap sm" fill="#9fb0d0">市況の底→回復で利益が一気に戻る</text></g>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s402"
+    data-narration="評価です。2026年6月5日時点で、株価はおよそ4千円、時価総額はおよそ1兆4千億円。じつは、直近の通期は赤字のため、PERは計算できません。PBRはおよそ2.5倍。注目すべきは、業績が赤字にもかかわらず、株価が年初からおよそ3倍に上昇していること。市場が、これからの市況回復を、先回りして織り込んでいる、という状態です。"
+    data-tts="評価です。二千二十六年六月五日時点で、株価はおよそ よんせんえん、時価総額はおよそ いっちょうよんせんおくえん。じつは、直近の通期は赤字のため、ピーイーアールは計算できません。ピービーアールはおよそ にてんごばい。注目すべきは、業績が赤字にもかかわらず、株価が年初からおよそ さんばい に上昇していること。市場が、これからの市況回復を、先回りして織り込んでいる、という状態です。">
+    <div class="s-kicker fin">⑨ バリュエーション</div>
+    <h2 class="s-title fin">いくらの会社？<span class="tk">2026/6/5時点</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <g class="pop" style="--d:.3s"><rect x="34" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="129" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">株価</text><text x="129" y="92" text-anchor="middle" class="svgcap w" style="font-size:24px;font-weight:800">約4,000円</text></g>
+        <g class="pop" style="--d:.6s"><rect x="236" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="331" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">時価総額</text><text x="331" y="92" text-anchor="middle" class="svgcap w" style="font-size:22px;font-weight:800">約1.4兆円</text></g>
+        <g class="pop" style="--d:.9s"><rect x="34" y="120" width="124" height="64" rx="10" fill="#241010" stroke="#ff6b6b"/><text x="96" y="144" text-anchor="middle" class="svgcap sm" fill="#ff9c9c">PER</text><text x="96" y="170" text-anchor="middle" class="svgcap w" style="font-size:16px;font-weight:800">赤字で算出不可</text></g>
+        <g class="pop" style="--d:1.1s"><rect x="168" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="230" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">PBR</text><text x="230" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約2.5倍</text></g>
+        <g class="pop" style="--d:1.3s"><rect x="302" y="120" width="124" height="64" rx="10" fill="#16241a" stroke="#39d98a"/><text x="364" y="144" text-anchor="middle" class="svgcap sm" fill="#7df0b0">株価(年初来)</text><text x="364" y="170" text-anchor="middle" class="svgcap w" style="font-size:18px;font-weight:800">約3倍</text></g>
+        <text x="230" y="212" text-anchor="middle" class="svgcap fin" style="--d:1.7s" fill="#9fb0d0">赤字でも株価3倍＝市況回復を先回りで織り込み</text>
+        <text x="230" y="230" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#5f6f8f">※2026/6/5時点・赤字でPER算出不可。最新値は要確認</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s403"
+    data-narration="ポイントは、AIによる先端300ミリウェハの増産、そして市況回復局面での、強い利益の戻りです。リスクは、専業ゆえの、業績の振れの大きさ。実際に、足元は赤字に転落しています。さらに、重い設備投資の償却負担、工場再編のコスト、そして、赤字でも株価が3倍になっているという、織り込みの先行。期待が外れたときの、調整余地も大きい銘柄です。"
+    data-tts="ポイントは、エーアイによる先端 さんびゃくミリウェハの増産、そして市況回復局面での、強い利益の戻りです。リスクは、専業ゆえの、業績の振れの大きさ。実際に、足元は赤字に転落しています。さらに、重い設備投資の償却負担、工場再編のコスト、そして、赤字でも株価が さんばい になっているという、織り込みの先行。期待が外れたときの、調整余地も大きい銘柄です。">
+    <div class="s-kicker fin">⑨ 投資ポイント ＆ リスク</div>
+    <h2 class="s-title fin">強みと<span class="hl">弱み</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="125" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:800" fill="#7df0b0">✅ 投資ポイント</text>
+        <g class="gh" style="--d:.5s"><rect x="20" y="42" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="63" class="svgcap w sm">AI向け先端300mm増産</text></g>
+        <g class="gh" style="--d:.8s"><rect x="20" y="82" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="103" class="svgcap w sm">市況回復で利益が一気に戻る</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="20" y="122" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="143" class="svgcap w sm">二強寡占＋長期契約(LTA)</text></g>
+        <text x="345" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.4s;font-weight:800" fill="#ff9c9c">⚠ リスク</text>
+        <g class="gh" style="--d:.7s"><rect x="240" y="42" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="63" class="svgcap w sm">専業ゆえ業績の振れ大（赤字も）</text></g>
+        <g class="gh" style="--d:1.0s"><rect x="240" y="82" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="103" class="svgcap w sm">重い償却・工場再編コスト</text></g>
+        <g class="gh" style="--d:1.3s"><rect x="240" y="122" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="143" class="svgcap w sm">赤字でも株価3倍＝織り込み先行</text></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap w fin" style="--d:1.7s;font-size:13px">ハイリスク・ハイリターンな市況プレー</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s404"
+    data-narration="まとめ。サムコは、信越に次ぐ、ウェハ世界2位の専業メーカー。市況回復への純粋レバレッジで、波に乗れば利益が一気に戻る。ただし、足元は赤字で、業績の振れが非常に大きく、株価はすでに回復を先回りしている。信越が守りなら、サムコは攻め、と覚えてください。"
+    data-tts="まとめ。サムコは、信越に次ぐ、ウェハ世界2位の専業メーカー。市況回復への純粋レバレッジで、波に乗れば利益が一気に戻る。ただし、足元は赤字で、業績の振れが非常に大きく、株価はすでに回復を先回りしている。信越が守りなら、サムコは攻め、と覚えてください。">
+    <div class="s-kicker fin">⑨ ミニ復習</div>
+    <h2 class="s-title fin">SUMCO <span class="hl">3行まとめ</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 230">
+        <g class="gh" style="--d:.3s"><rect x="40" y="40" width="380" height="42" rx="8" fill="#15233c" stroke="#4ea1ff"/><circle cx="66" cy="61" r="13" fill="#4ea1ff"/><text x="66" y="66" text-anchor="middle" fill="#071018" style="font-weight:800">1</text><text x="92" y="66" class="svgcap w" style="font-size:13px">ウェハ世界2位の純粋専業</text></g>
+        <g class="gh" style="--d:.7s"><rect x="40" y="92" width="380" height="42" rx="8" fill="#16331f" stroke="#39d98a"/><circle cx="66" cy="113" r="13" fill="#39d98a"/><text x="66" y="118" text-anchor="middle" fill="#06241a" style="font-weight:800">2</text><text x="92" y="118" class="svgcap w" style="font-size:13px">市況回復への純粋レバレッジ</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="40" y="144" width="380" height="42" rx="8" fill="#241010" stroke="#ff6b6b"/><circle cx="66" cy="165" r="13" fill="#ff6b6b"/><text x="66" y="170" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">3</text><text x="92" y="170" class="svgcap w" style="font-size:13px">赤字＝振れ大／株価は回復を織り込み済</text></g>
+      </svg>
+    </div></div>
+  </section>
+
+  <!-- ===================== 東京応化 4186 ===================== -->
+  <section class="scene" data-vid="s410"
+    data-narration="十社目は、東京応化工業、証券コード4186。1940年創業の、フォトレジスト専業の老舗です。フォトレジストとは、第1章で出てきた、露光のときにウェハへ塗る感光材。光を当てて回路を焼き付ける、まさにその主役の材料です。東京応化は、この分野で世界シェアおよそ25パーセントの、世界トップに立ちます。"
+    data-tts="十社目は、東京応化工業、証券コード よんいちはちろく。せんきゅうひゃくよんじゅうねん 創業の、フォトレジスト専業の老舗です。フォトレジストとは、第一章で出てきた、露光のときにウェハへ塗る感光材。光を当てて回路を焼き付ける、まさにその主役の材料です。東京応化は、この分野で世界シェアおよそ にじゅうごパーセント の、世界トップに立ちます。">
+    <div class="s-kicker fin">⑩ 材料・レジスト ／ 日本</div>
+    <h2 class="s-title fin">東京応化工業<span class="tk">4186</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <rect class="pop" style="--d:.2s" x="120" y="24" width="220" height="56" rx="10" fill="#15233c" stroke="#4ea1ff" stroke-width="2"/>
+        <text x="230" y="48" text-anchor="middle" class="svgcap w" style="font-size:16px;font-weight:800">東京応化工業 🇯🇵</text>
+        <text x="230" y="68" text-anchor="middle" class="svgcap" fill="#9fd0ff">フォトレジスト専業（1940〜）世界首位</text>
+        <text x="230" y="108" text-anchor="middle" class="svgcap w fin" style="--d:1.0s">レジスト＝露光で塗る感光材（回路を焼き付ける主役）</text>
+        <g class="fin" style="--d:1.4s">
+          <rect x="60" y="124" width="80" height="44" rx="6" fill="#1c2740" stroke="#27314c"/><text x="100" y="150" text-anchor="middle" class="svgcap sm w">塗布</text>
+          <rect x="160" y="124" width="80" height="44" rx="6" fill="#1c2740" stroke="#f4c542"/><text x="200" y="143" text-anchor="middle" class="svgcap sm w" fill="#f4d97a">レジスト</text><text x="200" y="158" text-anchor="middle" class="svgcap sm" fill="#f4d97a">(TOK)</text>
+          <rect x="260" y="124" width="80" height="44" rx="6" fill="#1c2740" stroke="#27314c"/><text x="300" y="150" text-anchor="middle" class="svgcap sm w">EUV露光</text>
+          <rect x="360" y="124" width="64" height="44" rx="6" fill="#16241a" stroke="#39d98a"/><text x="392" y="150" text-anchor="middle" class="svgcap sm" fill="#7df0b0">回路完成</text>
+        </g>
+        <g stroke="#9b6de8" stroke-width="2" class="flow"><line x1="140" y1="146" x2="160" y2="146"/><line x1="240" y1="146" x2="260" y2="146"/><line x1="340" y1="146" x2="360" y2="146"/></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap fin" style="--d:1.9s" fill="#9fb0d0">フォトレジスト世界シェア 約25%（世界トップ）</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s411"
+    data-narration="とくに重要なのが、最先端のEUV用レジスト。EUVレジストは、JSR、信越、東京応化、住友化学、富士フイルムという、日本の5社で、世界のおよそ95パーセントを握る、完全な寡占分野です。しかも、最大手だったJSRが、国の主導で非上場になったため、純粋なレジスト専業の上場企業としては、東京応化が、いまや希少な存在になっています。"
+    data-tts="とくに重要なのが、最先端のイーユーブイ用レジスト。イーユーブイレジストは、ジェイエスアール、信越、東京応化、住友化学、富士フイルムという、日本の ごしゃ で、世界のおよそ きゅうじゅうごパーセント を握る、完全な寡占分野です。しかも、最大手だったジェイエスアールが、国の主導で非上場になったため、純粋なレジスト専業の上場企業としては、東京応化が、いまや希少な存在になっています。">
+    <div class="s-kicker fin">⑩ 強み ／ なぜ関所か</div>
+    <h2 class="s-title fin">EUVレジストは<span class="hl">日本5社で95%</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="60" y="54" class="svgcap w fin" style="--d:.3s">EUVレジスト 世界シェア（全て日本企業）</text>
+        <rect x="60" y="68" width="340" height="36" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:.6s" x="60" y="68" width="323" height="36" rx="8" fill="url(#gGold)"/>
+        <text class="svgcap fin" style="--d:1.2s;font-size:15px;font-weight:800" x="221" y="91" text-anchor="middle" fill="#0a0f1a">日本5社で 約95%</text>
+        <text x="230" y="128" text-anchor="middle" class="svgcap fin" style="--d:1.5s" fill="#9fb0d0">JSR・信越・東京応化・住友化学・富士フイルム</text>
+        <g class="pop" style="--d:1.9s"><rect x="80" y="142" width="300" height="48" rx="8" fill="#1c2740" stroke="#f4c542"/>
+          <text x="230" y="164" text-anchor="middle" class="svgcap w" style="font-size:13px">最大手JSRが国主導で非上場化</text>
+          <text x="230" y="182" text-anchor="middle" class="svgcap" fill="#f4d97a">→ 純レジスト上場ピュアプレーとしてTOKは希少</text></g>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s412"
+    data-narration="評価です。2026年6月5日時点で、株価はおよそ1万円、時価総額はおよそ1兆3千億円。予想PERはおよそ30倍台、PBRはおよそ5倍と、高めの評価です。直近の通期決算は、売上がおよそ2千4百億円で前年比2割近い増加、営業利益はおよそ470億円で、4割を超える大幅な増益と、過去最高を更新しました。EUVレジストの伸びが、利益を押し上げています。"
+    data-tts="評価です。二千二十六年六月五日時点で、株価はおよそ いちまんえん、時価総額はおよそ いっちょうさんぜんおくえん。予想ピーイーアールはおよそ さんじゅうばいだい、ピービーアールはおよそ ごばい と、高めの評価です。直近の通期決算は、売上がおよそ にせんよんひゃくおくえん で前年比 にわり 近い増加、営業利益はおよそ よんひゃくななじゅうおくえん で、よわり を超える大幅な増益と、過去最高を更新しました。イーユーブイレジストの伸びが、利益を押し上げています。">
+    <div class="s-kicker fin">⑩ バリュエーション</div>
+    <h2 class="s-title fin">いくらの会社？<span class="tk">2026/6/5時点</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <g class="pop" style="--d:.3s"><rect x="34" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="129" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">株価</text><text x="129" y="92" text-anchor="middle" class="svgcap w" style="font-size:24px;font-weight:800">約1万円</text></g>
+        <g class="pop" style="--d:.6s"><rect x="236" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="331" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">時価総額</text><text x="331" y="92" text-anchor="middle" class="svgcap w" style="font-size:22px;font-weight:800">約1.3兆円</text></g>
+        <g class="pop" style="--d:.9s"><rect x="34" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="96" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">予想PER</text><text x="96" y="170" text-anchor="middle" class="svgcap w" style="font-size:18px;font-weight:800">約30倍台</text></g>
+        <g class="pop" style="--d:1.1s"><rect x="168" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="230" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">PBR</text><text x="230" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約5倍</text></g>
+        <g class="pop" style="--d:1.3s"><rect x="302" y="120" width="124" height="64" rx="10" fill="#16241a" stroke="#39d98a"/><text x="364" y="144" text-anchor="middle" class="svgcap sm" fill="#7df0b0">営業利益</text><text x="364" y="170" text-anchor="middle" class="svgcap w" style="font-size:16px;font-weight:800">+4割超・最高</text></g>
+        <text x="230" y="212" text-anchor="middle" class="svgcap fin" style="--d:1.7s" fill="#9fb0d0">売上 約2,400億円(+2割)・営業益 約470億円 過去最高</text>
+        <text x="230" y="230" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#5f6f8f">※2026/6/5時点・PERはソース差あり。最新値は要確認</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s413"
+    data-narration="ポイントは、利益率の高いEUVレジストの比率が上がる、ミックスの改善。2ナノ世代に向けた、熊本や韓国での増産。そして、JSR非上場後の、上場ピュアプレーとしての希少性です。リスクは、対中ビジネスと輸出規制、半導体サイクル、そして、PER30倍台という、相応に高い評価。AIの需要が続く前提が、すでに織り込まれている点には注意です。"
+    data-tts="ポイントは、利益率の高いイーユーブイレジストの比率が上がる、ミックスの改善。にナノ世代に向けた、熊本や韓国での増産。そして、ジェイエスアール非上場後の、上場ピュアプレーとしての希少性です。リスクは、対中ビジネスと輸出規制、半導体サイクル、そして、ピーイーアール さんじゅうばいだい という、相応に高い評価。エーアイの需要が続く前提が、すでに織り込まれている点には注意です。">
+    <div class="s-kicker fin">⑩ 投資ポイント ＆ リスク</div>
+    <h2 class="s-title fin">強みと<span class="hl">弱み</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="125" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:800" fill="#7df0b0">✅ 投資ポイント</text>
+        <g class="gh" style="--d:.5s"><rect x="20" y="42" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="63" class="svgcap w sm">EUV比率↑のミックス改善</text></g>
+        <g class="gh" style="--d:.8s"><rect x="20" y="82" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="103" class="svgcap w sm">2nm向け増産(熊本・韓国)</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="20" y="122" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="143" class="svgcap w sm">純レジスト上場の希少性</text></g>
+        <text x="345" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.4s;font-weight:800" fill="#ff9c9c">⚠ リスク</text>
+        <g class="gh" style="--d:.7s"><rect x="240" y="42" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="63" class="svgcap w sm">対中ビジネス・輸出規制</text></g>
+        <g class="gh" style="--d:1.0s"><rect x="240" y="82" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="103" class="svgcap w sm">半導体サイクル</text></g>
+        <g class="gh" style="--d:1.3s"><rect x="240" y="122" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="143" class="svgcap w sm">PER30倍台の高評価</text></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap w fin" style="--d:1.7s;font-size:13px">AI需要の持続が織り込み済み</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s414"
+    data-narration="まとめ。東京応化は、フォトレジスト世界首位で、EUVレジストの関所。日本5社で世界95パーセントの寡占、しかもJSR非上場後の、希少な純レジスト上場株。EUV比率上昇で利益も伸びる。ただし、対中リスクと、相応に高い評価には注意。EUVの陰の主役、と覚えましょう。"
+    data-tts="まとめ。東京応化は、フォトレジスト世界首位で、イーユーブイレジストの関所。日本 ごしゃ で世界 きゅうじゅうごパーセント の寡占、しかもジェイエスアール非上場後の、希少な純レジスト上場株。イーユーブイ比率上昇で利益も伸びる。ただし、対中リスクと、相応に高い評価には注意。イーユーブイの陰の主役、と覚えましょう。">
+    <div class="s-kicker fin">⑩ ミニ復習</div>
+    <h2 class="s-title fin">東京応化 <span class="hl">3行まとめ</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 230">
+        <g class="gh" style="--d:.3s"><rect x="40" y="40" width="380" height="42" rx="8" fill="#15233c" stroke="#4ea1ff"/><circle cx="66" cy="61" r="13" fill="#4ea1ff"/><text x="66" y="66" text-anchor="middle" fill="#071018" style="font-weight:800">1</text><text x="92" y="66" class="svgcap w" style="font-size:13px">フォトレジスト世界首位＝EUVの関所</text></g>
+        <g class="gh" style="--d:.7s"><rect x="40" y="92" width="380" height="42" rx="8" fill="#16331f" stroke="#39d98a"/><circle cx="66" cy="113" r="13" fill="#39d98a"/><text x="66" y="118" text-anchor="middle" fill="#06241a" style="font-weight:800">2</text><text x="92" y="118" class="svgcap w" style="font-size:13px">EUVレジストは日本5社で95%・希少上場株</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="40" y="144" width="380" height="42" rx="8" fill="#241010" stroke="#ff6b6b"/><circle cx="66" cy="165" r="13" fill="#ff6b6b"/><text x="66" y="170" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">3</text><text x="92" y="170" class="svgcap w" style="font-size:13px">対中・高評価のリスク</text></g>
+      </svg>
+    </div></div>
+  </section>
+
+  <!-- ===================== 味の素 2802 ===================== -->
+  <section class="scene" data-vid="s420"
+    data-narration="十一社目は、意外な会社、味の素、証券コード2802。そう、あの調味料の味の素です。じつはこの会社、AI半導体の世界で、なくてはならない存在。うま味調味料のアミノ酸技術から生まれた、ABF、味の素ビルドアップフィルムという絶縁材料が、高性能チップのパッケージ基板に、必ず使われているのです。食品会社の顔をした、隠れた半導体材料メーカーです。"
+    data-tts="十一社目は、意外な会社、味の素、証券コード にはちまるに。そう、あの調味料の味の素です。じつはこの会社、エーアイ半導体の世界で、なくてはならない存在。うま味調味料のアミノ酸技術から生まれた、エービーエフ、味の素ビルドアップフィルムという絶縁材料が、高性能チップのパッケージ基板に、必ず使われているのです。食品会社の顔をした、隠れた半導体材料メーカーです。">
+    <div class="s-kicker fin">⑪ 後工程・材料 ／ 日本</div>
+    <h2 class="s-title fin">味の素<span class="tk">2802</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <rect class="pop" style="--d:.2s" x="120" y="24" width="220" height="56" rx="10" fill="#15233c" stroke="#4ea1ff" stroke-width="2"/>
+        <text x="230" y="48" text-anchor="middle" class="svgcap w" style="font-size:17px;font-weight:800">味の素 🇯🇵</text>
+        <text x="230" y="68" text-anchor="middle" class="svgcap" fill="#9fd0ff">食品＋アミノサイエンス（半導体ABF）</text>
+        <g class="fin" style="--d:1.0s">
+          <rect x="50" y="110" width="120" height="44" rx="8" fill="#1c2740" stroke="#27314c"/><text x="110" y="128" text-anchor="middle" class="svgcap sm w">うま味調味料</text><text x="110" y="144" text-anchor="middle" class="svgcap sm">アミノ酸技術</text>
+          <text x="190" y="138" class="svgcap" style="font-size:18px" fill="#9b6de8">→</text>
+          <rect x="210" y="110" width="200" height="44" rx="8" fill="#16241a" stroke="#39d98a"/><text x="310" y="128" text-anchor="middle" class="svgcap w sm" fill="#7df0b0">ABF（味の素ビルドアップフィルム）</text><text x="310" y="144" text-anchor="middle" class="svgcap sm" fill="#7df0b0">＝パッケージ基板の絶縁材</text></g>
+        <text x="230" y="190" text-anchor="middle" class="svgcap fin" style="--d:1.6s" fill="#9fb0d0">食品の顔をした、隠れた半導体材料メーカー</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s421"
+    data-narration="このABFは、CPUやGPUといった、高性能チップのパッケージ基板で、層と層を絶縁する、必須の材料。そして味の素は、この分野で、世界シェアおよそ95パーセント以上という、ほぼ完全な独占を握っています。AIチップの基板が増えれば、必ず味の素のフィルムを通る。NVIDIAのチップの土台にも使われている、まさに、見えない関所なのです。"
+    data-tts="このエービーエフは、シーピーユーやジーピーユーといった、高性能チップのパッケージ基板で、層と層を絶縁する、必須の材料。そして味の素は、この分野で、世界シェアおよそ きゅうじゅうごパーセント 以上という、ほぼ完全な独占を握っています。エーアイチップの基板が増えれば、必ず味の素のフィルムを通る。エヌビディアのチップの土台にも使われている、まさに、見えない関所なのです。">
+    <div class="s-kicker fin">⑪ 強み ／ なぜ関所か</div>
+    <h2 class="s-title fin">ABFで<span class="hl">世界シェア95%超</span>の独占</h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="60" y="56" class="svgcap w fin" style="--d:.3s">ABF（パッケージ基板の絶縁材）世界シェア</text>
+        <rect x="60" y="70" width="340" height="40" rx="8" fill="#16203a" stroke="#27314c"/>
+        <rect class="gh" style="--d:.6s" x="60" y="70" width="323" height="40" rx="8" fill="url(#gGreen)"/>
+        <text class="svgcap big fin" style="--d:1.2s" x="221" y="99" text-anchor="middle" fill="#06241a">95%+</text>
+        <text x="230" y="140" text-anchor="middle" class="svgcap fin" style="--d:1.5s" fill="#9fb0d0">＝ほぼ完全独占（PC向けは実質100%）</text>
+        <g class="pop" style="--d:1.9s"><rect x="90" y="154" width="280" height="46" rx="8" fill="#1c2740" stroke="#f4c542"/>
+          <text x="230" y="176" text-anchor="middle" class="svgcap w" style="font-size:13px">AIチップの基板が増えれば必ず通る</text>
+          <text x="230" y="194" text-anchor="middle" class="svgcap" fill="#f4d97a">NVIDIAのチップの土台にも＝見えない関所</text></g>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s422"
+    data-narration="評価です。2026年6月5日時点で、株価はおよそ5千百円、時価総額はおよそ4兆8千億円。予想PERはおよそ40倍、PBRはおよそ6倍台と、食品会社としては高めの評価です。直近の通期決算は、売上がおよそ1兆6千億円、ABFを含む機能性材料の利益が、前年比4割超の増益と好調。ただし、本社ビルの売却益という、一時的な要因も含まれている点には、注意が必要です。"
+    data-tts="評価です。二千二十六年六月五日時点で、株価はおよそ ごせんひゃくえん、時価総額はおよそ よんちょうはっせんおくえん。予想ピーイーアールはおよそ よんじゅうばい、ピービーアールはおよそ ろくばいだい と、食品会社としては高めの評価です。直近の通期決算は、売上がおよそ いっちょうろくせんおくえん、エービーエフを含む機能性材料の利益が、前年比 よわり 超の増益と好調。ただし、本社ビルの売却益という、一時的な要因も含まれている点には、注意が必要です。">
+    <div class="s-kicker fin">⑪ バリュエーション</div>
+    <h2 class="s-title fin">いくらの会社？<span class="tk">2026/6/5時点</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <g class="pop" style="--d:.3s"><rect x="34" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="129" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">株価</text><text x="129" y="92" text-anchor="middle" class="svgcap w" style="font-size:23px;font-weight:800">約5,100円</text></g>
+        <g class="pop" style="--d:.6s"><rect x="236" y="34" width="190" height="76" rx="10" fill="#15233c" stroke="#4ea1ff"/><text x="331" y="60" text-anchor="middle" class="svgcap sm" fill="#9fd0ff">時価総額</text><text x="331" y="92" text-anchor="middle" class="svgcap w" style="font-size:22px;font-weight:800">約4.8兆円</text></g>
+        <g class="pop" style="--d:.9s"><rect x="34" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="96" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">予想PER</text><text x="96" y="170" text-anchor="middle" class="svgcap w" style="font-size:20px;font-weight:800">約40倍</text></g>
+        <g class="pop" style="--d:1.1s"><rect x="168" y="120" width="124" height="64" rx="10" fill="#1c2740" stroke="#f4c542"/><text x="230" y="144" text-anchor="middle" class="svgcap sm" fill="#f4d97a">PBR</text><text x="230" y="170" text-anchor="middle" class="svgcap w" style="font-size:18px;font-weight:800">約6倍台</text></g>
+        <g class="pop" style="--d:1.3s"><rect x="302" y="120" width="124" height="64" rx="10" fill="#16241a" stroke="#39d98a"/><text x="364" y="144" text-anchor="middle" class="svgcap sm" fill="#7df0b0">機能性材料益</text><text x="364" y="170" text-anchor="middle" class="svgcap w" style="font-size:18px;font-weight:800">+4割超</text></g>
+        <text x="230" y="212" text-anchor="middle" class="svgcap fin" style="--d:1.7s" fill="#9fb0d0">売上 約1.6兆円・ABF含む機能性材料が好調（全社利益の約1/3）</text>
+        <text x="230" y="230" text-anchor="middle" class="svgcap sm fin" style="--d:2s" fill="#5f6f8f">※最終益は本社ビル売却益の一時要因含む。最新値は要確認</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s423"
+    data-narration="ポイントは、ABF独占による、AI半導体の隠れた受益。電子材料の利益貢献が、全社の3分の1超まで拡大していること。そして、食品事業の安定した稼ぎが、成長を下支えすることです。リスクは、大型チップで、有機のABFから、ガラス基板への置き換えが進む、長期の代替リスク。食品の比重が大きく、ABFの好調が希薄化されること。そして、高めの評価と、一時益の反動です。"
+    data-tts="ポイントは、エービーエフ独占による、エーアイ半導体の隠れた受益。電子材料の利益貢献が、全社の さんぶんのいち 超まで拡大していること。そして、食品事業の安定した稼ぎが、成長を下支えすることです。リスクは、大型チップで、有機のエービーエフから、ガラス基板への置き換えが進む、長期の代替リスク。食品の比重が大きく、エービーエフの好調が希薄化されること。そして、高めの評価と、一時益の反動です。">
+    <div class="s-kicker fin">⑪ 投資ポイント ＆ リスク</div>
+    <h2 class="s-title fin">強みと<span class="hl">弱み</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 240">
+        <text x="125" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.2s;font-weight:800" fill="#7df0b0">✅ 投資ポイント</text>
+        <g class="gh" style="--d:.5s"><rect x="20" y="42" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="63" class="svgcap w sm">ABF独占＝AI半導体の隠れ受益</text></g>
+        <g class="gh" style="--d:.8s"><rect x="20" y="82" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="103" class="svgcap w sm">電子材料が全社利益の1/3超</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="20" y="122" width="210" height="34" rx="6" fill="#10241a" stroke="#39d98a"/><text x="32" y="143" class="svgcap w sm">食品のディフェンシブな稼ぎ</text></g>
+        <text x="345" y="30" text-anchor="middle" class="svgcap w fin" style="--d:.4s;font-weight:800" fill="#ff9c9c">⚠ リスク</text>
+        <g class="gh" style="--d:.7s"><rect x="240" y="42" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="63" class="svgcap w sm">ガラス基板による長期代替</text></g>
+        <g class="gh" style="--d:1.0s"><rect x="240" y="82" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="103" class="svgcap w sm">食品比重でABF好調が希薄化</text></g>
+        <g class="gh" style="--d:1.3s"><rect x="240" y="122" width="200" height="34" rx="6" fill="#241010" stroke="#ff6b6b"/><text x="252" y="143" class="svgcap w sm">高評価・一時益の反動</text></g>
+        <text x="230" y="200" text-anchor="middle" class="svgcap w fin" style="--d:1.7s;font-size:13px">「食品株」ではなく、AI材料株としての再評価余地</text>
+      </svg>
+    </div></div>
+  </section>
+  <section class="scene" data-vid="s424"
+    data-narration="まとめ。味の素は、うま味の技術から生まれたABFで、AI半導体パッケージのほぼ独占を握る、隠れた関所。電子材料の利益が拡大し、食品株から、AI材料株への再評価余地があります。ただし、長期ではガラス基板の代替リスク、そして食品比重による希薄化に注意。意外な伏兵、と覚えてください。"
+    data-tts="まとめ。味の素は、うま味の技術から生まれたエービーエフで、エーアイ半導体パッケージのほぼ独占を握る、隠れた関所。電子材料の利益が拡大し、食品株から、エーアイ材料株への再評価余地があります。ただし、長期ではガラス基板の代替リスク、そして食品比重による希薄化に注意。意外な伏兵、と覚えてください。">
+    <div class="s-kicker fin">⑪ ミニ復習</div>
+    <h2 class="s-title fin">味の素 <span class="hl">3行まとめ</span></h2>
+    <div class="s-body"><div class="s-viz">
+      <svg viewBox="0 0 460 230">
+        <g class="gh" style="--d:.3s"><rect x="40" y="40" width="380" height="42" rx="8" fill="#15233c" stroke="#4ea1ff"/><circle cx="66" cy="61" r="13" fill="#4ea1ff"/><text x="66" y="66" text-anchor="middle" fill="#071018" style="font-weight:800">1</text><text x="92" y="66" class="svgcap w" style="font-size:13px">ABFでAIパッケージをほぼ独占</text></g>
+        <g class="gh" style="--d:.7s"><rect x="40" y="92" width="380" height="42" rx="8" fill="#16331f" stroke="#39d98a"/><circle cx="66" cy="113" r="13" fill="#39d98a"/><text x="66" y="118" text-anchor="middle" fill="#06241a" style="font-weight:800">2</text><text x="92" y="118" class="svgcap w" style="font-size:13px">食品株→AI材料株への再評価余地</text></g>
+        <g class="gh" style="--d:1.1s"><rect x="40" y="144" width="380" height="42" rx="8" fill="#241010" stroke="#ff6b6b"/><circle cx="66" cy="165" r="13" fill="#ff6b6b"/><text x="66" y="170" text-anchor="middle" fill="#0a0f1a" style="font-weight:800">3</text><text x="92" y="170" class="svgcap w" style="font-size:13px">ガラス基板の代替・食品比重の希薄化</text></g>
+      </svg>
+    </div></div>
+  </section>
+
+  <!-- ===== S340 closing ===== -->
+  <section class="scene titlecard" data-vid="s340"
+    data-narration="ここまで、11社を見てきました。設計のNVIDIA、装置の東京エレクトロン・SCREEN・コクサイ、検査のレーザーテックとアドバンテスト、加工のDISCO、材料の信越化学・SUMCO・東京応化、そして後工程材料の味の素。設計・装置・検査・材料と、サプライチェーンの各所に、世界の関所を握る企業があることが見えてきました。次は、ソニー、キオクシア、村田、フジクラ、そしてTSMCやASML、韓国のメモリ勢へと、解説を広げていきます。ご視聴ありがとうございました。"
+    data-tts="ここまで、じゅういっしゃ を見てきました。設計のエヌビディア、装置の東京エレクトロン・スクリーン・コクサイ、検査のレーザーテックとアドバンテスト、加工のディスコ、材料の信越化学・サムコ・東京応化、そして後工程材料の味の素。設計・装置・検査・材料と、サプライチェーンの各所に、世界の関所を握る企業があることが見えてきました。次は、ソニー、キオクシア、村田、フジクラ、そしてティーエスエムシーやエーエスエムエル、韓国のメモリ勢へと、解説を広げていきます。ご視聴ありがとうございました。">
+    <svg id="titlebg" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid slice">
+      <g fill="#4ea1ff" filter="url(#glow)"><circle r="3"><animateMotion dur="9s" repeatCount="indefinite" path="M-20 200 H1020"/></circle><circle r="3" fill="#f4c542"><animateMotion dur="11s" begin="-4s" repeatCount="indefinite" path="M-20 360 H1020"/></circle></g>
+    </svg>
+    <div class="big fin">ここまで<span class="hl">11社</span></div>
+    <div class="lead fin" style="--d:.4s">設計・装置・検査・材料 ── サプライチェーンの各所に、世界の関所を握る企業がある。<br>次は ソニー・キオクシア・村田・フジクラ・TSMC・ASML・韓国メモリへ。</div>
+    <div class="chip fin" style="--d:1.0s">ご視聴ありがとうございました</div>
+  </section>
+
+  <div id="subtitle"></div>
+</div></div>
+
+<div class="badge-audio" id="audioBadge">🔊 音声を準備中…</div>
+<div class="hint">Space:再生/一時停止 ／ ← →:シーン移動<br>F:全画面 ／ M:ミュート ／ [ ]:再生速度</div>
+<div id="bar"><div id="barfill"></div></div>
+<div id="ctl">
+  <button id="prev" title="前へ (←)">⏮</button>
+  <button class="play" id="play" title="再生/一時停止 (Space)">▶</button>
+  <button id="next" title="次へ (→)">⏭</button>
+  <span class="lbl" id="lbl">1 / 1</span>
+  <select id="speed" title="再生速度 ( [ / ] )">
+    <option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option><option value="1.75">1.75×</option><option value="2">2×</option>
+  </select>
+  <select id="jump" title="シーンへ移動"></select>
+  <button id="mute" title="ミュート (M)">🔊</button>
+  <button id="full" title="全画面 (F)">⛶</button>
+</div>
+
+<script>
+(function(){
+  var scenes = Array.prototype.slice.call(document.querySelectorAll('.scene'));
+  var sub = document.getElementById('subtitle'), barfill = document.getElementById('barfill');
+  var lbl = document.getElementById('lbl'), playBtn = document.getElementById('play');
+  var jump = document.getElementById('jump'), audioBadge = document.getElementById('audioBadge');
+  var i = 0, playing = false, muted = false, rate = 1;
+  var fallbackTimer = null, hideTimer = null, audios = {};
+
+  function applyRate(){ for(var k in audios){ try{ audios[k].playbackRate = rate; audios[k].preservesPitch = true; }catch(e){} } }
+  var _lastTs = 0;
+  function rafLoop(ts){
+    var dt = _lastTs ? (ts - _lastTs)/1000 : 0; _lastTs = ts;
+    if(rate !== 1 && dt > 0 && dt < 0.5){
+      var svgs = document.querySelectorAll('#frame .scene.active svg');
+      for(var i2=0;i2<svgs.length;i2++){ try{ svgs[i2].setCurrentTime(svgs[i2].getCurrentTime() + dt*(rate-1)); }catch(e){} }
+    }
+    try{ var as = document.getAnimations(); for(var j=0;j<as.length;j++){ as[j].playbackRate = rate; } }catch(e){}
+    requestAnimationFrame(rafLoop);
+  }
+  requestAnimationFrame(rafLoop);
+
+  scenes.forEach(function(s, idx){
+    var t = s.querySelector('.s-title, .big');
+    var name = t ? t.textContent.replace(/\s+/g,' ').trim() : ('シーン '+(idx+1));
+    var o = document.createElement('option'); o.value = idx; o.textContent = (idx+1)+'. '+name.slice(0,20);
+    jump.appendChild(o);
+    var vid = s.getAttribute('data-vid');
+    var src = (window.EMBEDDED_AUDIO && window.EMBEDDED_AUDIO[vid]) ? window.EMBEDDED_AUDIO[vid] : 'audio/'+vid+'.mp3';
+    var a = new Audio(src); a.preload = 'auto';
+    a.addEventListener('canplaythrough', function(){ audioBadge.textContent='🔊 音声あり'; audioBadge.style.color='#7df0b0'; }, {once:true});
+    audios[vid] = a;
+  });
+
+  function estDuration(s){ var n=(s.getAttribute('data-narration')||'').length; return Math.max(4500, n*135+1200); }
+  function clearTimers(){ if(fallbackTimer){clearTimeout(fallbackTimer);fallbackTimer=null;} }
+  function stopAllAudio(){ for(var k in audios){ try{audios[k].pause(); audios[k].currentTime=0;}catch(e){} } }
+
+  function show(idx){
+    clearTimers(); stopAllAudio();
+    i = Math.max(0, Math.min(scenes.length-1, idx));
+    scenes.forEach(function(s,k){ s.classList.toggle('active', k===i); });
+    var s = scenes[i];
+    sub.innerHTML = s.getAttribute('data-narration')||'';
+    lbl.textContent = (i+1)+' / '+scenes.length;
+    jump.value = i; barfill.style.width = (i/(scenes.length-1)*100)+'%';
+    applyRate();
+    if(playing){ playScene(s); }
+  }
+  function playScene(s){
+    var vid = s.getAttribute('data-vid'), a = audios[vid], advanced = false;
+    function go(){ if(advanced) return; advanced=true; if(i<scenes.length-1 && playing) show(i+1); else { playing=false; updatePlayBtn(); } }
+    a.muted = muted; a.currentTime = 0; a.onended = go;
+    try{ a.playbackRate = rate; a.preservesPitch = true; }catch(e){}
+    var p = a.play();
+    if(p && p.catch){ p.catch(function(){ fallbackTimer = setTimeout(go, estDuration(s)/rate); }); }
+    setTimeout(function(){ if(!advanced && a.paused){ clearTimers(); fallbackTimer = setTimeout(go, estDuration(s)/rate); } }, 450);
+  }
+  function updatePlayBtn(){ playBtn.textContent = playing ? '❚❚' : '▶'; }
+  function play(){ playing = true; updatePlayBtn(); playScene(scenes[i]); }
+  function pause(){ playing = false; updatePlayBtn(); clearTimers(); stopAllAudio(); }
+  function toggle(){ if(playing) pause(); else { if(i>=scenes.length-1){ show(0); } play(); } }
+
+  playBtn.onclick = toggle;
+  document.getElementById('next').onclick = function(){ show(i+1); };
+  document.getElementById('prev').onclick = function(){ show(i-1); };
+  jump.onchange = function(){ show(parseInt(jump.value,10)); };
+  document.getElementById('mute').onclick = function(){ muted=!muted; this.textContent = muted?'🔇':'🔊'; for(var k in audios) audios[k].muted=muted; };
+  document.getElementById('full').onclick = function(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); };
+  var speedSel = document.getElementById('speed');
+  speedSel.onchange = function(){ rate = parseFloat(speedSel.value)||1; applyRate(); };
+  var RATES = [0.75,1,1.25,1.5,1.75,2];
+  function bumpRate(d){ var k=RATES.indexOf(rate); if(k<0)k=1; k=Math.max(0,Math.min(RATES.length-1,k+d)); rate=RATES[k]; speedSel.value=String(rate); applyRate(); }
+  document.addEventListener('keydown', function(e){
+    if(e.code==='Space'){ e.preventDefault(); toggle(); }
+    else if(e.code==='ArrowRight'){ show(i+1); }
+    else if(e.code==='ArrowLeft'){ show(i-1); }
+    else if(e.key==='f'||e.key==='F'){ document.getElementById('full').click(); }
+    else if(e.key==='m'||e.key==='M'){ document.getElementById('mute').click(); }
+    else if(e.key===']'){ bumpRate(1); } else if(e.key==='['){ bumpRate(-1); }
+  });
+  var ctl = document.getElementById('ctl');
+  function poke(){ ctl.classList.remove('hide'); clearTimeout(hideTimer); hideTimer=setTimeout(function(){ if(playing) ctl.classList.add('hide'); }, 2600); }
+  document.addEventListener('mousemove', poke); poke();
+  show(0);
+})();
+</script>
+</body>
+</html>
