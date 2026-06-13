@@ -131,6 +131,26 @@
   .termbox{background:#101a2b;border:1px dashed var(--line);border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.7}
   .termbox b{color:var(--accent)}
 
+  /* ---- stage detail (工程の詳細) ---- */
+  .steps{display:flex;flex-wrap:wrap;gap:12px}
+  .step{flex:1 1 170px;min-width:160px;background:var(--panel2);border:1px solid var(--line);
+    border-left:4px solid var(--accent);border-radius:10px;padding:13px 14px}
+  .step .sn{font-size:11px;color:var(--accent);font-weight:800;letter-spacing:.08em;margin-bottom:6px}
+  .step .st{font-weight:800;font-size:14px;margin-bottom:5px}
+  .step .sd{font-size:12.5px;color:var(--sub);line-height:1.55}
+  .techgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:13px}
+  .techcard{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 15px}
+  .techcard h4{margin:0 0 9px;font-size:13.5px;color:var(--gold);font-weight:800}
+  .tchip{display:inline-block;background:#0e1726;border:1px solid var(--line);border-radius:999px;
+    padding:5px 11px;font-size:12px;color:#cdd6ea;margin:0 5px 6px 0}
+  .gens{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .gen{background:var(--panel2);border:1px solid var(--accent);border-radius:10px;padding:11px 16px;font-weight:800;font-size:13.5px}
+  .genarrow{color:var(--dim);font-size:20px;font-weight:800}
+  .cochips{display:flex;flex-wrap:wrap;gap:10px}
+  .cochip{display:inline-flex;align-items:center;gap:6px;background:#101a2b;border:1px solid var(--line);
+    border-radius:999px;padding:8px 15px;font-size:13px;font-weight:700;cursor:pointer;color:var(--txt)}
+  .cochip:hover{border-color:var(--accent);background:#16233a}
+
   .d-links{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
   .d-links a{display:inline-flex;align-items:center;gap:8px;background:#101a2b;border:1px solid var(--line);
     border-radius:10px;padding:11px 18px;text-decoration:none;color:var(--txt);font-weight:700;font-size:14px}
@@ -157,7 +177,7 @@
   </div>
   <div class="spacer"></div>
   <input id="search" type="text" placeholder="🔍 企業名で検索（例：村田）" autocomplete="off">
-  <div class="tipbar">ドラッグで移動 ／ ホイールで拡大縮小 ／ <b style="color:#9fd0ff">企業にカーソルを乗せると取引関係が点灯</b> ／ クリックで解説</div>
+  <div class="tipbar">ドラッグ移動 ／ ホイール拡縮 ／ <b style="color:#9fd0ff">工程パネルの「詳しく▸」で工程の詳細</b> ／ 企業クリックで解説</div>
 </div>
 
 <div id="viewport">
@@ -885,6 +905,71 @@ var ILLU={
   return s;}
 };
 
+/* ====================== 工程の詳細（サブ工程・技術・分類・担い手） ====================== */
+var SDETAIL={
+ ingot:{n:1,t:"原材料・シリコン精製",ic:"ingot",
+  intro:"半導体はありふれた砂(けい砂)から始まる。徹底的に精製し、欠陥のない単結晶シリコンの柱(インゴット)に育てる。",
+  steps:[["珪石の還元","けい石を電気炉で還元し、純度98%程度の金属級シリコン(MG-Si)を得る"],["高純度化","シーメンス法で気体化・析出させ、99.999999999%(イレブンナイン)のポリシリコンに"],["単結晶化","種結晶を溶融シリコンに浸し、回転させながら引き上げる(チョクラルスキー法/CZ)"],["インゴット成形","円柱状に外周研削し、直径を300mmにそろえる"]],
+  tech:[["精製法",["シーメンス法(析出)","流動床法(FBR)"]],["結晶成長",["CZ法(回転引上げ・主流)","FZ法(浮遊帯溶融・高純度)"]],["先端材料",["SiC/GaN(パワー)","GaAs/InP(高周波・光)"]]],
+  terms:[["ポリシリコン","超高純度の多結晶シリコン。これを溶かして単結晶にする"],["インゴット","単結晶シリコンの円柱。薄く切ってウェハにする"]],
+  co:["4063","3436"],foreign:[["GlobalWafers","🇹🇼","ウェハ世界3位級"],["Siltronic","🇩🇪","欧州ウェハ大手"],["SK Siltron","🇰🇷","韓国ウェハ"],["Wacker/トクヤマ","🇩🇪🇯🇵","ポリシリコン大手"]]},
+ wafer:{n:2,t:"シリコンウェハ加工",ic:"wafer",
+  intro:"インゴットを薄く切り、原子レベルで平らな鏡面ウェハに仕上げる。用途に応じて様々な種類がある。",
+  steps:[["スライス","ワイヤソーで厚さ約0.7mmに切断"],["ラッピング/研削","厚みを均一にし、切断ダメージを除去"],["エッチング/面取り","薬液で加工層を除去、外周を面取り"],["鏡面研磨(CMP)","片面を原子レベルの鏡面に磨く"],["洗浄・検査","微粒子・金属を除去し欠陥を検査"]],
+  tech:[["ウェハの種類",["ポリッシュド(標準)","エピタキシャル(結晶膜付)","SOI(絶縁膜入り)"]],["口径",["200mm(成熟/パワー)","300mm(先端主流)","450mm(研究)"]],["品質指標",["平坦度","金属汚染","結晶欠陥(COP)"]]],
+  terms:[["エピタキシャル","ウェハ表面に高品質な単結晶薄膜を成長させたもの"],["SOI","絶縁膜の上にシリコン層を作り、消費電力やノイズを抑える基板"]],
+  co:["4063","3436"],foreign:[["GlobalWafers","🇹🇼","ウェハ世界3位級"],["Siltronic","🇩🇪","欧州ウェハ大手"],["SK Siltron","🇰🇷","韓国ウェハ"]]},
+ mask:{n:3,t:"設計・フォトマスク",ic:"mask",
+  intro:"どんな回路を作るかを設計し、ウェハに転写する原版(フォトマスク)を作る。AIチップの頭脳はここで決まる。",
+  steps:[["仕様・アーキテクチャ","チップに何をさせるか・構成を決める"],["論理設計(RTL)","HDL(Verilog等)で動作を記述"],["合成・配置配線","数百億素子をEDAで自動配置・配線"],["検証(DRC/LVS)","設計ルール・整合性を検証しGDSII出力"],["マスク製造","OPC補正→電子ビーム描画→検査"]],
+  tech:[["設計の担い手",["ファブレス(設計専業)","IDM(設計+製造)","ASIC設計サービス"]],["EDA・IP",["論理合成/配置配線","検証ツール","設計資産(IPコア)"]],["マスク技術",["OPC(光近接効果補正)","位相シフトマスク","EUVマスク(反射型)+ペリクル"]],["新潮流",["チップレット設計","DTCO(設計・製造協調)"]]],
+  terms:[["EDA","半導体設計を自動化するソフト。数百億素子は人手では設計不可能"],["OPC","光のにじみを見越し、マスクの形をわざと歪ませ狙い通り転写する補正技術"]],
+  co:["NVDA","6723","6526"],foreign:[["Synopsys","🇺🇸","EDA最大手"],["Cadence","🇺🇸","EDA大手"],["Arm","🇬🇧","CPU設計IPの標準"],["Siemens EDA","🇩🇪","検証ツール"]]},
+ fab:{n:4,t:"前工程（ウェハ製造）",ic:"fab",
+  intro:"ウェハ上に「成膜→露光→エッチング…」のサイクルを数百回繰り返し、ナノの立体回路を積み上げる。製造の心臓部。",
+  steps:[["成膜","絶縁体・金属・半導体の薄膜を積む(CVD/PVD/ALD)"],["レジスト塗布","感光材を均一に塗る(コータ)"],["露光","マスクの回路を光で転写(スキャナ)"],["現像","光が当たった部分を溶かしパターン化"],["エッチング","パターン通りに削る(ドライ/ウェット)"],["不純物注入","イオン注入→アニールで性質付与"],["平坦化(CMP)","凸凹を磨いて平らに戻す"],["洗浄→次サイクル","これを数百回繰り返す"]],
+  tech:[["成膜",["CVD(化学気相)","PVD/スパッタ(物理)","ALD(原子層堆積)","熱酸化","エピ成長"]],["露光世代",["i線→KrF→ArF→ArF液浸","マルチパターニング","EUV(13.5nm)","High-NA EUV"]],["エッチング",["ドライ(プラズマ/RIE)","ウェット","ALE(原子層)"]],["配線",["Cuダマシン","Low-k絶縁膜","バリアメタル"]]],
+  gens:{t:"トランジスタ構造の進化",items:["プレーナ","FinFET","GAA(ナノシート)","CFET(次世代)"]},
+  terms:[["EUV露光","波長13.5nmの極端紫外線で最先端の微細パターンを描く"],["FinFET/GAA","トランジスタを立体化し、微細でも電流を確実に制御できるようにした構造"]],
+  co:["TSMC","5930","8035","ASML","6525","7735","4186"],foreign:[["Applied Materials","🇺🇸","成膜・エッチ等の総合最大手"],["Lam Research","🇺🇸","エッチ・成膜の雄"],["ASML","🇳🇱","EUV露光を独占"],["KLA","🇺🇸","検査・計測首位"]]},
+ inspect:{n:5,t:"研磨(CMP)・検査・計測",ic:"inspect",
+  intro:"各工程の後、表面を平らに磨き、ナノの欠陥や寸法ずれを検査する。歩留まり(良品率)を左右する縁の下の要。",
+  steps:[["CMP(平坦化)","スラリーとパッドで凸凹を磨き、次の露光に備える"],["欠陥検査","光学/電子線でパターン欠陥・異物を検出"],["寸法・膜厚計測","CD-SEMで線幅、光学で膜厚を測る"],["重ね合わせ計測","層と層のズレ(オーバーレイ)を管理"],["歩留まり解析","不良原因を特定し工程へフィードバック"]],
+  tech:[["平坦化",["CMP装置","スラリー(研磨剤)","パッド/コンディショナ"]],["検査",["明視野/暗視野 光学","電子線(eビーム)","マスク欠陥検査"]],["計測",["CD-SEM(線幅)","オーバーレイ","膜厚・組成分析"]]],
+  terms:[["歩留まり(イールド)","製造したチップのうち良品の割合。先端品は歩留まり向上が利益の鍵"],["メトロロジー","ナノ単位で寸法や欠陥を測る計測技術の総称"]],
+  co:["6361","5384","6920","6857"],foreign:[["KLA","🇺🇸","検査・計測の世界首位"],["Applied Materials","🇺🇸","CMP装置"],["Lam Research","🇺🇸","研磨・洗浄"]]},
+ dice:{n:6,t:"薄化・ダイシング",ic:"dice",
+  intro:"完成したウェハを薄く削り、格子状のチップを1個ずつ切り出す。HBMのような積層には極薄加工が要る。",
+  steps:[["バックグラインド","裏面を削り、厚さを数十μmまで薄化"],["ダイシング","ブレードやレーザーでチップに切り分け"],["ピックアップ","良品チップを吸着して取り出す"],["ダイボンド","基板やリードフレームに固定"]],
+  tech:[["薄化",["バックグラインド","DBG(先ダイシング)","TSV用 極薄化"]],["切断",["ブレードダイシング","ステルス(レーザー)ダイシング","プラズマダイシング"]]],
+  terms:[["バックグラインド","ウェハ裏面を研削して薄くする工程。積層パッケージほど薄さが要る"],["TSV","チップを貫く電極。チップを縦に積んで配線する(HBM等)"]],
+  co:["6146","7729"],foreign:[["ASMPT","🇭🇰","後工程装置大手"],["Besi","🇳🇱","先端実装装置"]]},
+ package:{n:7,t:"後工程・パッケージング",ic:"package",
+  intro:"裸のチップを基板に載せ、配線し、樹脂で守る。今やAI性能を左右する主戦場で、チップを積む・並べる先端技術が花盛り。",
+  steps:[["ダイアタッチ","チップを基板に接着"],["接続","ワイヤボンディング or フリップチップ(バンプ接合)"],["先端実装","2.5D/3Dでチップを並べる・積む"],["封止(モールド)","樹脂で覆い保護"],["ボール付け・検査","BGA端子を付け検査・マーキング"]],
+  tech:[["接続方式",["ワイヤボンディング","フリップチップ(バンプ)","ハイブリッドボンディング(直接接合)"]],["先端パッケージ",["2.5D(CoWoS/インターポーザ)","3D積層","チップレット","ファンアウト(FOWLP)"]],["メモリ積層",["HBM(TSVでDRAMを縦積み)"]],["基板・材料",["ABF基板(FC-BGA)","ビルドアップ基板","封止材"]]],
+  terms:[["チップレット","小さなチップを複数つないで1つの高性能チップにする手法。歩留まり・コストで有利"],["CoWoS","ロジックとHBMを1枚の土台(インターポーザ)に並べるTSMCの先端実装。AI半導体の標準"]],
+  co:["4062","2802","6315","660","6967"],foreign:[["ASE","🇹🇼","OSAT(後工程受託)世界最大"],["Amkor","🇺🇸","OSAT大手"],["Unimicron","🇹🇼","基板世界大手"]]},
+ test:{n:8,t:"最終テスト",ic:"test",
+  intro:"完成チップが設計通り動くか、電気を流して全数検査する。不良を出荷しないための最後の関門。",
+  steps:[["ウェハテスト","切る前にプローブ針で全チップを良否選別"],["最終テスト","パッケージ後に再度フル検査"],["バーンイン","高温で動かし初期不良をあぶり出す"],["選別(ビニング)","性能でランク分けして出荷"]],
+  tech:[["装置",["テスタ(試験装置)","プローブカード","ハンドラ(搬送)"]],["種類",["ロジックテスト","メモリテスト","SoCテスト"]],["品質",["KGD(良品ダイ保証)","バーンイン"]]],
+  terms:[["プローブカード","ウェハ上のチップ端子に一斉に針を当てる検査用の板"],["KGD","検査済みの良品ダイ。積層では1個の不良が全体を壊すため必須"]],
+  co:["6857","7729"],foreign:[["Teradyne","🇺🇸","テスタでアドバンテストと二強"],["FormFactor","🇺🇸","プローブカード最大手"],["Cohu","🇺🇸","ハンドラ・周辺"]]},
+ board:{n:9,t:"実装・基板",ic:"board",
+  intro:"完成したチップを、電子部品とともにプリント基板へ実装し、AIサーバーのボードを組み上げる。",
+  steps:[["はんだ印刷","基板にクリームはんだを塗る"],["部品マウント","チップマウンタが部品を高速に載せる"],["リフロー","加熱してはんだを溶かし接合"],["検査(AOI)","はんだ・実装を自動光学検査"]],
+  tech:[["基板",["プリント基板(PCB)","多層基板","低損失な高速基板"]],["受動部品",["MLCC(コンデンサ)","インダクタ","抵抗"]],["電源",["電源IC","パワーモジュール","DC-DCコンバータ"]],["AIボード",["GPUモジュール(SXM)","VRM(電源)","ヒートシンク"]]],
+  terms:[["MLCC","電圧を安定させる超小型コンデンサ。AIサーバー1枚に数千〜数万個"],["SMT","部品を基板表面に載せて一括接合する実装方式"]],
+  co:["6981","6762","6976","6963","6503","6504"],foreign:[["Samsung電機","🇰🇷","MLCC2位"],["Yageo","🇹🇼","受動部品大手"],["Infineon","🇩🇪","パワー半導体首位"]]},
+ datacenter:{n:10,t:"データセンター・AIシステム",ic:"datacenter",
+  intro:"完成したAIサーバーは、データセンターで巨大なクラスタとして稼働する。膨大な電力・冷却・超高速接続が要る。",
+  steps:[["サーバー設置","GPUサーバーをラックに搭載"],["クラスタ接続","GPU同士を超高速ネットワークで連結"],["電力供給","変圧器→UPS→PDUで安定給電"],["冷却","空冷・液冷・液浸で発熱を処理"],["運用","クラウドとしてAI学習・推論を提供"]],
+  tech:[["接続",["NVLink(GPU間)","InfiniBand/Ethernet","光トランシーバ/CPO"]],["冷却",["空冷","液冷(コールドプレート)","液浸冷却"]],["電力",["変圧器","UPS/蓄電","高効率電源(PSU)"]],["ストレージ",["NAND SSD","HDD"]]],
+  terms:[["液冷","水や冷媒でGPUを直接冷やす方式。AIの発熱増で空冷から移行が進む"],["CPO","チップ近傍で電気↔光を変換し、データを高速・省電力で運ぶ次世代接続"]],
+  co:["3778","NVDA","5803","5801","6508","6501"],foreign:[["AWS / Azure / GCP","🇺🇸","ハイパースケーラー"],["CoreWeave","🇺🇸","GPUクラウド専業"],["Vertiv","🇺🇸","DC電源・冷却"]]}
+};
+
 /* ====================== 取引関係(エッジ) ======================
    ty: mat=材料供給 / tool=装置・技術 / design=設計委託 / make=製造・受託 / pkg=後工程・実装 / sys=接続・電力・統合 */
 var EDGES=[
@@ -1067,9 +1152,12 @@ function buildFlow(svg){
     var h='<rect x="'+px+'" y="'+FLOWY+'" width="'+PANEL_W+'" height="'+PANEL_H+'" rx="16" fill="rgba(13,21,36,0.92)" stroke="'+col+'" stroke-opacity="0.5" stroke-width="2" filter="url(#soft)"/>';
     h+='<path d="M'+px+' '+(FLOWY+44)+' h'+PANEL_W+'" stroke="'+col+'" stroke-opacity="0.3"/>';
     h+='<circle cx="'+(px+30)+'" cy="'+(FLOWY+24)+'" r="15" fill="'+col+'"/><text x="'+(px+30)+'" y="'+(FLOWY+29)+'" fill="#071018" font-size="15" font-weight="800" text-anchor="middle">'+st.n+'</text>';
-    h+='<text x="'+(px+54)+'" y="'+(FLOWY+30)+'" fill="#eaf0fb" font-size="18" font-weight="800">'+esc(st.t)+'</text>';
+    h+='<text x="'+(px+54)+'" y="'+(FLOWY+30)+'" fill="#eaf0fb" font-size="17" font-weight="800">'+esc(st.t)+'</text>';
     h+=ILLU[st.ic](icx,icy);
     h+='<text x="'+icx+'" y="'+(FLOWY+236)+'" fill="#cdd6ea" font-size="12.5" text-anchor="middle">'+esc(st.s)+'</text>';
+    // クリックで工程の詳細（サブ工程・技術・分類）へ。ヘッダー＋イラスト領域が当たり判定
+    h+='<rect class="stagehead" data-stage="'+st.ic+'" x="'+px+'" y="'+FLOWY+'" width="'+PANEL_W+'" height="248" fill="transparent" style="cursor:pointer"/>';
+    h+='<text class="stagehint" x="'+(px+PANEL_W-12)+'" y="'+(FLOWY+29)+'" fill="'+col+'" font-size="11.5" font-weight="800" text-anchor="end" style="pointer-events:none">詳しく ▸</text>';
     (st.co||[]).slice(0,4).forEach(function(code,ci){
       var co=byCode[code]; if(!co)return;
       var cyy=FLOWY+252+ci*29, col0=co.jp?"#4ea1ff":"#f4c542";
@@ -1161,7 +1249,9 @@ vp.addEventListener("pointerup",function(e){
     // pointer captureでe.targetがvp固定になるため、座標から実際の要素を取得
     var el=document.elementFromPoint(e.clientX,e.clientY);
     var node=el && el.closest ? el.closest(".node") : null;
-    if(node){ location.hash="#c/"+node.getAttribute("data-code"); }
+    if(node){ location.hash="#c/"+node.getAttribute("data-code"); return; }
+    var sh=el && el.closest ? el.closest(".stagehead") : null;
+    if(sh){ location.hash="#s/"+sh.getAttribute("data-stage"); }
   }
 });
 vp.addEventListener("pointercancel",function(){dragging=false;vp.classList.remove("grabbing");});
@@ -1233,12 +1323,45 @@ function renderDetail(code){
   document.getElementById("dbody").innerHTML=h;
 }
 
+/* ---- 工程の詳細ページ ---- */
+function renderStageDetail(id){
+  var st=SDETAIL[id]; if(!st){ location.hash=""; return; }
+  var h='<button class="d-back" onclick="location.hash=\'\'">‹ マップに戻る</button>';
+  h+='<div class="d-head"><div style="flex:0 0 260px;max-width:260px"><svg viewBox="0 0 300 210" style="width:100%;background:#0c1322;border-radius:14px;border:1px solid var(--line)"><g>'+ILLU[st.ic](150,108)+'</g></svg></div>'+
+     '<div class="d-htext"><div class="d-name">工程 '+st.n+'：'+esc(st.t)+'</div>'+
+     '<div class="d-tags"><span class="d-tag stage" style="background:#4ea1ff">全工程の詳細</span><span class="d-tag">サブ工程・技術・分類</span></div>'+
+     '<p style="font-size:15px;color:#dbe5f5;line-height:1.7;margin:14px 0 0">'+esc(st.intro)+'</p></div></div>';
+
+  h+='<div class="sec"><h3><span class="ic">🔧</span>詳しい工程の流れ</h3><div class="steps">'+
+     st.steps.map(function(s,i){return '<div class="step"><div class="sn">STEP '+(i+1)+'</div><div class="st">'+esc(s[0])+'</div><div class="sd">'+esc(s[1])+'</div></div>';}).join('')+'</div></div>';
+
+  h+='<div class="sec"><h3><span class="ic">⚙️</span>主な技術・分類</h3><div class="techgrid">'+
+     st.tech.map(function(t){return '<div class="techcard"><h4>'+esc(t[0])+'</h4>'+t[1].map(function(x){return '<span class="tchip">'+esc(x)+'</span>';}).join('')+'</div>';}).join('')+'</div></div>';
+
+  if(st.gens){ h+='<div class="sec"><h3><span class="ic">🧬</span>'+esc(st.gens.t)+'</h3><div class="gens">'+
+     st.gens.items.map(function(g,i){return (i?'<span class="genarrow">→</span>':'')+'<span class="gen">'+esc(g)+'</span>';}).join('')+'</div></div>'; }
+
+  if(st.terms){ h+='<div class="sec"><h3><span class="ic">📘</span>用語解説</h3>'+
+     st.terms.map(function(t){return '<div class="termbox" style="margin-bottom:10px"><b>'+esc(t[0])+'</b> … '+esc(t[1])+'</div>';}).join('')+'</div>'; }
+
+  h+='<div class="sec"><h3><span class="ic">🏢</span>この工程を担う主な企業</h3><div class="cochips">'+
+     (st.co||[]).map(function(code){var co=byCode[code];if(!co)return '';return '<span class="cochip" onclick="location.hash=\'#c/'+code+'\'">'+co.flag+' '+esc(co.name)+' ›</span>';}).join('')+'</div>';
+  if(st.foreign){ h+='<div style="margin-top:16px"><div style="font-size:12px;color:var(--dim);margin-bottom:9px;font-weight:700">海外の主要プレイヤー</div><div class="rivals">'+
+     st.foreign.map(function(r){return '<div class="rival"><div class="rn">'+esc(r[0])+'<span class="rf">'+(r[1]||'')+'</span></div><div class="rd">'+esc(r[2]||'')+'</div></div>';}).join('')+'</div></div>'; }
+  h+='</div>';
+
+  h+='<div class="d-links"><a href="javascript:location.hash=\'\'">🗺 全体マップに戻る</a></div>';
+  h+='<div class="disclaimer">本ページは半導体の製造工程を学ぶための教材です。工程・技術の分類は理解しやすさを優先した簡略化を含みます。</div>';
+  document.getElementById("dbody").innerHTML=h;
+}
+
 /* ====================== ルーティング ====================== */
 function route(){
   var hash=location.hash||"";
   var d=document.getElementById("detail");
-  var m=hash.match(/^#c\/(.+)$/);
+  var m=hash.match(/^#c\/(.+)$/), ms=hash.match(/^#s\/(.+)$/);
   if(m){ renderDetail(decodeURIComponent(m[1])); d.classList.add("show"); d.scrollTop=0; window.scrollTo(0,0); }
+  else if(ms){ renderStageDetail(decodeURIComponent(ms[1])); d.classList.add("show"); d.scrollTop=0; window.scrollTo(0,0); }
   else { d.classList.remove("show"); }
 }
 window.addEventListener("hashchange",route);
@@ -1248,7 +1371,7 @@ window.addEventListener("resize",function(){ if(!location.hash) fit(); });
 buildMap();
 fit();
 route();
-try{ console.log("%c[map] supply-chain graph v4 / "+C.length+" companies, "+EDGES.length+" links, illustrated flow","color:#39d98a;font-weight:bold"); }catch(e){}
+try{ console.log("%c[map] supply-chain graph v5 / "+C.length+" companies, "+EDGES.length+" links, "+Object.keys(SDETAIL).length+" process deep-dives","color:#39d98a;font-weight:bold"); }catch(e){}
 </script>
 </body>
 </html>
