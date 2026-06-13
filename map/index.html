@@ -43,14 +43,27 @@
   .node.match .card{filter:brightness(1.5) drop-shadow(0 0 14px rgba(244,197,66,.7))}
 
   /* ---- relationship edges (取引関係) ---- */
-  .edge{stroke-opacity:.16;transition:stroke-opacity .15s, stroke-width .15s}
+  .edge{stroke-opacity:.18;transition:stroke-opacity .15s, stroke-width .15s}
   .edges{pointer-events:none}
-  svg.focusing .edge{stroke-opacity:.045}
+  .backdrop{pointer-events:none}
+  .flowdot{opacity:.5;transition:opacity .15s}
+  svg.focusing .edge{stroke-opacity:.04}
   svg.focusing .edge.lit{stroke-opacity:.95;stroke-width:2.8}
-  svg.focusing .node{opacity:.15;transition:opacity .15s}
+  svg.focusing .flowdot{opacity:0}
+  svg.focusing .flowdot.lit{opacity:1}
+  svg.focusing .node{opacity:.14;transition:opacity .15s}
   svg.focusing .node.lit{opacity:1}
   svg.focusing .node.lit .card{filter:brightness(1.3) drop-shadow(0 0 12px rgba(78,161,255,.6))}
   .procnode{pointer-events:none}
+
+  /* ---- edge-type legend ---- */
+  #elegend{position:fixed;left:14px;bottom:18px;z-index:30;background:rgba(16,24,40,.92);
+    border:1px solid var(--line);border-radius:12px;padding:11px 14px;backdrop-filter:blur(6px)}
+  #elegend .et{font-size:11px;color:var(--dim);font-weight:800;letter-spacing:.08em;margin-bottom:7px}
+  #elegend .er{display:flex;gap:13px;flex-wrap:wrap}
+  #elegend span{font-size:11.5px;color:var(--sub);white-space:nowrap}
+  #elegend i{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
+  @media (max-width:720px){ #elegend{display:none} }
 
   /* ---- zoom controls ---- */
   #zoomctl{position:fixed;right:18px;bottom:22px;z-index:30;display:flex;flex-direction:column;gap:8px}
@@ -152,6 +165,18 @@
 
 <div id="viewport">
   <div id="canvas"></div>
+</div>
+
+<div id="elegend">
+  <div class="et">取引の流れ（粒子が供給元→納入先へ移動）</div>
+  <div class="er">
+    <span><i style="background:#39d98a"></i>材料供給</span>
+    <span><i style="background:#4ea1ff"></i>装置・技術</span>
+    <span><i style="background:#b58bff"></i>設計委託</span>
+    <span><i style="background:#f4c542"></i>製造・受託</span>
+    <span><i style="background:#e08bff"></i>後工程・実装</span>
+    <span><i style="background:#5fe0cf"></i>接続・電力</span>
+  </div>
 </div>
 
 <div id="zoomctl">
@@ -775,19 +800,19 @@ var EDGES=[
  ["3436","TSMC","mat"],["3436","285A","mat"],
  ["4186","TSMC","mat","レジスト"],["4901","TSMC","mat","薬液"],["4091","TSMC","mat","ガス"],["5016","TSMC","mat","配線材"],["5384","TSMC","mat","スラリー"],
  ["7741","TSMC","mat","マスク材"],["5201","TSMC","mat"],
- // 材料 → 後工程・基板
- ["2802","4062","mat","ABF"],["2802","6967","mat"],["5706","4062","mat","極薄銅箔"],["4004","6315","mat"],["4203","6315","mat","封止材"],["4004","4062","mat"],
- // 製造装置 → ファウンドリ/メモリ
- ["ASML","TSMC","tool","EUV"],["ASML","5930","tool"],["ASML","660","tool"],
- ["8035","TSMC","tool","装置"],["7735","TSMC","tool"],["6525","TSMC","tool"],["6361","TSMC","tool","CMP"],["6302","TSMC","tool"],["6622","TSMC","tool"],["6506","TSMC","tool"],
- ["6920","TSMC","tool","マスク検査"],["6857","TSMC","tool","テスト"],["7729","TSMC","tool","検査"],
- ["8035","5930","tool"],["ASML","285A","tool"],["6146","660","tool","ダイシング"],["7751","4062","tool","後工程露光"],
- // 設計 → ファウンドリ
- ["NVDA","TSMC","design","設計委託"],["6526","TSMC","design"],["6723","TSMC","design"],["6758","TSMC","design"],
- // ファウンドリ/メモリ → 顧客
- ["TSMC","NVDA","make","製造"],["TSMC","4062","make","チップ"],["660","NVDA","make","HBM"],["5930","NVDA","make"],
- // 後工程 → システム
- ["4062","NVDA","pkg","パッケージ"],["6315","NVDA","pkg"],
+ // 材料 → 後工程・基板（封止材・基板材は実装工程へ）
+ ["2802","4062","mat","ABF"],["2802","6967","mat"],["5706","4062","mat","極薄銅箔"],["4203","4062","mat","封止材"],["4004","4062","mat","CMP/封止材"],
+ // 製造装置 → ファウンドリ/メモリ（露光・成膜・検査などの装置を供給）
+ ["ASML","TSMC","tool","EUV露光"],["ASML","5930","tool","EUV"],["ASML","660","tool","EUV"],
+ ["8035","TSMC","tool","成膜/エッチ"],["7735","TSMC","tool","洗浄"],["6525","TSMC","tool","成膜"],["6361","TSMC","tool","CMP/真空"],["6302","TSMC","tool","イオン注入"],["6622","TSMC","tool","RF電源"],["6506","TSMC","tool","搬送"],
+ ["6920","TSMC","tool","マスク検査"],["6857","TSMC","tool","テスト"],["7729","TSMC","tool","プローブ検査"],["7731","TSMC","tool","露光"],
+ ["8035","5930","tool"],["ASML","285A","tool"],["6146","660","tool","ダイシング"],["6146","285A","tool"],["7751","4062","tool","後工程露光"],["6315","4062","tool","封止装置"],
+ // 設計 → ファウンドリ（自社で作らずTSMCに製造委託）
+ ["NVDA","TSMC","design","設計委託"],["6526","TSMC","design","設計委託"],["6723","TSMC","design"],["6758","TSMC","design"],
+ // ファウンドリ/メモリ → 顧客（完成チップ・HBMを供給）
+ ["TSMC","NVDA","make","ロジック製造"],["TSMC","4062","make","ダイ"],["660","NVDA","make","HBM"],["5930","NVDA","make","HBM/受託"],["285A","3778","make","NANDストレージ"],
+ // 後工程・基板 → AI製品（パッケージしてGPUに）
+ ["4062","NVDA","pkg","パッケージ基板"],["6967","NVDA","pkg","基板"],
  // 部品・パワー → システム/DC
  ["6981","NVDA","pkg","MLCC"],["6762","NVDA","pkg"],["6976","NVDA","pkg"],
  ["6963","3778","sys","電力"],["6503","3778","sys"],["6504","3778","sys","電源"],
@@ -838,6 +863,27 @@ function buildMap(){
   // ---- adjacency ----
   EDGES.forEach(function(e){ (ADJ[e[0]]=ADJ[e[0]]||{})[e[1]]=1; (ADJ[e[1]]=ADJ[e[1]]||{})[e[0]]=1; });
 
+  // ---- 方向性のある背景（上流→下流の流れ）----
+  var bg=document.createElementNS(NS,"g"); bg.setAttribute("class","backdrop");
+  var grad=document.createElementNS(NS,"linearGradient"); grad.setAttribute("id","flowgrad"); grad.setAttribute("x1","0"); grad.setAttribute("x2","1");
+  grad.innerHTML='<stop offset="0" stop-color="#0e1a14"/><stop offset="0.5" stop-color="#15130a"/><stop offset="1" stop-color="#0a1618"/>';
+  defs.appendChild(grad);
+  var fb=document.createElementNS(NS,"rect");
+  fb.setAttribute("x","60"); fb.setAttribute("y",MIDY-330); fb.setAttribute("width",canvasW-120); fb.setAttribute("height","660");
+  fb.setAttribute("rx","40"); fb.setAttribute("fill","url(#flowgrad)"); fb.setAttribute("opacity","0.5"); bg.appendChild(fb);
+  for(var cxp=440; cxp<canvasW-220; cxp+=320){
+    var ch=document.createElementNS(NS,"path");
+    ch.setAttribute("d","M "+cxp+" "+(MIDY-46)+" l 38 46 l -38 46");
+    ch.setAttribute("fill","none"); ch.setAttribute("stroke","#1b2b44"); ch.setAttribute("stroke-width","11");
+    ch.setAttribute("stroke-linecap","round"); ch.setAttribute("stroke-linejoin","round"); ch.setAttribute("opacity","0.55");
+    bg.appendChild(ch);
+  }
+  function cap(x,txt,col){ var t=mkText(x,canvasH-30,txt,18,col,"middle"); t.setAttribute("font-weight","800"); t.setAttribute("opacity","0.55"); bg.appendChild(t); }
+  cap(700,"▲ 上流：素材・装置・設計","#6fa8ff");
+  cap(1950,"製造：ファウンドリ／メモリ","#f4c542");
+  cap(3450,"下流：実装・システム・AI ▶","#6be0d0");
+  svg.appendChild(bg);
+
   // ---- cluster background bands ----
   CLUSTERS.forEach(function(cl){
     if(cl.id==="sink")return;
@@ -855,19 +901,28 @@ function buildMap(){
   // sink label
   var sk=POS["NVDA"]; var skl=mkText(sk.x,sk.y-46,"AIアクセラレータ（最終製品）",13,"#f4c542","middle"); skl.setAttribute("font-weight","800"); svg.appendChild(skl);
 
-  // ---- edges layer ----
+  // ---- edges layer（取引関係＋流れの粒子） ----
   var gEdges=document.createElementNS(NS,"g"); gEdges.setAttribute("class","edges");
-  EDGES.forEach(function(e){
+  EDGES.forEach(function(e,i){
     var a=POS[e[0]], b=POS[e[1]]; if(!a||!b)return;
-    var x1=a.x+NW/2*sgn(b.x-a.x), y1=a.y+NH/2, x2=b.x-NW/2*sgn(b.x-a.x), y2=b.y+NH/2;
+    var rev=b.x<a.x;
+    var x1=a.x+NW/2*(rev?-1:1), y1=a.y+NH/2, x2=b.x+NW/2*(rev?1:-1), y2=b.y+NH/2;
     if(a.x===b.x){ x1=a.x+NW/2; x2=b.x+NW/2; }
     var mx=(x1+x2)/2;
+    var dStr="M "+x1+" "+y1+" C "+mx+" "+y1+" "+mx+" "+y2+" "+x2+" "+y2;
+    var col=EDGE_COL[e[2]]||"#3a4a72";
     var p=document.createElementNS(NS,"path");
-    p.setAttribute("d","M "+x1+" "+y1+" C "+mx+" "+y1+" "+mx+" "+y2+" "+x2+" "+y2);
-    p.setAttribute("class","edge"); p.setAttribute("data-f",e[0]); p.setAttribute("data-t",e[1]);
-    p.setAttribute("stroke",EDGE_COL[e[2]]||"#3a4a72"); p.setAttribute("fill","none");
-    p.setAttribute("stroke-width","1.6");
+    p.setAttribute("d",dStr); p.setAttribute("class","edge"); p.setAttribute("data-f",e[0]); p.setAttribute("data-t",e[1]);
+    p.setAttribute("stroke",col); p.setAttribute("fill","none"); p.setAttribute("stroke-width","1.6");
     gEdges.appendChild(p);
+    // 供給元→納入先へ流れる粒子（向きが直感的に分かる）
+    var dot=document.createElementNS(NS,"circle");
+    dot.setAttribute("r","3.6"); dot.setAttribute("fill",col); dot.setAttribute("class","flowdot");
+    dot.setAttribute("data-f",e[0]); dot.setAttribute("data-t",e[1]);
+    var am=document.createElementNS(NS,"animateMotion");
+    am.setAttribute("dur",(3.6+(i%6)*0.5)+"s"); am.setAttribute("repeatCount","indefinite");
+    am.setAttribute("path",dStr); am.setAttribute("begin",(-((i%7)*0.45)).toFixed(2)+"s");
+    dot.appendChild(am); gEdges.appendChild(dot);
   });
   svg.appendChild(gEdges);
 
@@ -938,7 +993,7 @@ function focusNode(code){
     var c=n.getAttribute("data-code");
     n.classList.toggle("lit", c===code||nb[c]===1);
   });
-  svg.querySelectorAll(".edge").forEach(function(e){
+  svg.querySelectorAll(".edge,.flowdot").forEach(function(e){
     var lit=e.getAttribute("data-f")===code||e.getAttribute("data-t")===code;
     e.classList.toggle("lit",lit);
   });
@@ -946,7 +1001,7 @@ function focusNode(code){
 function clearFocus(){
   var svg=window.__svg; if(!svg)return;
   svg.classList.remove("focusing");
-  svg.querySelectorAll(".node.lit,.edge.lit").forEach(function(n){n.classList.remove("lit");});
+  svg.querySelectorAll(".node.lit,.edge.lit,.flowdot.lit").forEach(function(n){n.classList.remove("lit");});
 }
 function mkText(x,y,str,size,fill,anchor){
   var t=document.createElementNS(NS,"text");
@@ -993,8 +1048,11 @@ vp.addEventListener("pointermove",function(e){
 });
 vp.addEventListener("pointerup",function(e){
   dragging=false; vp.classList.remove("grabbing");
-  if(moved<6 && Date.now()-downT<400){
-    var node=e.target.closest && e.target.closest(".node");
+  try{ vp.releasePointerCapture(e.pointerId); }catch(_){}
+  if(moved<6 && Date.now()-downT<450){
+    // pointer captureでe.targetがvp固定になるため、座標から実際の要素を取得
+    var el=document.elementFromPoint(e.clientX,e.clientY);
+    var node=el && el.closest ? el.closest(".node") : null;
     if(node){ location.hash="#c/"+node.getAttribute("data-code"); }
   }
 });
@@ -1082,7 +1140,7 @@ window.addEventListener("resize",function(){ if(!location.hash) fit(); });
 buildMap();
 fit();
 route();
-try{ console.log("%c[map] supply-chain graph v2 / "+C.length+" companies, "+EDGES.length+" links","color:#39d98a;font-weight:bold"); }catch(e){}
+try{ console.log("%c[map] supply-chain graph v3 / "+C.length+" companies, "+EDGES.length+" links (flow particles)","color:#39d98a;font-weight:bold"); }catch(e){}
 </script>
 </body>
 </html>
