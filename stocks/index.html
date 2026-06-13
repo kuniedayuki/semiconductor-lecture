@@ -5257,22 +5257,15 @@
   function applyRate(){
     for(var k in audios){ try{ audios[k].playbackRate = rate; audios[k].preservesPitch = true; }catch(e){} }
   }
-  // CSSアニメ(.pop/.fin/.gh/.kb等)を毎フレーム選択速度に同期。新規シーンで生成されるアニメも捕捉。
+  // [speed-engine v3] CSSアニメ(.pop/.fin/.gh/.kb)を毎フレーム選択速度に同期。新規シーンのアニメも捕捉。
   function rafLoop(){
     try{ var as = document.getAnimations(); for(var j=0;j<as.length;j++){ if(as[j].playbackRate !== rate) as[j].playbackRate = rate; } }catch(e){}
-    // SMIL(animateMotion)はplaybackRate APIが無いため、SVGのアニメ速度をsetCurrentTimeで近似スケール
-    if(rate !== 1){
-      var now = (performance && performance.now) ? performance.now() : Date.now();
-      var d = _smilTs ? (now - _smilTs)/1000 : 0; _smilTs = now;
-      if(d > 0 && d < 0.4){
-        var svgs = document.querySelectorAll('#frame .scene.active svg');
-        for(var i2=0;i2<svgs.length;i2++){ try{ if(svgs[i2].getCurrentTime) svgs[i2].setCurrentTime(svgs[i2].getCurrentTime() + d*(rate-1)); }catch(e){} }
-      }
-    } else { _smilTs = 0; }
+    // 再生中の音声の速度を毎フレーム再適用（ブラウザ/拡張機能による上書きを是正し、選択速度を死守）
+    try{ var cur = scenes[i] && scenes[i].getAttribute('data-vid'); var a = cur && audios[cur]; if(a && !a.paused && a.playbackRate !== rate){ a.playbackRate = rate; a.preservesPitch = true; } }catch(e){}
     requestAnimationFrame(rafLoop);
   }
-  var _smilTs = 0;
   requestAnimationFrame(rafLoop);
+  try{ console.log('%c[movie] speed-engine v3 loaded','color:#39d98a;font-weight:bold'); }catch(e){}
 
   scenes.forEach(function(s, idx){
     var t = s.querySelector('.s-title, .big');

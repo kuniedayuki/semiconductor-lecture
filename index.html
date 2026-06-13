@@ -1238,18 +1238,14 @@
     for(var k in audios){ try{ audios[k].playbackRate = rate; audios[k].preservesPitch = true; audios[k].mozPreservesPitch = true; audios[k].webkitPreservesPitch = true; }catch(e){} }
     try{ document.getAnimations().forEach(function(a){ a.playbackRate = rate; }); }catch(e){}
   }
-  // 速度を音声・CSSアニメ・SMILアニメすべてに継続適用する
-  var _lastTs = 0;
-  function rafLoop(ts){
-    var dt = _lastTs ? (ts - _lastTs)/1000 : 0; _lastTs = ts;
-    if(rate !== 1 && dt > 0 && dt < 0.5){
-      var svgs = document.querySelectorAll('#frame .scene.active svg');
-      for(var i=0;i<svgs.length;i++){ try{ svgs[i].setCurrentTime(svgs[i].getCurrentTime() + dt*(rate-1)); }catch(e){} }
-    }
-    try{ var as = document.getAnimations(); for(var j=0;j<as.length;j++){ as[j].playbackRate = rate; } }catch(e){}
+  // [speed-engine v3] CSSアニメを選択速度に同期＋再生中音声の速度を毎フレーム死守(外部上書きを是正)
+  function rafLoop(){
+    try{ var as = document.getAnimations(); for(var j=0;j<as.length;j++){ if(as[j].playbackRate !== rate) as[j].playbackRate = rate; } }catch(e){}
+    try{ var cur = scenes[i] && scenes[i].getAttribute('data-vid'); var a = cur && audios[cur]; if(a && !a.paused && a.playbackRate !== rate){ a.playbackRate = rate; a.preservesPitch = true; } }catch(e){}
     requestAnimationFrame(rafLoop);
   }
   requestAnimationFrame(rafLoop);
+  try{ console.log('%c[movie] speed-engine v3 loaded','color:#39d98a;font-weight:bold'); }catch(e){}
 
   scenes.forEach(function(s, idx){
     var t = s.querySelector('.s-title, .big');
