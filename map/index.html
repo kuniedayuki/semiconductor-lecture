@@ -151,6 +151,29 @@
     border-radius:999px;padding:8px 15px;font-size:13px;font-weight:700;cursor:pointer;color:var(--txt)}
   .cochip:hover{border-color:var(--accent);background:#16233a}
 
+  /* ---- inline dossier (SVG foreignObject内のHTML) ---- */
+  .dossier{font-family:"Segoe UI","Hiragino Kaku Gothic ProN","Meiryo",sans-serif;color:#dbe5f5;-webkit-font-smoothing:antialiased}
+  .dintro{font-size:11.5px;color:#9fb0d0;line-height:1.5;margin-bottom:11px;
+    border-left:3px solid #2c3e63;padding-left:9px}
+  .dsec{margin-bottom:12px}
+  .dh{font-size:11px;font-weight:800;color:#7fb0ff;letter-spacing:.04em;margin-bottom:6px;
+    border-bottom:1px solid #1e2c46;padding-bottom:4px}
+  .dsteps{margin:0;padding-left:17px}
+  .dsteps li{font-size:11.5px;line-height:1.5;margin-bottom:5px;color:#aebbd2}
+  .dsteps li b{color:#eaf0fb;font-weight:800}
+  .dtc{margin-bottom:8px}
+  .dtcn{display:block;font-size:11px;color:#f4c542;font-weight:800;margin-bottom:4px}
+  .tg{display:inline-block;background:#0e1726;border:1px solid #243250;border-radius:999px;
+    padding:3px 9px;font-size:10.5px;color:#cdd6ea;margin:0 5px 5px 0;line-height:1.3}
+  .dgen{font-size:12.5px;font-weight:800;line-height:1.8}
+  .dgen b{color:#eaf0fb} .ga{color:#5f6f8f;margin:0 7px}
+  .dterm{font-size:11px;line-height:1.5;color:#9fb0d0;margin-bottom:6px}
+  .dterm b{color:#7fb0ff}
+  .dco{display:flex;flex-wrap:wrap;gap:6px}
+  .cochip3{display:inline-block;background:#101a2b;border:1px solid #27314c;border-radius:8px;
+    padding:5px 9px;font-size:11px;font-weight:700;color:#eaf0fb;cursor:pointer;line-height:1.3}
+  .cochip3:hover{border-color:#4ea1ff;background:#16233a}
+
   .d-links{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
   .d-links a{display:inline-flex;align-items:center;gap:8px;background:#101a2b;border:1px solid var(--line);
     border-radius:10px;padding:11px 18px;text-decoration:none;color:var(--txt);font-weight:700;font-size:14px}
@@ -177,7 +200,7 @@
   </div>
   <div class="spacer"></div>
   <input id="search" type="text" placeholder="🔍 企業名で検索（例：村田）" autocomplete="off">
-  <div class="tipbar">ドラッグ移動 ／ ホイール拡縮 ／ <b style="color:#9fd0ff">工程パネルの「詳しく▸」で工程の詳細</b> ／ 企業クリックで解説</div>
+  <div class="tipbar">ドラッグ移動 ／ ホイール拡縮 ／ <b style="color:#9fd0ff">上=物理構造・工程詳細／下=企業の相関</b> ／ 企業クリックで解説</div>
 </div>
 
 <div id="viewport">
@@ -817,6 +840,17 @@ var FLOW=[
 ];
 var FLOWX0=120, FLOWY=72, PANEL_W=384, PANEL_GAP=34, PANEL_H=372;
 
+/* ---- 物理構造ヒーロー（大きさのスケール：DC→原子） ---- */
+var HEROY=46, PIPEY=640, ILLU_H=168;
+var HERO=[
+ {t:"データセンター",sc:"〜 数十 m",ic:"dcbuild"},
+ {t:"サーバー／基板",sc:"〜 数十 cm",ic:"board"},
+ {t:"パッケージ(GPU+HBM)",sc:"〜 数 cm",ic:"package"},
+ {t:"ダイ（チップ）",sc:"〜 10 mm",ic:"die"},
+ {t:"トランジスタ",sc:"〜 数 nm",ic:"transistor"},
+ {t:"シリコン原子",sc:"〜 0.2 nm",ic:"atom"}
+];
+
 /* ---- 各工程のSVGイラスト（半導体の構成要素を図解） ---- */
 var ILLU={
  ingot:function(x,y){return ''
@@ -902,7 +936,36 @@ var ILLU={
    for(var u=0;u<6;u++){var uy=y-48+u*16;s+='<rect x="'+(rx+5)+'" y="'+uy+'" width="42" height="11" rx="1.5" fill="#15233c" stroke="#27406a"/>';
     s+='<circle cx="'+(rx+11)+'" cy="'+(uy+5.5)+'" r="1.7" fill="#39d98a"/><circle cx="'+(rx+17)+'" cy="'+(uy+5.5)+'" r="1.7" fill="#4ea1ff"/>';}}
   s+='<text x="'+x+'" y="'+(y+74)+'" fill="#9fb0d0" font-size="12" text-anchor="middle">AIサーバーが稼働</text>';
-  return s;}
+  return s;},
+ dcbuild:function(x,y){var s='';
+  s+='<rect x="'+(x-74)+'" y="'+(y-46)+'" width="148" height="96" rx="5" fill="#101b2e" stroke="#3a4a72" stroke-width="2"/>';
+  s+='<g fill="#1f3a5c">';for(var r=0;r<4;r++){for(var c=0;c<6;c++){s+='<rect x="'+(x-62+c*21)+'" y="'+(y-38+r*21)+'" width="14" height="14" rx="2"/>';}}s+='</g>';
+  s+='<circle cx="'+(x-52)+'" cy="'+(y-30)+'" r="2.4" fill="#39d98a"/><circle cx="'+(x+58)+'" cy="'+(y+40)+'" r="2.4" fill="#4ea1ff"/>';
+  s+='<text x="'+x+'" y="'+(y+70)+'" fill="#9fb0d0" font-size="11" text-anchor="middle">巨大データセンター</text>';return s;},
+ die:function(x,y){var s='';
+  s+='<rect x="'+(x-58)+'" y="'+(y-48)+'" width="116" height="96" rx="4" fill="#0e1c33" stroke="#4ea1ff" stroke-width="2"/>';
+  s+='<g stroke="#3a6aa0" stroke-width="1" opacity="0.8" fill="none">';
+  for(var gx=-44;gx<=44;gx+=12){s+='<line x1="'+(x+gx)+'" y1="'+(y-40)+'" x2="'+(x+gx)+'" y2="'+(y+40)+'"/>';}
+  for(var gy=-40;gy<=40;gy+=12){s+='<line x1="'+(x-48)+'" y1="'+(y+gy)+'" x2="'+(x+48)+'" y2="'+(y+gy)+'"/>';}
+  s+='</g>';
+  s+='<rect x="'+(x-18)+'" y="'+(y-16)+'" width="36" height="32" fill="#4ea1ff" fill-opacity="0.3" stroke="#7fd0ff"/><text x="'+x+'" y="'+(y+4)+'" fill="#cfe6ff" font-size="9" text-anchor="middle">コア</text>';
+  s+='<text x="'+x+'" y="'+(y+66)+'" fill="#9fb0d0" font-size="11" text-anchor="middle">1個のチップ(ダイ)</text>';return s;},
+ transistor:function(x,y){var s='';
+  s+='<rect x="'+(x-92)+'" y="'+(y+20)+'" width="184" height="32" fill="#33455f" stroke="#5878a8"/>';
+  s+='<text x="'+x+'" y="'+(y+41)+'" fill="#cdd6ea" font-size="9.5" text-anchor="middle">シリコン基板</text>';
+  s+='<rect x="'+(x-12)+'" y="'+(y-28)+'" width="24" height="52" fill="url(#gBlu)" stroke="#7fd0ff"/>';
+  s+='<rect x="'+(x-62)+'" y="'+(y-4)+'" width="42" height="26" fill="#39d98a" stroke="#0f3d28"/><text x="'+(x-41)+'" y="'+(y+13)+'" fill="#06241a" font-size="9" text-anchor="middle">ソース</text>';
+  s+='<rect x="'+(x+20)+'" y="'+(y-4)+'" width="42" height="26" fill="#39d98a" stroke="#0f3d28"/><text x="'+(x+41)+'" y="'+(y+13)+'" fill="#06241a" font-size="9" text-anchor="middle">ドレイン</text>';
+  s+='<rect x="'+(x-22)+'" y="'+(y-44)+'" width="44" height="42" fill="#f4c542" fill-opacity="0.88" stroke="#c9962a"/><text x="'+x+'" y="'+(y-50)+'" fill="#f4c542" font-size="10" text-anchor="middle">ゲート</text>';
+  s+='<text x="'+x+'" y="'+(y+70)+'" fill="#9fb0d0" font-size="10.5" text-anchor="middle">電流をON/OFFする立体トランジスタ</text>';return s;},
+ atom:function(x,y){var s='',R=20;
+  var bonds=[[-1.4,-1.4],[1.4,-1.4],[-1.4,1.4],[1.4,1.4]];
+  s+='<g stroke="#4a6da0" stroke-width="2">';
+  bonds.forEach(function(p){s+='<line x1="'+x+'" y1="'+y+'" x2="'+(x+p[0]*R)+'" y2="'+(y+p[1]*R)+'"/>';});
+  s+='</g>';
+  [[-1.4,-1.4],[1.4,-1.4],[-1.4,1.4],[1.4,1.4]].forEach(function(p){s+='<circle cx="'+(x+p[0]*R)+'" cy="'+(y+p[1]*R)+'" r="12" fill="url(#gSil)" stroke="#7f8db0"/>';});
+  s+='<circle cx="'+x+'" cy="'+y+'" r="15" fill="url(#gSil)" stroke="#7f8db0"/><text x="'+x+'" y="'+(y+4)+'" fill="#1a2030" font-size="12" font-weight="800" text-anchor="middle">Si</text>';
+  s+='<text x="'+x+'" y="'+(y+64)+'" fill="#9fb0d0" font-size="10.5" text-anchor="middle">規則正しく並ぶシリコン原子</text>';return s;}
 };
 
 /* ====================== 工程の詳細（サブ工程・技術・分類・担い手） ====================== */
@@ -924,32 +987,32 @@ var SDETAIL={
   steps:[["仕様・アーキテクチャ","チップに何をさせるか・構成を決める"],["論理設計(RTL)","HDL(Verilog等)で動作を記述"],["合成・配置配線","数百億素子をEDAで自動配置・配線"],["検証(DRC/LVS)","設計ルール・整合性を検証しGDSII出力"],["マスク製造","OPC補正→電子ビーム描画→検査"]],
   tech:[["設計の担い手",["ファブレス(設計専業)","IDM(設計+製造)","ASIC設計サービス"]],["EDA・IP",["論理合成/配置配線","検証ツール","設計資産(IPコア)"]],["マスク技術",["OPC(光近接効果補正)","位相シフトマスク","EUVマスク(反射型)+ペリクル"]],["新潮流",["チップレット設計","DTCO(設計・製造協調)"]]],
   terms:[["EDA","半導体設計を自動化するソフト。数百億素子は人手では設計不可能"],["OPC","光のにじみを見越し、マスクの形をわざと歪ませ狙い通り転写する補正技術"]],
-  co:["NVDA","6723","6526"],foreign:[["Synopsys","🇺🇸","EDA最大手"],["Cadence","🇺🇸","EDA大手"],["Arm","🇬🇧","CPU設計IPの標準"],["Siemens EDA","🇩🇪","検証ツール"]]},
+  co:["NVDA","6723","6526","6758","7741","5201","6920"],foreign:[["Synopsys","🇺🇸","EDA最大手"],["Cadence","🇺🇸","EDA大手"],["Arm","🇬🇧","CPU設計IPの標準"],["Siemens EDA","🇩🇪","検証ツール"]]},
  fab:{n:4,t:"前工程（ウェハ製造）",ic:"fab",
   intro:"ウェハ上に「成膜→露光→エッチング…」のサイクルを数百回繰り返し、ナノの立体回路を積み上げる。製造の心臓部。",
   steps:[["成膜","絶縁体・金属・半導体の薄膜を積む(CVD/PVD/ALD)"],["レジスト塗布","感光材を均一に塗る(コータ)"],["露光","マスクの回路を光で転写(スキャナ)"],["現像","光が当たった部分を溶かしパターン化"],["エッチング","パターン通りに削る(ドライ/ウェット)"],["不純物注入","イオン注入→アニールで性質付与"],["平坦化(CMP)","凸凹を磨いて平らに戻す"],["洗浄→次サイクル","これを数百回繰り返す"]],
   tech:[["成膜",["CVD(化学気相)","PVD/スパッタ(物理)","ALD(原子層堆積)","熱酸化","エピ成長"]],["露光世代",["i線→KrF→ArF→ArF液浸","マルチパターニング","EUV(13.5nm)","High-NA EUV"]],["エッチング",["ドライ(プラズマ/RIE)","ウェット","ALE(原子層)"]],["配線",["Cuダマシン","Low-k絶縁膜","バリアメタル"]]],
   gens:{t:"トランジスタ構造の進化",items:["プレーナ","FinFET","GAA(ナノシート)","CFET(次世代)"]},
   terms:[["EUV露光","波長13.5nmの極端紫外線で最先端の微細パターンを描く"],["FinFET/GAA","トランジスタを立体化し、微細でも電流を確実に制御できるようにした構造"]],
-  co:["TSMC","5930","8035","ASML","6525","7735","4186"],foreign:[["Applied Materials","🇺🇸","成膜・エッチ等の総合最大手"],["Lam Research","🇺🇸","エッチ・成膜の雄"],["ASML","🇳🇱","EUV露光を独占"],["KLA","🇺🇸","検査・計測首位"]]},
+  co:["TSMC","5930","285A","8035","ASML","6525","7735","4186","4901","4091","5016","7731","6302","6622","6506"],foreign:[["Applied Materials","🇺🇸","成膜・エッチ等の総合最大手"],["Lam Research","🇺🇸","エッチ・成膜の雄"],["ASML","🇳🇱","EUV露光を独占"],["KLA","🇺🇸","検査・計測首位"]]},
  inspect:{n:5,t:"研磨(CMP)・検査・計測",ic:"inspect",
   intro:"各工程の後、表面を平らに磨き、ナノの欠陥や寸法ずれを検査する。歩留まり(良品率)を左右する縁の下の要。",
   steps:[["CMP(平坦化)","スラリーとパッドで凸凹を磨き、次の露光に備える"],["欠陥検査","光学/電子線でパターン欠陥・異物を検出"],["寸法・膜厚計測","CD-SEMで線幅、光学で膜厚を測る"],["重ね合わせ計測","層と層のズレ(オーバーレイ)を管理"],["歩留まり解析","不良原因を特定し工程へフィードバック"]],
   tech:[["平坦化",["CMP装置","スラリー(研磨剤)","パッド/コンディショナ"]],["検査",["明視野/暗視野 光学","電子線(eビーム)","マスク欠陥検査"]],["計測",["CD-SEM(線幅)","オーバーレイ","膜厚・組成分析"]]],
   terms:[["歩留まり(イールド)","製造したチップのうち良品の割合。先端品は歩留まり向上が利益の鍵"],["メトロロジー","ナノ単位で寸法や欠陥を測る計測技術の総称"]],
-  co:["6361","5384","6920","6857"],foreign:[["KLA","🇺🇸","検査・計測の世界首位"],["Applied Materials","🇺🇸","CMP装置"],["Lam Research","🇺🇸","研磨・洗浄"]]},
+  co:["6361","5384","4004","6920","6857","7729"],foreign:[["KLA","🇺🇸","検査・計測の世界首位"],["Applied Materials","🇺🇸","CMP装置"],["Lam Research","🇺🇸","研磨・洗浄"]]},
  dice:{n:6,t:"薄化・ダイシング",ic:"dice",
   intro:"完成したウェハを薄く削り、格子状のチップを1個ずつ切り出す。HBMのような積層には極薄加工が要る。",
   steps:[["バックグラインド","裏面を削り、厚さを数十μmまで薄化"],["ダイシング","ブレードやレーザーでチップに切り分け"],["ピックアップ","良品チップを吸着して取り出す"],["ダイボンド","基板やリードフレームに固定"]],
   tech:[["薄化",["バックグラインド","DBG(先ダイシング)","TSV用 極薄化"]],["切断",["ブレードダイシング","ステルス(レーザー)ダイシング","プラズマダイシング"]]],
   terms:[["バックグラインド","ウェハ裏面を研削して薄くする工程。積層パッケージほど薄さが要る"],["TSV","チップを貫く電極。チップを縦に積んで配線する(HBM等)"]],
-  co:["6146","7729"],foreign:[["ASMPT","🇭🇰","後工程装置大手"],["Besi","🇳🇱","先端実装装置"]]},
+  co:["6146","7729","7751"],foreign:[["ASMPT","🇭🇰","後工程装置大手"],["Besi","🇳🇱","先端実装装置"]]},
  package:{n:7,t:"後工程・パッケージング",ic:"package",
   intro:"裸のチップを基板に載せ、配線し、樹脂で守る。今やAI性能を左右する主戦場で、チップを積む・並べる先端技術が花盛り。",
   steps:[["ダイアタッチ","チップを基板に接着"],["接続","ワイヤボンディング or フリップチップ(バンプ接合)"],["先端実装","2.5D/3Dでチップを並べる・積む"],["封止(モールド)","樹脂で覆い保護"],["ボール付け・検査","BGA端子を付け検査・マーキング"]],
   tech:[["接続方式",["ワイヤボンディング","フリップチップ(バンプ)","ハイブリッドボンディング(直接接合)"]],["先端パッケージ",["2.5D(CoWoS/インターポーザ)","3D積層","チップレット","ファンアウト(FOWLP)"]],["メモリ積層",["HBM(TSVでDRAMを縦積み)"]],["基板・材料",["ABF基板(FC-BGA)","ビルドアップ基板","封止材"]]],
   terms:[["チップレット","小さなチップを複数つないで1つの高性能チップにする手法。歩留まり・コストで有利"],["CoWoS","ロジックとHBMを1枚の土台(インターポーザ)に並べるTSMCの先端実装。AI半導体の標準"]],
-  co:["4062","2802","6315","660","6967"],foreign:[["ASE","🇹🇼","OSAT(後工程受託)世界最大"],["Amkor","🇺🇸","OSAT大手"],["Unimicron","🇹🇼","基板世界大手"]]},
+  co:["4062","2802","5706","4203","6315","660","6967"],foreign:[["ASE","🇹🇼","OSAT(後工程受託)世界最大"],["Amkor","🇺🇸","OSAT大手"],["Unimicron","🇹🇼","基板世界大手"]]},
  test:{n:8,t:"最終テスト",ic:"test",
   intro:"完成チップが設計通り動くか、電気を流して全数検査する。不良を出荷しないための最後の関門。",
   steps:[["ウェハテスト","切る前にプローブ針で全チップを良否選別"],["最終テスト","パッケージ後に再度フル検査"],["バーンイン","高温で動かし初期不良をあぶり出す"],["選別(ビニング)","性能でランク分けして出荷"]],
@@ -1007,31 +1070,21 @@ var byCode={}; C.forEach(function(x){ byCode[x.code]=x; });
 var CLUSTERS=[
  {id:"material",x:200,dy:96,codes:["4063","3436","4186","2802","5384","4091","5016","5706","5201","7741","4004","4203","4901"]},
  {id:"equip",   x:660,dy:92,codes:["8035","ASML","6920","6857","6146","7735","6525","7729","7751","7731","6302","6622","6361","6506"]},
- {id:"design",  x:1140,dy:128,codes:["6723","6526","6758"],y0:330},
+ {id:"design",  x:1140,dy:128,codes:["6723","6526","6758"]},
  {id:"fab",     x:1880,dy:172,codes:["TSMC","5930","285A","660"]},
  {id:"osat",    x:2440,dy:150,codes:["4062","6967","6315"]},
  {id:"comp",    x:2960,dy:132,codes:["6981","6762","6976","6963","6503","6504"]},
  {id:"sys",     x:3500,dy:150,codes:["5803","5801","6508","6501","3778"]},
- {id:"sink",    x:4080,dy:0,  codes:["NVDA"],y0:1010}
+ {id:"sink",    x:4080,dy:0,  codes:["NVDA"]}
 ];
 var NW=190, NH=56, MIDY=1200, RIBY=150;
 var POS={}, canvasW=0, canvasH=0, ADJ={};
 
+function clusterHalf(){ var m=0; CLUSTERS.forEach(function(cl){ if(cl.codes.length>1){ var h=(cl.codes.length-1)/2*cl.dy; if(h>m)m=h; } }); return m; }
+
 function buildMap(){
-  var svg=document.createElementNS(NS,"svg");
-  // ---- positions ----
-  CLUSTERS.forEach(function(cl){
-    var n=cl.codes.length;
-    var y0=(cl.y0!=null)?cl.y0:(MIDY-(n-1)/2*cl.dy);
-    cl.codes.forEach(function(code,i){ POS[code]={x:cl.x,y:y0+i*cl.dy,cl:cl.id}; });
-  });
+  var svg=document.createElementNS(NS,"svg"); svg.setAttribute("class","map");
   canvasW=4080+NW+60;
-  var maxY=0; for(var k in POS){ if(POS[k].y>maxY)maxY=POS[k].y; }
-  canvasH=maxY+NH+90;
-
-  svg.setAttribute("width",canvasW); svg.setAttribute("height",canvasH);
-  svg.setAttribute("viewBox","0 0 "+canvasW+" "+canvasH);
-
   var defs=document.createElementNS(NS,"defs");
   defs.innerHTML=symbolDefs()+
     '<filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#4ea1ff" flood-opacity="0.55"/></filter>'+
@@ -1040,34 +1093,55 @@ function buildMap(){
     '<linearGradient id="gGld" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd86b"/><stop offset="1" stop-color="#c9962a"/></linearGradient>'+
     '<linearGradient id="gPcb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f6b46"/><stop offset="1" stop-color="#0f3d28"/></linearGradient>'+
     '<linearGradient id="gBlu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fb0ff"/><stop offset="1" stop-color="#2a5a9a"/></linearGradient>'+
+    '<linearGradient id="flowgrad" x1="0" x2="1"><stop offset="0" stop-color="#0e1a14"/><stop offset="0.5" stop-color="#15130a"/><stop offset="1" stop-color="#0a1618"/></linearGradient>'+
     '<marker id="fa" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M1,1 L8,4 L1,7 Z" fill="#7aa2ff"/></marker>';
   svg.appendChild(defs);
 
-  // ---- adjacency ----
+  // foreignObject測定のためDOMへ先に挿入
+  var cv=document.getElementById("canvas"); cv.innerHTML=""; cv.appendChild(svg);
+
+  // adjacency
   EDGES.forEach(function(e){ (ADJ[e[0]]=ADJ[e[0]]||{})[e[1]]=1; (ADJ[e[1]]=ADJ[e[1]]||{})[e[0]]=1; });
 
-  // ---- 方向性のある背景（上流→下流の流れ）----
+  // ① 物理構造ヒーロー
+  buildHero(svg);
+  // ② 工程パイプライン（インライン詳細）
+  var pipeBottom=buildPipeline(svg);
+
+  // ③ 相関グラフを下に配置
+  var half=clusterHalf();
+  MIDY = pipeBottom + 150 + half;
+  CLUSTERS.forEach(function(cl){
+    var n=cl.codes.length, y0=(MIDY-(n-1)/2*cl.dy);
+    cl.codes.forEach(function(code,i){ POS[code]={x:cl.x,y:y0+i*cl.dy,cl:cl.id}; });
+  });
+  var maxY=0; for(var k in POS){ if(POS[k].y>maxY)maxY=POS[k].y; }
+  canvasH=maxY+NH+110;
+  svg.setAttribute("width",canvasW); svg.setAttribute("height",canvasH); svg.setAttribute("viewBox","0 0 "+canvasW+" "+canvasH);
+  cv.style.width=canvasW+"px"; cv.style.height=canvasH+"px";
+
+  // グラフのセクション見出し
+  var gt=mkText(FLOWX0, MIDY-half-66, "企業の相関ネットワーク ── 誰が誰に供給するか（カーソルで点灯／クリックで解説）", 22, "#eaf0fb","start"); gt.setAttribute("font-weight","800"); svg.appendChild(gt);
+
+  // 背景（上流→下流）
   var bg=document.createElementNS(NS,"g"); bg.setAttribute("class","backdrop");
-  var grad=document.createElementNS(NS,"linearGradient"); grad.setAttribute("id","flowgrad"); grad.setAttribute("x1","0"); grad.setAttribute("x2","1");
-  grad.innerHTML='<stop offset="0" stop-color="#0e1a14"/><stop offset="0.5" stop-color="#15130a"/><stop offset="1" stop-color="#0a1618"/>';
-  defs.appendChild(grad);
   var fb=document.createElementNS(NS,"rect");
-  fb.setAttribute("x","60"); fb.setAttribute("y",MIDY-330); fb.setAttribute("width",canvasW-120); fb.setAttribute("height","660");
-  fb.setAttribute("rx","40"); fb.setAttribute("fill","url(#flowgrad)"); fb.setAttribute("opacity","0.5"); bg.appendChild(fb);
+  fb.setAttribute("x","60"); fb.setAttribute("y",MIDY-half-30); fb.setAttribute("width",canvasW-120); fb.setAttribute("height",2*half+90);
+  fb.setAttribute("rx","40"); fb.setAttribute("fill","url(#flowgrad)"); fb.setAttribute("opacity","0.45"); bg.appendChild(fb);
   for(var cxp=440; cxp<canvasW-220; cxp+=320){
     var ch=document.createElementNS(NS,"path");
-    ch.setAttribute("d","M "+cxp+" "+(MIDY-46)+" l 38 46 l -38 46");
-    ch.setAttribute("fill","none"); ch.setAttribute("stroke","#1b2b44"); ch.setAttribute("stroke-width","11");
-    ch.setAttribute("stroke-linecap","round"); ch.setAttribute("stroke-linejoin","round"); ch.setAttribute("opacity","0.55");
+    ch.setAttribute("d","M "+cxp+" "+(MIDY-44)+" l 36 44 l -36 44");
+    ch.setAttribute("fill","none"); ch.setAttribute("stroke","#1b2b44"); ch.setAttribute("stroke-width","10");
+    ch.setAttribute("stroke-linecap","round"); ch.setAttribute("stroke-linejoin","round"); ch.setAttribute("opacity","0.5");
     bg.appendChild(ch);
   }
-  function cap(x,txt,col){ var t=mkText(x,canvasH-30,txt,18,col,"middle"); t.setAttribute("font-weight","800"); t.setAttribute("opacity","0.55"); bg.appendChild(t); }
+  function cap(x,txt,col){ var t=mkText(x,canvasH-26,txt,18,col,"middle"); t.setAttribute("font-weight","800"); t.setAttribute("opacity","0.55"); bg.appendChild(t); }
   cap(700,"▲ 上流：素材・装置・設計","#6fa8ff");
   cap(1950,"製造：ファウンドリ／メモリ","#f4c542");
   cap(3450,"下流：実装・システム・AI ▶","#6be0d0");
   svg.appendChild(bg);
 
-  // ---- cluster background bands ----
+  // クラスタ帯
   CLUSTERS.forEach(function(cl){
     if(cl.id==="sink")return;
     var st=STAGES.filter(function(s){return s.id===cl.id;})[0]; if(!st)return;
@@ -1079,32 +1153,26 @@ function buildMap(){
     r.setAttribute("fill","rgba(16,24,40,0.5)"); r.setAttribute("stroke",st.c); r.setAttribute("stroke-opacity","0.25"); r.setAttribute("stroke-width","1.5");
     svg.appendChild(r);
     var lab=mkText(cl.x,top-12,st.t,17,st.c,"middle"); lab.setAttribute("font-weight","800"); svg.appendChild(lab);
-    var lab2=mkText(cl.x,top-12+0,"",1,"#000","middle"); // spacer
   });
-  // sink label
-  var sk=POS["NVDA"]; var skl=mkText(sk.x,sk.y-46,"AIアクセラレータ（最終製品）",13,"#f4c542","middle"); skl.setAttribute("font-weight","800"); svg.appendChild(skl);
+  var sk=POS["NVDA"]; var skl=mkText(sk.x,sk.y-46,"AIアクセラレータ(最終製品)",13,"#f4c542","middle"); skl.setAttribute("font-weight","800"); svg.appendChild(skl);
 
-  // ---- edges layer（取引関係＋流れの粒子） ----
+  // エッジ
   var gEdges=document.createElementNS(NS,"g"); gEdges.setAttribute("class","edges");
-  EDGES.forEach(function(e,i){
+  EDGES.forEach(function(e){
     var a=POS[e[0]], b=POS[e[1]]; if(!a||!b)return;
     var rev=b.x<a.x;
     var x1=a.x+NW/2*(rev?-1:1), y1=a.y+NH/2, x2=b.x+NW/2*(rev?1:-1), y2=b.y+NH/2;
     if(a.x===b.x){ x1=a.x+NW/2; x2=b.x+NW/2; }
     var mx=(x1+x2)/2;
-    var dStr="M "+x1+" "+y1+" C "+mx+" "+y1+" "+mx+" "+y2+" "+x2+" "+y2;
-    var col=EDGE_COL[e[2]]||"#3a4a72";
     var p=document.createElementNS(NS,"path");
-    p.setAttribute("d",dStr); p.setAttribute("class","edge"); p.setAttribute("data-f",e[0]); p.setAttribute("data-t",e[1]);
-    p.setAttribute("stroke",col); p.setAttribute("fill","none"); p.setAttribute("stroke-width","1.6");
+    p.setAttribute("d","M "+x1+" "+y1+" C "+mx+" "+y1+" "+mx+" "+y2+" "+x2+" "+y2);
+    p.setAttribute("class","edge"); p.setAttribute("data-f",e[0]); p.setAttribute("data-t",e[1]);
+    p.setAttribute("stroke",EDGE_COL[e[2]]||"#3a4a72"); p.setAttribute("fill","none"); p.setAttribute("stroke-width","1.6");
     gEdges.appendChild(p);
   });
   svg.appendChild(gEdges);
 
-  // ---- 全工程フロー（イラスト付き大型パネル）----
-  buildFlow(svg);
-
-  // ---- nodes ----
+  // ノード
   var gNodes=document.createElementNS(NS,"g"); gNodes.setAttribute("class","nodes");
   CLUSTERS.forEach(function(cl){
     cl.codes.forEach(function(code){
@@ -1126,57 +1194,91 @@ function buildMap(){
   });
   svg.appendChild(gNodes);
 
-  // 全ノード（グラフ＋フロー内のチップ）にフォーカス挙動を付与
+  // 全ノード（グラフ＋工程パネル内の企業チップ）にフォーカス挙動
   svg.querySelectorAll(".node").forEach(function(n){
     var code=n.getAttribute("data-code");
     n.addEventListener("mouseenter",function(){ focusNode(code); });
     n.addEventListener("mouseleave",clearFocus);
   });
-
-  var cv=document.getElementById("canvas");
-  cv.innerHTML=""; cv.appendChild(svg);
-  cv.style.width=canvasW+"px"; cv.style.height=canvasH+"px";
   window.__svg=svg;
 }
 
-/* ---- 全工程フロー（半導体グラフィックで図解） ---- */
-function buildFlow(svg){
-  var g=document.createElementNS(NS,"g"); g.setAttribute("class","macroflow");
-  var ttl=mkText(FLOWX0, FLOWY-22, "半導体ができるまで ── 1枚で分かる全工程", 24, "#eaf0fb","start"); ttl.setAttribute("font-weight","800"); g.appendChild(ttl);
-  var sub0=mkText(FLOWX0+600, FLOWY-22, "左=上流 → 右=下流／各工程の主要企業カードをクリックで解説", 14, "#6b7da0","start"); g.appendChild(sub0);
-  FLOW.forEach(function(st,i){
-    var px=FLOWX0+i*(PANEL_W+PANEL_GAP);
-    var col=(i<2)?"#39d98a":((i<5)?"#4ea1ff":((i<8)?"#f4c542":"#5fe0cf"));
-    var icx=px+PANEL_W/2, icy=FLOWY+126;
-    var panel=document.createElementNS(NS,"g");
-    var h='<rect x="'+px+'" y="'+FLOWY+'" width="'+PANEL_W+'" height="'+PANEL_H+'" rx="16" fill="rgba(13,21,36,0.92)" stroke="'+col+'" stroke-opacity="0.5" stroke-width="2" filter="url(#soft)"/>';
-    h+='<path d="M'+px+' '+(FLOWY+44)+' h'+PANEL_W+'" stroke="'+col+'" stroke-opacity="0.3"/>';
-    h+='<circle cx="'+(px+30)+'" cy="'+(FLOWY+24)+'" r="15" fill="'+col+'"/><text x="'+(px+30)+'" y="'+(FLOWY+29)+'" fill="#071018" font-size="15" font-weight="800" text-anchor="middle">'+st.n+'</text>';
-    h+='<text x="'+(px+54)+'" y="'+(FLOWY+30)+'" fill="#eaf0fb" font-size="17" font-weight="800">'+esc(st.t)+'</text>';
-    h+=ILLU[st.ic](icx,icy);
-    h+='<text x="'+icx+'" y="'+(FLOWY+236)+'" fill="#cdd6ea" font-size="12.5" text-anchor="middle">'+esc(st.s)+'</text>';
-    // クリックで工程の詳細（サブ工程・技術・分類）へ。ヘッダー＋イラスト領域が当たり判定
-    h+='<rect class="stagehead" data-stage="'+st.ic+'" x="'+px+'" y="'+FLOWY+'" width="'+PANEL_W+'" height="248" fill="transparent" style="cursor:pointer"/>';
-    h+='<text class="stagehint" x="'+(px+PANEL_W-12)+'" y="'+(FLOWY+29)+'" fill="'+col+'" font-size="11.5" font-weight="800" text-anchor="end" style="pointer-events:none">詳しく ▸</text>';
-    (st.co||[]).slice(0,4).forEach(function(code,ci){
-      var co=byCode[code]; if(!co)return;
-      var cyy=FLOWY+252+ci*29, col0=co.jp?"#4ea1ff":"#f4c542";
-      h+='<g class="node" data-code="'+esc(code)+'" data-name="'+esc(co.name)+'">'+
-        '<rect class="card" x="'+(px+18)+'" y="'+cyy+'" width="'+(PANEL_W-36)+'" height="25" rx="7" fill="#15233c" stroke="'+col0+'" stroke-opacity="0.5"/>'+
-        '<rect x="'+(px+18)+'" y="'+cyy+'" width="4" height="25" rx="2" fill="'+col0+'"/>'+
-        '<text x="'+(px+30)+'" y="'+(cyy+17)+'" fill="#eaf0fb" font-size="12" font-weight="700">'+co.flag+' '+esc(clip(co.name,12))+'</text>'+
-        '<text x="'+(px+PANEL_W-26)+'" y="'+(cyy+17)+'" fill="'+col0+'" font-size="9" text-anchor="end">'+esc(co.code)+' ›</text></g>';
-    });
-    panel.innerHTML=h;
-    g.appendChild(panel);
-    if(i<FLOW.length-1){
-      var ar=document.createElementNS(NS,"path");
-      ar.setAttribute("d","M "+(px+PANEL_W+5)+" "+(FLOWY+PANEL_H/2)+" l "+(PANEL_GAP-12)+" 0");
-      ar.setAttribute("stroke",col); ar.setAttribute("stroke-width","3.5"); ar.setAttribute("opacity","0.65"); ar.setAttribute("marker-end","url(#fa)");
-      g.appendChild(ar);
+/* ---- ① 物理構造ヒーロー（スケールラダー） ---- */
+function buildHero(svg){
+  var g=document.createElementNS(NS,"g"); g.setAttribute("class","hero"); svg.appendChild(g);
+  var ttl=mkText(FLOWX0, HEROY+6, "半導体の物理構造 ── 「大きさのスケール」で見る（データセンター → 原子）", 24, "#eaf0fb","start"); ttl.setAttribute("font-weight","800"); g.appendChild(ttl);
+  var n=HERO.length, M=FLOWX0, gap=46, cellW=(canvasW-2*M-(n-1)*gap)/n, top=HEROY+28, H=304;
+  HERO.forEach(function(hc,i){
+    var cx=M+i*(cellW+gap), ccx=cx+cellW/2, ccy=top+158;
+    var cell=document.createElementNS(NS,"g");
+    var hh='<rect x="'+cx+'" y="'+top+'" width="'+cellW+'" height="'+H+'" rx="18" fill="rgba(13,21,36,0.9)" stroke="#2c3e63" stroke-width="1.5" filter="url(#soft)"/>';
+    hh+='<rect x="'+(ccx-60)+'" y="'+(top+18)+'" width="120" height="24" rx="12" fill="#0e1726" stroke="#4ea1ff" stroke-opacity="0.55"/><text x="'+ccx+'" y="'+(top+34)+'" fill="#7fc4ff" font-size="13" font-weight="800" text-anchor="middle">'+esc(hc.sc)+'</text>';
+    hh+=ILLU[hc.ic](ccx,ccy);
+    hh+='<text x="'+ccx+'" y="'+(top+H-20)+'" fill="#eaf0fb" font-size="16" font-weight="800" text-anchor="middle">'+esc(hc.t)+'</text>';
+    cell.innerHTML=hh; g.appendChild(cell);
+    if(i<n-1){
+      var fx=cx+cellW, nx=cx+cellW+gap;
+      var f=document.createElementNS(NS,"path");
+      f.setAttribute("d","M "+(fx-28)+" "+(top+122)+" L "+nx+" "+(top+10)+" M "+(fx-28)+" "+(top+192)+" L "+nx+" "+(top+H-10));
+      f.setAttribute("stroke","#f4c542"); f.setAttribute("stroke-width","1.4"); f.setAttribute("stroke-dasharray","3 4"); f.setAttribute("opacity","0.5"); f.setAttribute("fill","none");
+      g.appendChild(f);
+      var zl=mkText((fx+nx)/2, top-6, "拡大 ▸", 11, "#f4c542","middle"); zl.setAttribute("font-weight","700"); g.appendChild(zl);
     }
   });
-  svg.appendChild(g);
+  return top+H;
+}
+
+/* ---- ② 工程パイプライン（イラスト＋インライン詳細ドシエ） ---- */
+function dossierHTML(sd){
+  var h='<div class="dintro">'+esc(sd.intro)+'</div>';
+  h+='<div class="dsec"><div class="dh">工程の流れ</div><ol class="dsteps">'+
+     sd.steps.map(function(s){return '<li><b>'+esc(s[0])+'</b> '+esc(s[1])+'</li>';}).join('')+'</ol></div>';
+  h+='<div class="dsec"><div class="dh">主な技術・分類</div>'+
+     sd.tech.map(function(t){return '<div class="dtc"><span class="dtcn">'+esc(t[0])+'</span>'+t[1].map(function(x){return '<span class="tg">'+esc(x)+'</span>';}).join('')+'</div>';}).join('')+'</div>';
+  if(sd.gens){ h+='<div class="dsec"><div class="dh">'+esc(sd.gens.t)+'</div><div class="dgen">'+
+     sd.gens.items.map(function(x,i){return (i?'<span class="ga">→</span>':'')+'<b>'+esc(x)+'</b>';}).join('')+'</div></div>'; }
+  if(sd.terms){ h+='<div class="dsec"><div class="dh">用語</div>'+
+     sd.terms.map(function(t){return '<div class="dterm"><b>'+esc(t[0])+'</b> '+esc(t[1])+'</div>';}).join('')+'</div>'; }
+  h+='<div class="dsec"><div class="dh">担い手（クリックで解説）</div><div class="dco">'+
+     (sd.co||[]).map(function(code){var co=byCode[code];if(!co)return '';return '<span class="node cochip3" data-code="'+esc(code)+'" data-name="'+esc(co.name)+'">'+co.flag+' '+esc(co.name)+'</span>';}).join('')+'</div></div>';
+  return h;
+}
+function buildPipeline(svg){
+  var xhtml='http://www.w3.org/1999/xhtml';
+  var ttl=mkText(FLOWX0, PIPEY-16, "製造工程の詳細マップ ── 各工程の作業・技術・分類・担い手（企業はクリックで解説）", 22, "#eaf0fb","start"); ttl.setAttribute("font-weight","800"); svg.appendChild(ttl);
+  var gFo=document.createElementNS(NS,"g"); gFo.setAttribute("class","pipefo"); svg.appendChild(gFo);
+  var arr=[], maxDoss=0, foTop=PIPEY+44+ILLU_H+4;
+  FLOW.forEach(function(st,i){
+    var sd=SDETAIL[st.ic]; var px=FLOWX0+i*(PANEL_W+PANEL_GAP);
+    var fo=document.createElementNS(NS,"foreignObject");
+    fo.setAttribute("x",px+14); fo.setAttribute("y",foTop); fo.setAttribute("width",PANEL_W-28); fo.setAttribute("height","3000");
+    fo.innerHTML='<div xmlns="'+xhtml+'" class="dossier">'+dossierHTML(sd)+'</div>';
+    gFo.appendChild(fo);
+    var div=fo.firstChild, dh=div?div.getBoundingClientRect().height:320;
+    if(dh>maxDoss)maxDoss=dh;
+    arr.push({st:st,px:px,fo:fo});
+  });
+  var panelH=44+ILLU_H+4+maxDoss+18;
+  var gBg=document.createElementNS(NS,"g"); gBg.setAttribute("class","pipebg"); svg.insertBefore(gBg,gFo);
+  arr.forEach(function(p,i){
+    var px=p.px, st=p.st;
+    var col=(i<2)?"#39d98a":((i<5)?"#4ea1ff":((i<8)?"#f4c542":"#5fe0cf"));
+    var icx=px+PANEL_W/2, icy=PIPEY+44+ILLU_H/2+2;
+    var h='<rect x="'+px+'" y="'+PIPEY+'" width="'+PANEL_W+'" height="'+panelH+'" rx="16" fill="rgba(13,21,36,0.96)" stroke="'+col+'" stroke-opacity="0.5" stroke-width="2" filter="url(#soft)"/>';
+    h+='<path d="M'+px+' '+(PIPEY+44)+' h'+PANEL_W+'" stroke="'+col+'" stroke-opacity="0.3"/>';
+    h+='<circle cx="'+(px+30)+'" cy="'+(PIPEY+24)+'" r="15" fill="'+col+'"/><text x="'+(px+30)+'" y="'+(PIPEY+29)+'" fill="#071018" font-size="15" font-weight="800" text-anchor="middle">'+st.n+'</text>';
+    h+='<text x="'+(px+54)+'" y="'+(PIPEY+30)+'" fill="#eaf0fb" font-size="16" font-weight="800">'+esc(st.t)+'</text>';
+    h+=ILLU[st.ic](icx,icy);
+    var bgg=document.createElementNS(NS,"g"); bgg.innerHTML=h; gBg.appendChild(bgg);
+    p.fo.setAttribute("height", maxDoss+14);
+    if(i<FLOW.length-1){
+      var ar=document.createElementNS(NS,"path");
+      ar.setAttribute("d","M "+(px+PANEL_W+5)+" "+(PIPEY+22)+" l "+(PANEL_GAP-12)+" 0");
+      ar.setAttribute("stroke",col); ar.setAttribute("stroke-width","3.5"); ar.setAttribute("opacity","0.7"); ar.setAttribute("marker-end","url(#fa)");
+      gBg.appendChild(ar);
+    }
+  });
+  return PIPEY+panelH;
 }
 function sgn(v){ return v>0?1:(v<0?-1:0); }
 
@@ -1371,7 +1473,7 @@ window.addEventListener("resize",function(){ if(!location.hash) fit(); });
 buildMap();
 fit();
 route();
-try{ console.log("%c[map] supply-chain graph v5 / "+C.length+" companies, "+EDGES.length+" links, "+Object.keys(SDETAIL).length+" process deep-dives","color:#39d98a;font-weight:bold"); }catch(e){}
+try{ console.log("%c[map] semiconductor universe v6 / physical-structure hero + inline process dossiers + "+C.length+"-company graph","color:#39d98a;font-weight:bold"); }catch(e){}
 </script>
 </body>
 </html>
