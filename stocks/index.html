@@ -5254,17 +5254,24 @@
   var i = 0, playing = false, muted = false, rate = 1;
   var fallbackTimer = null, hideTimer = null, audios = {};
 
-  function applyRate(){ for(var k in audios){ try{ audios[k].playbackRate = rate; audios[k].preservesPitch = true; }catch(e){} } }
-  var _lastTs = 0;
-  function rafLoop(ts){
-    var dt = _lastTs ? (ts - _lastTs)/1000 : 0; _lastTs = ts;
-    if(rate !== 1 && dt > 0 && dt < 0.5){
-      var svgs = document.querySelectorAll('#frame .scene.active svg');
-      for(var i2=0;i2<svgs.length;i2++){ try{ svgs[i2].setCurrentTime(svgs[i2].getCurrentTime() + dt*(rate-1)); }catch(e){} }
-    }
-    try{ var as = document.getAnimations(); for(var j=0;j<as.length;j++){ as[j].playbackRate = rate; } }catch(e){}
+  function applyRate(){
+    for(var k in audios){ try{ audios[k].playbackRate = rate; audios[k].preservesPitch = true; }catch(e){} }
+  }
+  // CSSアニメ(.pop/.fin/.gh/.kb等)を毎フレーム選択速度に同期。新規シーンで生成されるアニメも捕捉。
+  function rafLoop(){
+    try{ var as = document.getAnimations(); for(var j=0;j<as.length;j++){ if(as[j].playbackRate !== rate) as[j].playbackRate = rate; } }catch(e){}
+    // SMIL(animateMotion)はplaybackRate APIが無いため、SVGのアニメ速度をsetCurrentTimeで近似スケール
+    if(rate !== 1){
+      var now = (performance && performance.now) ? performance.now() : Date.now();
+      var d = _smilTs ? (now - _smilTs)/1000 : 0; _smilTs = now;
+      if(d > 0 && d < 0.4){
+        var svgs = document.querySelectorAll('#frame .scene.active svg');
+        for(var i2=0;i2<svgs.length;i2++){ try{ if(svgs[i2].getCurrentTime) svgs[i2].setCurrentTime(svgs[i2].getCurrentTime() + d*(rate-1)); }catch(e){} }
+      }
+    } else { _smilTs = 0; }
     requestAnimationFrame(rafLoop);
   }
+  var _smilTs = 0;
   requestAnimationFrame(rafLoop);
 
   scenes.forEach(function(s, idx){
@@ -5316,6 +5323,8 @@
   document.getElementById('full').onclick = function(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); };
   var speedSel = document.getElementById('speed');
   speedSel.onchange = function(){ rate = parseFloat(speedSel.value)||1; applyRate(); };
+  // マウスホイールで<select>の値が勝手に変わる(=末尾の2×まで飛ぶ)のを防止
+  speedSel.addEventListener('wheel', function(e){ e.preventDefault(); }, {passive:false});
   var RATES = [0.75,1,1.25,1.5,1.75,2];
   function bumpRate(d){ var k=RATES.indexOf(rate); if(k<0)k=1; k=Math.max(0,Math.min(RATES.length-1,k+d)); rate=RATES[k]; speedSel.value=String(rate); applyRate(); }
   document.addEventListener('keydown', function(e){

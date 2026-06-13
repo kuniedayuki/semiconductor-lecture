@@ -1302,6 +1302,8 @@
   document.getElementById('full').onclick = function(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); };
   var speedSel = document.getElementById('speed');
   speedSel.onchange = function(){ rate = parseFloat(speedSel.value)||1; applyRate(); };
+  // マウスホイールで<select>の値が勝手に変わる(=末尾の2×まで飛ぶ)のを防止
+  speedSel.addEventListener('wheel', function(e){ e.preventDefault(); }, {passive:false});
   var RATES = [0.75,1,1.25,1.5,1.75,2];
   function setRate(r){ rate=r; speedSel.value=String(r); applyRate(); }
   function bumpRate(d){ var k=RATES.indexOf(rate); if(k<0)k=1; k=Math.max(0,Math.min(RATES.length-1,k+d)); setRate(RATES[k]); }
